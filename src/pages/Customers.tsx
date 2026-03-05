@@ -9,6 +9,11 @@ import { generateReportPDF } from "@/lib/pdfExport";
 import { useToast } from "@/hooks/use-toast";
 import { enhancedCustomers } from "@/data/enhancedCustomerData";
 import type { EnhancedCustomer } from "@/data/customerTypes";
+import { sampleQuotes, sampleProducts } from "@/data/sampleData";
+import type { Quote, Product, Invoice } from "@/data/sampleData";
+import { enhancedSampleProjects } from "@/data/enhancedProjectData";
+import type { EnhancedProject } from "@/data/enhancedProjectData";
+import { sampleInvoices } from "@/data/sampleData";
 
 import { CustomerStats } from "@/components/customers/CustomerStats";
 import { CustomerFilters, defaultCustomerFilters, type CustomerFilterState } from "@/components/customers/CustomerFilters";
@@ -150,7 +155,7 @@ export default function Customers() {
       {/* Dialogs */}
       <AddEnhancedCustomerDialog open={addOpen} onOpenChange={setAddOpen} onAdd={c => setCustomers(prev => [...prev, c])} existingCustomers={customers} />
       <EditEnhancedCustomerDialog open={!!editCustomer} onOpenChange={open => { if (!open) setEditCustomer(null); }} customer={editCustomer} onSave={updated => setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c))} />
-      <CustomerDetailsDialog open={!!viewCustomer} onOpenChange={open => { if (!open) setViewCustomer(null); }} customer={viewCustomer} onEdit={c => { setViewCustomer(null); setEditCustomer(c); }} language={language} />
+      <CustomerDetailsDialog open={!!viewCustomer} onOpenChange={open => { if (!open) setViewCustomer(null); }} customer={viewCustomer} onEdit={c => { setViewCustomer(null); setEditCustomer(c); }} language={language} projects={enhancedSampleProjects} quotes={sampleQuotes} invoices={sampleInvoices} />
     </div>
   );
 }
