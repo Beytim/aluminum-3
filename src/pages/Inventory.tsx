@@ -1,178 +1,206 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Search, Plus, AlertTriangle, Boxes, Trash2 } from "lucide-react";
-import { sampleInventory } from "@/data/sampleData";
+import { Plus, LayoutGrid, List, Download, Boxes } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { InventoryItem } from "@/data/sampleData";
+import {
+  enhancedSampleInventory, sampleStockMovements, sampleReservations,
+  calculateInventoryStats, type EnhancedInventoryItem, type StockMovement, type StockReservation,
+} from "@/data/enhancedInventoryData";
+import InventoryStats from "@/components/inventory/InventoryStats";
+import InventoryCard from "@/components/inventory/InventoryCard";
+import InventoryTable from "@/components/inventory/InventoryTable";
+import InventoryFilters from "@/components/inventory/InventoryFilters";
+import InventoryBulkActions from "@/components/inventory/InventoryBulkActions";
+import AddInventoryDialog from "@/components/inventory/AddInventoryDialog";
+import InventoryDetailsDialog from "@/components/inventory/InventoryDetailsDialog";
+import StockMovementDialog from "@/components/inventory/StockMovementDialog";
 
 export default function Inventory() {
-  const [inventory, setInventory] = useLocalStorage<InventoryItem[]>(STORAGE_KEYS.INVENTORY, sampleInventory);
-  const [search, setSearch] = useState("");
-  const [catFilter, setCatFilter] = useState("all");
+  const [inventory, setInventory] = useLocalStorage<EnhancedInventoryItem[]>('enhanced_inventory', enhancedSampleInventory);
+  const [movements, setMovements] = useLocalStorage<StockMovement[]>('stock_movements', sampleStockMovements);
+  const [reservations] = useLocalStorage<StockReservation[]>('stock_reservations', sampleReservations);
+
+  const [view, setView] = useState<'grid' | 'table'>('table');
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all');
+  const [stockFilter, setStockFilter] = useState('all');
+  const [qualityFilter, setQualityFilter] = useState('all');
+  const [showRemnants, setShowRemnants] = useState(false);
   const [showLowStock, setShowLowStock] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showQuarantine, setShowQuarantine] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [detailItem, setDetailItem] = useState<EnhancedInventoryItem | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [movementItem, setMovementItem] = useState<EnhancedInventoryItem | null>(null);
+  const [movementType, setMovementType] = useState<'receive' | 'issue'>('receive');
+  const [movementOpen, setMovementOpen] = useState(false);
+
   const { t, language } = useI18n();
   const { toast } = useToast();
 
-  const [form, setForm] = useState({ name: '', nameAm: '', category: '', unit: '', stock: '', minStock: '', location: '', cost: '' });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const stats = useMemo(() => calculateInventoryStats(inventory, movements), [inventory, movements]);
+
+  const lowStockCount = inventory.filter(i => i.stock <= i.minimum && i.stock > 0 && i.status === 'active').length + inventory.filter(i => i.stock === 0 && i.status === 'active').length;
+  const quarantineCount = inventory.filter(i => i.qualityStatus === 'quarantine').length;
+  const remnantCount = inventory.filter(i => i.isRemnant).length;
 
   const filtered = useMemo(() => {
     return inventory.filter(item => {
-      const matchSearch = !search || item.name.toLowerCase().includes(search.toLowerCase()) || item.code.toLowerCase().includes(search.toLowerCase());
-      const matchCat = catFilter === "all" || item.category === catFilter;
-      const matchLow = !showLowStock || item.stock <= item.minStock;
-      return matchSearch && matchCat && matchLow;
+      if (search) {
+        const s = search.toLowerCase();
+        if (!item.itemCode.toLowerCase().includes(s) && !item.productName.toLowerCase().includes(s) && !item.productNameAm.toLowerCase().includes(s) && !item.productCode.toLowerCase().includes(s)) return false;
+      }
+      if (category !== 'all' && item.category !== category) return false;
+      if (stockFilter === 'low' && !(item.stock <= item.minimum && item.stock > 0)) return false;
+      if (stockFilter === 'out' && item.stock !== 0) return false;
+      if (stockFilter === 'overstock' && item.stock <= item.maximum) return false;
+      if (stockFilter === 'normal' && (item.stock <= item.minimum || item.stock > item.maximum)) return false;
+      if (qualityFilter !== 'all' && item.qualityStatus !== qualityFilter) return false;
+      if (showRemnants && !item.isRemnant) return false;
+      if (showLowStock && !(item.stock <= item.minimum)) return false;
+      if (showQuarantine && item.qualityStatus !== 'quarantine') return false;
+      return true;
     });
-  }, [search, catFilter, showLowStock, inventory]);
+  }, [inventory, search, category, stockFilter, qualityFilter, showRemnants, showLowStock, showQuarantine]);
 
-  const lowStockCount = inventory.filter(i => i.stock <= i.minStock).length;
-  const totalValue = inventory.reduce((sum, i) => sum + i.stock * i.cost, 0);
-
-  const handleAdd = () => {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = 'Required';
-    if (!form.category) e.category = 'Required';
-    if (!form.stock || Number(form.stock) < 0) e.stock = 'Invalid';
-    if (!form.cost || Number(form.cost) <= 0) e.cost = 'Must be > 0';
-    setErrors(e);
-    if (Object.keys(e).length > 0) return;
-
-    const code = `${form.category.substring(0, 2).toUpperCase()}-${String(inventory.length + 1).padStart(3, '0')}`;
-    const stock = Number(form.stock);
-    const item: InventoryItem = {
-      id: `INV-${String(inventory.length + 1).padStart(3, '0')}`, code,
-      name: form.name.trim(), nameAm: form.nameAm.trim() || form.name.trim(),
-      category: form.category as InventoryItem['category'],
-      unit: form.unit || 'piece', stock, minStock: Number(form.minStock) || 10,
-      reserved: 0, available: stock, location: form.location || 'R1-A1', cost: Number(form.cost),
-    };
+  const handleAdd = (item: EnhancedInventoryItem) => {
     setInventory(prev => [...prev, item]);
-    toast({ title: t('common.add'), description: `${item.name} added.` });
-    setForm({ name: '', nameAm: '', category: '', unit: '', stock: '', minStock: '', location: '', cost: '' });
-    setErrors({});
-    setDialogOpen(false);
+    toast({ title: 'Item Added', description: `${item.productName} added to inventory` });
+  };
+
+  const handleDelete = (id: string) => {
+    setInventory(prev => prev.filter(i => i.id !== id));
+    toast({ title: 'Deleted' });
+  };
+
+  const handleBulkDelete = () => {
+    setInventory(prev => prev.filter(i => !selectedIds.includes(i.id)));
+    toast({ title: `${selectedIds.length} items deleted` });
+    setSelectedIds([]);
+  };
+
+  const handleView = (item: EnhancedInventoryItem) => {
+    setDetailItem(item);
+    setDetailOpen(true);
+  };
+
+  const handleReceive = (item: EnhancedInventoryItem) => {
+    setMovementItem(item);
+    setMovementType('receive');
+    setMovementOpen(true);
+  };
+
+  const handleIssue = (item: EnhancedInventoryItem) => {
+    setMovementItem(item);
+    setMovementType('issue');
+    setMovementOpen(true);
+  };
+
+  const handleMovementConfirm = (movement: StockMovement, updatedItem: EnhancedInventoryItem) => {
+    setMovements(prev => [...prev, movement]);
+    setInventory(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
+    toast({
+      title: movement.type === 'receipt' ? 'Stock Received' : 'Stock Issued',
+      description: `${Math.abs(movement.quantity)} ${movement.unit} of ${movement.itemName}`,
+    });
+  };
+
+  const handleExport = () => {
+    const data = (selectedIds.length > 0 ? filtered.filter(i => selectedIds.includes(i.id)) : filtered);
+    const csv = [
+      ['Code', 'Product', 'Category', 'Stock', 'Reserved', 'Available', 'Unit', 'Unit Cost', 'Total Value', 'Location', 'Status'].join(','),
+      ...data.map(i => [i.itemCode, `"${i.productName}"`, i.category, i.stock, i.reserved, i.available, i.primaryUnit, i.unitCost, i.totalValue, `${i.warehouse}-${i.zone}-${i.rack}`, i.qualityStatus].join(',')),
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'inventory-export.csv'; a.click();
+    toast({ title: 'Exported', description: `${data.length} items exported to CSV` });
   };
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('inventory.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {inventory.length} items · Value: ETB {totalValue.toLocaleString()}
-            {lowStockCount > 0 && <span className="text-destructive font-medium ml-2">· {lowStockCount} {t('inventory.low_stock')}</span>}
+            {inventory.length} items · {stats.totalValue > 0 ? `Value: ETB ${stats.totalValue.toLocaleString()}` : ''}
+            {lowStockCount > 0 && <span className="text-destructive font-medium ml-2">· {lowStockCount} need attention</span>}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">{t('inventory.receive')}</Button>
-          <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />{t('common.add')}</Button>
+          <div className="flex border border-border rounded-md">
+            <Button variant={view === 'grid' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-r-none" onClick={() => setView('grid')}><LayoutGrid className="h-3.5 w-3.5" /></Button>
+            <Button variant={view === 'table' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-l-none" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExport}><Download className="h-3.5 w-3.5 mr-1" />Export</Button>
+          <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5 mr-1" />Add Item</Button>
         </div>
       </div>
 
-      <Card className="shadow-card">
-        <CardContent className="p-3 flex gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder={t('common.search')} className="pl-9 h-9" value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <Select value={catFilter} onValueChange={setCatFilter}>
-            <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {['Profile', 'Glass', 'Hardware', 'Accessory', 'Steel'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Button variant={showLowStock ? "destructive" : "outline"} size="sm" onClick={() => setShowLowStock(!showLowStock)}>
-            <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />{t('inventory.low_stock')} ({lowStockCount})
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Stats */}
+      <InventoryStats stats={stats} />
 
-      <Card className="shadow-card">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs">Code</TableHead>
-                <TableHead className="text-xs">{t('common.name')}</TableHead>
-                <TableHead className="text-xs">{t('products.category')}</TableHead>
-                <TableHead className="text-xs text-right">Stock</TableHead>
-                <TableHead className="text-xs text-right">Reserved</TableHead>
-                <TableHead className="text-xs text-right">Available</TableHead>
-                <TableHead className="text-xs">Location</TableHead>
-                <TableHead className="text-xs text-right">Cost</TableHead>
-                <TableHead className="text-xs">{t('common.status')}</TableHead>
-                <TableHead className="text-xs"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map(item => {
-                const isLow = item.stock <= item.minStock;
-                return (
-                  <TableRow key={item.id} className={isLow ? "bg-destructive/5" : ""}>
-                    <TableCell className="text-xs font-mono">{item.code}</TableCell>
-                    <TableCell className="text-xs font-medium">{language === 'am' ? item.nameAm : item.name}</TableCell>
-                    <TableCell><Badge variant="secondary" className="text-[10px]">{item.category}</Badge></TableCell>
-                    <TableCell className="text-xs text-right font-semibold">{item.stock} {item.unit}</TableCell>
-                    <TableCell className="text-xs text-right text-muted-foreground">{item.reserved}</TableCell>
-                    <TableCell className="text-xs text-right font-medium">{item.available}</TableCell>
-                    <TableCell className="text-xs font-mono text-muted-foreground">{item.location}</TableCell>
-                    <TableCell className="text-xs text-right">ETB {item.cost}</TableCell>
-                    <TableCell>
-                      {isLow ? (
-                        <Badge variant="destructive" className="text-[10px]">{t('inventory.low_stock')}</Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] text-success border-success/30">OK</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setInventory(prev => prev.filter(i => i.id !== item.id)); toast({ title: "Deleted" }); }}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Boxes className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">{t('common.no_data')}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Filters */}
+      <InventoryFilters
+        search={search} onSearchChange={setSearch}
+        category={category} onCategoryChange={setCategory}
+        stockFilter={stockFilter} onStockFilterChange={setStockFilter}
+        qualityFilter={qualityFilter} onQualityFilterChange={setQualityFilter}
+        showRemnants={showRemnants} onToggleRemnants={() => setShowRemnants(!showRemnants)}
+        showLowStock={showLowStock} onToggleLowStock={() => setShowLowStock(!showLowStock)}
+        showQuarantine={showQuarantine} onToggleQuarantine={() => setShowQuarantine(!showQuarantine)}
+        lowStockCount={lowStockCount} quarantineCount={quarantineCount} remnantCount={remnantCount}
+      />
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Add Inventory Item</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><Label className="text-xs">Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className={errors.name ? 'border-destructive' : ''} />{errors.name && <p className="text-[10px] text-destructive">{errors.name}</p>}</div>
-            <div><Label className="text-xs">ስም (AM)</Label><Input value={form.nameAm} onChange={e => setForm(p => ({ ...p, nameAm: e.target.value }))} /></div>
-            <div><Label className="text-xs">Category *</Label>
-              <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v }))}><SelectTrigger className={errors.category ? 'border-destructive' : ''}><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{['Profile', 'Glass', 'Hardware', 'Accessory', 'Steel'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select>
-              {errors.category && <p className="text-[10px] text-destructive">{errors.category}</p>}
-            </div>
-            <div><Label className="text-xs">Unit</Label><Input value={form.unit} onChange={e => setForm(p => ({ ...p, unit: e.target.value }))} placeholder="meter, sqm, piece" /></div>
-            <div><Label className="text-xs">Stock *</Label><Input type="number" value={form.stock} onChange={e => setForm(p => ({ ...p, stock: e.target.value }))} className={errors.stock ? 'border-destructive' : ''} />{errors.stock && <p className="text-[10px] text-destructive">{errors.stock}</p>}</div>
-            <div><Label className="text-xs">Min Stock</Label><Input type="number" value={form.minStock} onChange={e => setForm(p => ({ ...p, minStock: e.target.value }))} /></div>
-            <div><Label className="text-xs">Location</Label><Input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} placeholder="R1-A1" /></div>
-            <div><Label className="text-xs">Cost (ETB) *</Label><Input type="number" value={form.cost} onChange={e => setForm(p => ({ ...p, cost: e.target.value }))} className={errors.cost ? 'border-destructive' : ''} />{errors.cost && <p className="text-[10px] text-destructive">{errors.cost}</p>}</div>
-          </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</Button><Button onClick={handleAdd}>{t('common.add')}</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Bulk Actions */}
+      <InventoryBulkActions count={selectedIds.length} onDelete={handleBulkDelete} onExport={handleExport} onClear={() => setSelectedIds([])} />
+
+      {/* Results */}
+      <p className="text-xs text-muted-foreground">{filtered.length} of {inventory.length} items</p>
+
+      {/* Grid / Table View */}
+      {filtered.length === 0 ? (
+        <Card className="shadow-card">
+          <CardContent className="text-center py-12 text-muted-foreground">
+            <Boxes className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">{t('common.no_data')}</p>
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => setAddOpen(true)}>
+              <Plus className="h-3.5 w-3.5 mr-1" />Add First Item
+            </Button>
+          </CardContent>
+        </Card>
+      ) : view === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {filtered.map(item => (
+            <InventoryCard key={item.id} item={item} language={language} onView={handleView} onEdit={handleView} onDelete={handleDelete} onReceive={handleReceive} onIssue={handleIssue} />
+          ))}
+        </div>
+      ) : (
+        <Card className="shadow-card">
+          <CardContent className="p-0 overflow-x-auto">
+            <InventoryTable
+              items={filtered} language={language}
+              selectedIds={selectedIds}
+              onToggleSelect={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+              onToggleAll={() => setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(i => i.id))}
+              onView={handleView} onEdit={handleView} onDelete={handleDelete}
+              onReceive={handleReceive} onIssue={handleIssue}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dialogs */}
+      <AddInventoryDialog open={addOpen} onOpenChange={setAddOpen} onAdd={handleAdd} existingCount={inventory.length} />
+      <InventoryDetailsDialog item={detailItem} open={detailOpen} onOpenChange={setDetailOpen} movements={movements} reservations={reservations} language={language} onEdit={handleView} />
+      <StockMovementDialog open={movementOpen} onOpenChange={setMovementOpen} item={movementItem} type={movementType} onConfirm={handleMovementConfirm} movementCount={movements.length} />
     </div>
   );
 }
