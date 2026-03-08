@@ -88,12 +88,23 @@ export default function UserManagement() {
   }, [users, filters]);
 
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
+    const targetUser = users.find(u => u.id === userId);
+    const oldRole = targetUser?.roles[0] || "user";
+    
     await supabase.from("user_roles").delete().eq("user_id", userId);
     const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
+      // Log the activity
+      await supabase.from("activity_log").insert({
+        actor_id: currentUser?.id,
+        action: "role_changed",
+        target_user_id: userId,
+        details: { from_role: oldRole, to_role: newRole },
+      });
       toast({ title: "Role updated", description: `User role changed to ${newRole}.` });
+      setLogRefresh(prev => prev + 1);
       fetchUsers();
     }
   };
