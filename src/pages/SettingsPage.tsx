@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
+import { useSettings } from "@/lib/settingsContext";
 import { useLocalStorage, STORAGE_KEYS, clearAllStorage } from "@/lib/localStorage";
 
 interface CompanySettings {
