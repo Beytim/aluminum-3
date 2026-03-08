@@ -44,6 +44,10 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { t, language, setLanguage } = useI18n();
+  const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
+
+  const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
+  const modules = allModules.filter(m => m.moduleId === null || !disabledIds.has(m.moduleId));
 
   return (
     <Sidebar collapsible="icon">
