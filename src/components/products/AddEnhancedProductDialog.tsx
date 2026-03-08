@@ -350,9 +350,9 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
                     <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select supplier" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">— No supplier —</SelectItem>
-                      {sampleSuppliers.map(s => (
+                      {dbSuppliers.map(s => (
                         <SelectItem key={s.id} value={s.id}>
-                          {s.company} ({s.country})
+                          {s.company_name} ({s.country})
                         </SelectItem>
                       ))}
                     </SelectContent>
