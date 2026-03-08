@@ -148,8 +148,8 @@ export default function Reports() {
     const catMap: Record<string, { value: number; qty: number }> = {};
     inventory.forEach(i => {
       if (!catMap[i.category]) catMap[i.category] = { value: 0, qty: 0 };
-      catMap[i.category].value += i.currentStock * i.unitCost;
-      catMap[i.category].qty += i.currentStock;
+      catMap[i.category].value += i.stock * i.unitCost;
+      catMap[i.category].qty += i.stock;
     });
     return Object.entries(catMap).map(([category, d]) => ({ category, ...d }));
   }, [inventory]);
