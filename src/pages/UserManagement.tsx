@@ -1,64 +1,61 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Shield, Plus, Crown, UserCog, User } from "lucide-react";
+import { Download, Plus, LayoutGrid, List, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+
+import { UserStats } from "@/components/users/UserStats";
+import { UserFilters, defaultUserFilters, type UserFilterState } from "@/components/users/UserFilters";
+import { UserTable } from "@/components/users/UserTable";
+import { UserCard } from "@/components/users/UserCard";
+import { UserDetailsDialog } from "@/components/users/UserDetailsDialog";
+import { UserBulkActions } from "@/components/users/UserBulkActions";
 
 type AppRole = "admin" | "manager" | "user";
 
 interface UserWithRole {
   id: string;
-  email: string;
   full_name: string | null;
+  avatar_url: string | null;
   roles: AppRole[];
   created_at: string;
 }
 
-const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; class: string }> = {
-  admin: { label: "Admin", icon: Crown, class: "bg-destructive/10 text-destructive" },
-  manager: { label: "Manager", icon: UserCog, class: "bg-primary/10 text-primary" },
-  user: { label: "User", icon: User, class: "bg-success/10 text-success" },
-};
-
 export default function UserManagement() {
   const { t } = useI18n();
-  const { hasRole } = useAuth();
+  const { hasRole, user: currentUser } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<UserFilterState>(defaultUserFilters);
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [viewUser, setViewUser] = useState<UserWithRole | null>(null);
   const isAdmin = hasRole("admin");
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, full_name, created_at");
+    const [profileRes, rolesRes] = await Promise.all([
+      supabase.from("profiles").select("id, full_name, avatar_url, created_at"),
+      supabase.from("user_roles").select("user_id, role"),
+    ]);
 
-    const { data: allRoles } = await supabase
-      .from("user_roles")
-      .select("user_id, role");
-
-    if (profiles) {
+    if (profileRes.data) {
       const roleMap = new Map<string, AppRole[]>();
-      allRoles?.forEach((r) => {
+      rolesRes.data?.forEach((r) => {
         const existing = roleMap.get(r.user_id) || [];
         existing.push(r.role as AppRole);
         roleMap.set(r.user_id, existing);
       });
 
       setUsers(
-        profiles.map((p) => ({
+        profileRes.data.map((p) => ({
           id: p.id,
-          email: "",
           full_name: p.full_name,
+          avatar_url: p.avatar_url,
           roles: roleMap.get(p.id) || ["user"],
           created_at: p.created_at,
         }))
@@ -71,114 +68,156 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
+  const filtered = useMemo(() => {
+    return users.filter((u) => {
+      if (filters.search) {
+        const s = filters.search.toLowerCase();
+        if (!(u.full_name?.toLowerCase().includes(s))) return false;
+      }
+      if (filters.role !== "all" && !u.roles.includes(filters.role as AppRole)) return false;
+      if (filters.joinedPeriod !== "all") {
+        const now = new Date();
+        const days = filters.joinedPeriod === "7d" ? 7 : filters.joinedPeriod === "30d" ? 30 : 90;
+        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+        if (new Date(u.created_at) < cutoff) return false;
+      }
+      return true;
+    });
+  }, [users, filters]);
+
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
-    // Remove existing roles, add new one
     await supabase.from("user_roles").delete().eq("user_id", userId);
     const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Role updated" });
+      toast({ title: "Role updated", description: `User role changed to ${newRole}.` });
       fetchUsers();
     }
   };
 
-  const roleCounts = { admin: 0, manager: 0, user: 0 };
-  users.forEach((u) => u.roles.forEach((r) => { roleCounts[r] = (roleCounts[r] || 0) + 1; }));
+  const handleBulkRole = async (role: AppRole) => {
+    for (const id of selectedIds) {
+      await supabase.from("user_roles").delete().eq("user_id", id);
+      await supabase.from("user_roles").insert({ user_id: id, role });
+    }
+    toast({ title: "Roles updated", description: `${selectedIds.length} users set to ${role}.` });
+    setSelectedIds([]);
+    fetchUsers();
+  };
+
+  const handleDelete = async (userId: string) => {
+    toast({ title: "Not allowed", description: "User deletion requires backend admin access.", variant: "destructive" });
+  };
+
+  const handleBulkDelete = () => {
+    toast({ title: "Not allowed", description: "Bulk user deletion requires backend admin access.", variant: "destructive" });
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("nav.users")}</h1>
-          <p className="text-sm text-muted-foreground">Manage roles and access control</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t("nav.users")}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {filtered.length} of {users.length} users
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loading}>
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {(["admin", "manager", "user"] as AppRole[]).map((role) => {
-          const cfg = roleConfig[role];
-          const Icon = cfg.icon;
-          return (
-            <Card key={role} className="shadow-card">
-              <CardContent className="p-3 text-center">
-                <Icon className="h-5 w-5 mx-auto mb-1 text-primary" />
-                <p className="text-xs font-semibold">{cfg.label}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {roleCounts[role]} user(s)
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Stats */}
+      <UserStats users={users} />
+
+      {/* Filters */}
+      <UserFilters filters={filters} onChange={setFilters} />
+
+      {/* Bulk Actions */}
+      {isAdmin && (
+        <UserBulkActions
+          count={selectedIds.length}
+          onSetRole={handleBulkRole}
+          onDelete={handleBulkDelete}
+          onClear={() => setSelectedIds([])}
+        />
+      )}
+
+      {/* View Toggle + Count */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">{filtered.length} results</p>
+        <div className="flex gap-1 border rounded-md p-0.5">
+          <Button variant={viewMode === "table" ? "default" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewMode("table")}>
+            <List className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant={viewMode === "grid" ? "default" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewMode("grid")}>
+            <LayoutGrid className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
-      <Card className="shadow-card">
-        <CardContent className="p-0 overflow-x-auto">
-          {loading ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs">{t("common.name")}</TableHead>
-                  <TableHead className="text-xs">Role</TableHead>
-                  <TableHead className="text-xs">Joined</TableHead>
-                  {isAdmin && <TableHead className="text-xs">Actions</TableHead>}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="text-xs font-medium">
-                      {u.full_name || "Unnamed User"}
-                    </TableCell>
-                    <TableCell>
-                      {u.roles.map((r) => (
-                        <span
-                          key={r}
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${roleConfig[r]?.class || "bg-muted text-muted-foreground"}`}
-                        >
-                          {roleConfig[r]?.label || r}
-                        </span>
-                      ))}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(u.created_at).toLocaleDateString()}
-                    </TableCell>
-                    {isAdmin && (
-                      <TableCell>
-                        <Select
-                          defaultValue={u.roles[0]}
-                          onValueChange={(val) => handleRoleChange(u.id, val as AppRole)}
-                        >
-                          <SelectTrigger className="h-7 w-28 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="manager">Manager</SelectItem>
-                            <SelectItem value="user">User</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-                {users.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={isAdmin ? 4 : 3} className="text-center text-xs text-muted-foreground py-8">
-                      No users found. Sign up to create the first user.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* Content */}
+      {loading ? (
+        <Card className="shadow-card">
+          <CardContent className="flex items-center justify-center p-12">
+            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+          </CardContent>
+        </Card>
+      ) : viewMode === "table" ? (
+        <Card className="shadow-card">
+          <CardContent className="p-0 overflow-x-auto">
+            <UserTable
+              users={filtered}
+              selectedIds={selectedIds}
+              onSelectIds={setSelectedIds}
+              onView={(u) => setViewUser(u)}
+              onChangeRole={handleRoleChange}
+              onDelete={handleDelete}
+              isAdmin={isAdmin}
+              currentUserId={currentUser?.id}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtered.map((u) => (
+            <UserCard
+              key={u.id}
+              user={u}
+              onView={(u) => setViewUser(u)}
+              onChangeRole={handleRoleChange}
+              isAdmin={isAdmin}
+              currentUserId={currentUser?.id}
+            />
+          ))}
+        </div>
+      )}
+
+      {!loading && filtered.length === 0 && (
+        <Card className="shadow-card">
+          <CardContent className="p-8 text-center">
+            <p className="text-sm text-muted-foreground">No users found matching your filters.</p>
+            <Button size="sm" variant="outline" className="mt-2" onClick={() => setFilters(defaultUserFilters)}>
+              Clear Filters
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Details Dialog */}
+      <UserDetailsDialog
+        open={!!viewUser}
+        onOpenChange={(open) => { if (!open) setViewUser(null); }}
+        user={viewUser}
+        onChangeRole={handleRoleChange}
+        isAdmin={isAdmin}
+        currentUserId={currentUser?.id}
+      />
     </div>
   );
 }
