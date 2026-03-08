@@ -116,7 +116,12 @@ export function ActivityLog({ refreshTrigger, userMap }: Props) {
                             bulk-changed {log.details.count} user(s) to <Badge variant="secondary" className="text-[9px] px-1 py-0 mx-0.5">{roleLabel(log.details.to_role)}</Badge>
                           </>
                         )}
-                        {!["role_changed", "bulk_role_change"].includes(log.action) && (
+                        {log.action === "user_approved" && (
+                          <>
+                            approved <span className="font-medium">{getName(log.target_user_id)}</span>'s account
+                          </>
+                        )}
+                        {!["role_changed", "bulk_role_change", "user_approved"].includes(log.action) && (
                           <span className="text-muted-foreground"> {config.label.toLowerCase()}</span>
                         )}
                       </p>
