@@ -1,27 +1,23 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { Bell, Moon, Sun } from "lucide-react";
+import { Bell, Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from "react";
+import { useSettings } from "@/lib/settingsContext";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [dark, setDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('aluerp_theme') === 'dark';
-    }
-    return false;
-  });
+  const { settings, updateSettings, isDark } = useSettings();
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-    localStorage.setItem('aluerp_theme', dark ? 'dark' : 'light');
-  }, [dark]);
+  const cycleTheme = () => {
+    const order = ['light', 'dark', 'system'] as const;
+    const idx = order.indexOf(settings.theme);
+    updateSettings({ theme: order[(idx + 1) % 3] });
+  };
 
   return (
     <SidebarProvider>
@@ -33,8 +29,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               <SidebarTrigger className="text-muted-foreground" />
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => setDark(!dark)}>
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <Button variant="ghost" size="icon" onClick={cycleTheme} title={`Theme: ${settings.theme}`}>
+                {settings.theme === 'system' ? <Monitor className="h-4 w-4" /> : isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-4 w-4" />
