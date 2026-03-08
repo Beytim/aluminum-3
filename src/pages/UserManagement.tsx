@@ -35,6 +35,7 @@ export default function UserManagement() {
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [viewUser, setViewUser] = useState<UserWithRole | null>(null);
+  const [logRefresh, setLogRefresh] = useState(0);
   const isAdmin = hasRole("admin");
 
   const fetchUsers = async () => {
