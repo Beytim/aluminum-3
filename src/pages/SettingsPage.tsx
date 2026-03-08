@@ -615,7 +615,9 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {modules.map(mod => (
+                {modules.map(mod => {
+                  const Icon = moduleIcons[mod.id] || Package;
+                  return (
                   <div
                     key={mod.id}
                     className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
@@ -625,11 +627,8 @@ export default function SettingsPage() {
                     }`}
                     onClick={() => toggleModule(mod.id)}
                   >
-                    {(() => { const Icon = moduleIcons[mod.id] || Package; return (
-                      <div className={`p-2 rounded-md ${mod.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                    ); })()}
+                    <div className={`p-2 rounded-md ${mod.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                      <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
@@ -639,7 +638,8 @@ export default function SettingsPage() {
                       <p className="text-[10px] text-muted-foreground truncate">{mod.description}</p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
