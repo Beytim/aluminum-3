@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, Calculator } from "lucide-react";
 import { useAddProduct, useSaveBOM } from "@/hooks/useProducts";
-import { sampleSuppliers } from "@/data/sampleData";
+import { useSuppliers } from "@/hooks/useSuppliers";
 
 const categories = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
 const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
