@@ -24,6 +24,7 @@ const actionConfig: Record<string, { icon: React.ElementType; color: string; lab
   user_created: { icon: UserPlus, label: "User Joined", color: "text-success" },
   user_removed: { icon: UserMinus, label: "User Removed", color: "text-destructive" },
   bulk_role_change: { icon: Crown, label: "Bulk Role Change", color: "text-primary" },
+  user_approved: { icon: UserPlus, label: "User Approved", color: "text-success" },
 };
 
 export function ActivityLog({ refreshTrigger, userMap }: Props) {
