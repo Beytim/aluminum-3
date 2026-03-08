@@ -133,7 +133,7 @@ export default function Reports() {
     { module: 'Production', score: Math.min(100, productionStats.onTimeRate) },
     { module: 'Quality', score: qualityStats.passRate },
     { module: 'Inventory', score: inventoryStats.lowStockItems === 0 ? 95 : Math.max(50, 95 - inventoryStats.lowStockItems * 10) },
-    { module: 'Finance', score: financeStats.collectionRate },
+    { module: 'Finance', score: financeStats.paidInvoices > 0 ? (financeStats.paidInvoices / financeStats.totalInvoices) * 100 : 80 },
     { module: 'HR', score: hrStats.activeEmployees > 0 ? Math.min(100, (hrStats.presentToday / hrStats.activeEmployees) * 100) : 0 },
     { module: 'Procurement', score: procurementStats.overduePOs === 0 ? 95 : Math.max(50, 95 - procurementStats.overduePOs * 15) },
   ], [productionStats, qualityStats, inventoryStats, financeStats, hrStats, procurementStats]);
