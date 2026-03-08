@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Receipt, CreditCard, TrendingDown } from "lucide-react";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import {
   type EnhancedInvoice, type EnhancedPayment, type Expense,
   sampleEnhancedInvoices, sampleEnhancedPayments, sampleExpenses,
