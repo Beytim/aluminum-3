@@ -8,6 +8,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { SettingsProvider } from "@/lib/settingsContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
@@ -62,8 +63,8 @@ const App = () => (
                         <Route path="/finance" element={<Finance />} />
                         <Route path="/hr" element={<HR />} />
                         <Route path="/reports" element={<Reports />} />
-                        <Route path="/users" element={<UserManagement />} />
-                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+                        <Route path="/settings" element={<AdminRoute><SettingsPage /></AdminRoute>} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

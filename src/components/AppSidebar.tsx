@@ -34,8 +34,8 @@ const allModules = [
   { title: 'nav.finance', url: '/finance', icon: DollarSign, moduleId: 'finance' },
   { title: 'nav.hr', url: '/hr', icon: UserCog, moduleId: 'hr' },
   { title: 'nav.reports', url: '/reports', icon: BarChart3, moduleId: 'reports' },
-  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null },
-  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null },
+  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null, adminOnly: true },
+  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null, adminOnly: true },
 ];
 
 interface ModuleToggle { id: string; enabled: boolean }
@@ -48,8 +48,12 @@ export function AppSidebar() {
   const { user, profile, roles, signOut } = useAuth();
   const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
 
+  const isAdmin = roles.includes("admin");
   const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
-  const modules = allModules.filter(m => m.moduleId === null || !disabledIds.has(m.moduleId));
+  const modules = allModules.filter(m =>
+    (m.moduleId === null || !disabledIds.has(m.moduleId)) &&
+    (!(m as any).adminOnly || isAdmin)
+  );
 
   return (
     <Sidebar collapsible="icon">
