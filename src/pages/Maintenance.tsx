@@ -1,61 +1,98 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, AlertTriangle, Wrench, Trash2 } from "lucide-react";
-import { sampleMaintenanceTasks } from "@/data/sampleData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, LayoutGrid, List, Calendar as CalendarIcon, Wrench } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { MaintenanceTask } from "@/data/sampleData";
+import {
+  sampleEnhancedMaintenanceTasks, sampleEquipment, calculateMaintenanceStats, daysUntil,
+  type EnhancedMaintenanceTask, type Equipment
+} from "@/data/enhancedMaintenanceData";
+import { MaintenanceStats } from "@/components/maintenance/MaintenanceStats";
+import { MaintenanceFilters } from "@/components/maintenance/MaintenanceFilters";
+import { MaintenanceCard } from "@/components/maintenance/MaintenanceCard";
+import { MaintenanceTable } from "@/components/maintenance/MaintenanceTable";
+import { MaintenanceCalendar } from "@/components/maintenance/MaintenanceCalendar";
+import { MaintenanceBulkActions } from "@/components/maintenance/MaintenanceBulkActions";
+import { EquipmentRegistry } from "@/components/maintenance/EquipmentRegistry";
+import { AddMaintenanceTaskDialog } from "@/components/maintenance/AddMaintenanceTaskDialog";
+import { MaintenanceDetailsDialog } from "@/components/maintenance/MaintenanceDetailsDialog";
+import { EquipmentDetailsDialog } from "@/components/maintenance/EquipmentDetailsDialog";
 
-const statusColor: Record<string, string> = {
-  Scheduled: 'bg-info/10 text-info',
-  'In Progress': 'bg-warning/10 text-warning',
-  Completed: 'bg-success/10 text-success',
-  Overdue: 'bg-destructive/10 text-destructive',
-};
-
-const typeColor: Record<string, string> = {
-  Preventive: 'bg-primary/10 text-primary',
-  Corrective: 'bg-warning/10 text-warning',
-  Predictive: 'bg-info/10 text-info',
-};
+type ViewMode = 'grid' | 'table' | 'calendar';
+type MainTab = 'tasks' | 'equipment';
 
 export default function Maintenance() {
-  const [tasks, setTasks] = useLocalStorage<MaintenanceTask[]>(STORAGE_KEYS.MAINTENANCE_TASKS, sampleMaintenanceTasks);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [tasks, setTasks] = useLocalStorage<EnhancedMaintenanceTask[]>(STORAGE_KEYS.MAINTENANCE_TASKS, sampleEnhancedMaintenanceTasks);
+  const [equipment] = useLocalStorage<Equipment[]>('equipment', sampleEquipment);
+  const [mainTab, setMainTab] = useState<MainTab>('tasks');
+  const [view, setView] = useState<ViewMode>('grid');
+  const [addOpen, setAddOpen] = useState(false);
+  const [detailsTask, setDetailsTask] = useState<EnhancedMaintenanceTask | null>(null);
+  const [detailsEquipment, setDetailsEquipment] = useState<Equipment | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [quickFilter, setQuickFilter] = useState('all');
+  const [filters, setFilters] = useState({ search: '', status: '', priority: '', type: '', equipment: '', department: '' });
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
   const { t } = useI18n();
   const { toast } = useToast();
-  const [form, setForm] = useState({ machineName: '', type: '', scheduledDate: '', assignee: '', notes: '' });
 
-  const overdueCount = tasks.filter(m => m.status === 'Overdue').length;
+  const stats = useMemo(() => calculateMaintenanceStats(tasks, equipment), [tasks, equipment]);
 
-  const handleAdd = () => {
-    if (!form.machineName.trim() || !form.scheduledDate) return;
-    const task: MaintenanceTask = {
-      id: `MT-${String(tasks.length + 1).padStart(3, '0')}`,
-      machineId: `M-${String(tasks.length + 1).padStart(3, '0')}`,
-      machineName: form.machineName.trim(),
-      type: (form.type || 'Preventive') as MaintenanceTask['type'],
-      scheduledDate: form.scheduledDate,
-      status: 'Scheduled',
-      assignee: form.assignee || 'Unassigned',
-      notes: form.notes,
-    };
-    setTasks(prev => [...prev, task]);
-    toast({ title: "Task Created", description: task.id });
-    setForm({ machineName: '', type: '', scheduledDate: '', assignee: '', notes: '' });
-    setDialogOpen(false);
+  const filteredTasks = useMemo(() => {
+    let result = [...tasks];
+    const today = new Date().toISOString().split('T')[0];
+    const weekFromNow = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+
+    if (quickFilter === 'open') result = result.filter(t => t.status === 'scheduled' || t.status === 'pending_parts');
+    else if (quickFilter === 'in_progress') result = result.filter(t => t.status === 'in_progress');
+    else if (quickFilter === 'completed') result = result.filter(t => t.status === 'completed');
+    else if (quickFilter === 'overdue') result = result.filter(t => t.isOverdue || (daysUntil(t.scheduledDate) < 0 && t.status !== 'completed' && t.status !== 'cancelled'));
+    else if (quickFilter === 'critical') result = result.filter(t => t.priority === 'critical');
+    else if (quickFilter === 'today') result = result.filter(t => t.scheduledDate === today);
+    else if (quickFilter === 'this_week') result = result.filter(t => t.scheduledDate >= today && t.scheduledDate <= weekFromNow);
+
+    if (filters.search) {
+      const s = filters.search.toLowerCase();
+      result = result.filter(t => t.taskNumber.toLowerCase().includes(s) || t.title.toLowerCase().includes(s) || t.equipmentName.toLowerCase().includes(s));
+    }
+    if (filters.status) result = result.filter(t => t.status === filters.status);
+    if (filters.priority) result = result.filter(t => t.priority === filters.priority);
+    if (filters.type) result = result.filter(t => t.type === filters.type);
+    if (filters.department) {
+      const eqIds = equipment.filter(e => e.department === filters.department).map(e => e.id);
+      result = result.filter(t => eqIds.includes(t.equipmentId));
+    }
+    return result;
+  }, [tasks, equipment, quickFilter, filters]);
+
+  const departments = useMemo(() => [...new Set(equipment.map(e => e.department))], [equipment]);
+  const equipmentNames = useMemo(() => equipment.map(e => e.name), [equipment]);
+
+  const handleStart = (id: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'in_progress' as const, startDate: new Date().toISOString().split('T')[0], updatedAt: new Date().toISOString().split('T')[0], activityLog: [...t.activityLog, { date: new Date().toISOString().split('T')[0], user: 'EMP-001', userName: 'Current User', action: 'Maintenance started' }] } : t));
+    toast({ title: "Maintenance Started" });
   };
 
-  const updateStatus = (id: string, status: MaintenanceTask['status']) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
-    toast({ title: "Status Updated" });
+  const handleComplete = (id: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'completed' as const, completionDate: new Date().toISOString().split('T')[0], outcome: 'successful' as const, checklist: t.checklist.map(c => ({ ...c, completed: true })), updatedAt: new Date().toISOString().split('T')[0], activityLog: [...t.activityLog, { date: new Date().toISOString().split('T')[0], user: 'EMP-001', userName: 'Current User', action: 'Maintenance completed' }] } : t));
+    toast({ title: "Maintenance Completed" });
+  };
+
+  const handleDelete = (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    toast({ title: "Task Deleted" });
+  };
+
+  const handleExport = () => {
+    const data = selectedIds.length > 0 ? tasks.filter(t => selectedIds.includes(t.id)) : filteredTasks;
+    const csv = ['#,Equipment,Type,Priority,Status,Date,Assigned,Parts,Cost',
+      ...data.map(t => `${t.taskNumber},${t.equipmentName},${t.type},${t.priority},${t.status},${t.scheduledDate},${t.assignedToNames.join(';')},${t.partsUsed.length},${t.totalCost}`)
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'maintenance_tasks.csv'; a.click();
+    toast({ title: "Exported" });
   };
 
   return (
@@ -63,66 +100,83 @@ export default function Maintenance() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('nav.maintenance')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {tasks.length} tasks
-            {overdueCount > 0 && <span className="text-destructive font-medium ml-2">· {overdueCount} overdue</span>}
-          </p>
+          <p className="text-sm text-muted-foreground">{filteredTasks.length} of {tasks.length} tasks · {equipment.length} equipment</p>
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Task</Button>
+        <div className="flex items-center gap-2">
+          {mainTab === 'tasks' && (
+            <div className="flex border rounded-md">
+              <Button size="sm" variant={view === 'grid' ? 'default' : 'ghost'} className="rounded-r-none" onClick={() => setView('grid')}><LayoutGrid className="h-3.5 w-3.5" /></Button>
+              <Button size="sm" variant={view === 'table' ? 'default' : 'ghost'} className="rounded-none" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
+              <Button size="sm" variant={view === 'calendar' ? 'default' : 'ghost'} className="rounded-l-none" onClick={() => setView('calendar')}><CalendarIcon className="h-3.5 w-3.5" /></Button>
+            </div>
+          )}
+          <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Task</Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {tasks.map(task => (
-          <Card key={task.id} className={`shadow-card ${task.status === 'Overdue' ? 'border-destructive/30' : ''}`}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <Wrench className={`h-4 w-4 ${task.status === 'Overdue' ? 'text-destructive' : 'text-primary'}`} />
-                  <div>
-                    <p className="text-sm font-semibold">{task.machineName}</p>
-                    <p className="text-[10px] text-muted-foreground">{task.machineId}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColor[task.status]}`}>{task.status}</span>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setTasks(prev => prev.filter(t => t.id !== task.id)); toast({ title: "Deleted" }); }}>
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                <span className="text-muted-foreground">Type: <Badge className={`text-[10px] ${typeColor[task.type]}`}>{task.type}</Badge></span>
-                <span className="text-muted-foreground">Date: <strong className="text-foreground">{task.scheduledDate}</strong></span>
-                <span className="text-muted-foreground">Assignee: <strong className="text-foreground">{task.assignee}</strong></span>
-              </div>
-              <p className="text-[10px] text-muted-foreground border-t pt-2">{task.notes}</p>
-              <div className="flex gap-1">
-                {task.status === 'Scheduled' && <Button size="sm" variant="outline" className="text-[10px] h-6" onClick={() => updateStatus(task.id, 'In Progress')}>Start</Button>}
-                {(task.status === 'In Progress' || task.status === 'Overdue') && <Button size="sm" variant="outline" className="text-[10px] h-6" onClick={() => updateStatus(task.id, 'Completed')}>Complete</Button>}
-              </div>
-              {task.status === 'Overdue' && (
-                <div className="flex items-center gap-1 text-[10px] text-destructive">
-                  <AlertTriangle className="h-3 w-3" />Maintenance overdue - requires immediate attention
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <MaintenanceStats stats={stats} />
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>New Maintenance Task</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2"><Label className="text-xs">Machine Name *</Label><Input value={form.machineName} onChange={e => setForm(p => ({ ...p, machineName: e.target.value }))} /></div>
-            <div><Label className="text-xs">Type</Label><Select value={form.type} onValueChange={v => setForm(p => ({ ...p, type: v }))}><SelectTrigger><SelectValue placeholder="Preventive" /></SelectTrigger><SelectContent><SelectItem value="Preventive">Preventive</SelectItem><SelectItem value="Corrective">Corrective</SelectItem><SelectItem value="Predictive">Predictive</SelectItem></SelectContent></Select></div>
-            <div><Label className="text-xs">Date *</Label><Input type="date" value={form.scheduledDate} onChange={e => setForm(p => ({ ...p, scheduledDate: e.target.value }))} /></div>
-            <div><Label className="text-xs">Assignee</Label><Input value={form.assignee} onChange={e => setForm(p => ({ ...p, assignee: e.target.value }))} /></div>
-            <div><Label className="text-xs">Notes</Label><Input value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} /></div>
-          </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button><Button onClick={handleAdd}>Create</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <Tabs value={mainTab} onValueChange={v => setMainTab(v as MainTab)}>
+        <TabsList>
+          <TabsTrigger value="tasks" className="text-xs"><Wrench className="h-3 w-3 mr-1" />Tasks</TabsTrigger>
+          <TabsTrigger value="equipment" className="text-xs"><Wrench className="h-3 w-3 mr-1" />Equipment ({equipment.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tasks" className="space-y-4 mt-3">
+          <MaintenanceFilters
+            quickFilter={quickFilter} onQuickFilterChange={setQuickFilter}
+            filters={filters} onFiltersChange={setFilters}
+            equipmentNames={equipmentNames} departments={departments}
+          />
+
+          <MaintenanceBulkActions
+            count={selectedIds.length}
+            onClear={() => setSelectedIds([])}
+            onDelete={() => { setTasks(prev => prev.filter(t => !selectedIds.includes(t.id))); setSelectedIds([]); toast({ title: `${selectedIds.length} deleted` }); }}
+            onExport={handleExport}
+            onStart={() => { selectedIds.forEach(handleStart); setSelectedIds([]); }}
+            onComplete={() => { selectedIds.forEach(handleComplete); setSelectedIds([]); }}
+          />
+
+          {view === 'grid' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredTasks.map(task => (
+                <MaintenanceCard key={task.id} task={task} onView={setDetailsTask} onStart={handleStart} onComplete={handleComplete} onDelete={handleDelete} />
+              ))}
+            </div>
+          )}
+
+          {view === 'table' && (
+            <MaintenanceTable
+              tasks={filteredTasks} selectedIds={selectedIds}
+              onToggleSelect={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
+              onSelectAll={() => setSelectedIds(prev => prev.length === filteredTasks.length ? [] : filteredTasks.map(t => t.id))}
+              onView={setDetailsTask} onStart={handleStart} onComplete={handleComplete} onDelete={handleDelete}
+            />
+          )}
+
+          {view === 'calendar' && (
+            <MaintenanceCalendar tasks={filteredTasks} currentMonth={calendarMonth} onMonthChange={setCalendarMonth} onView={setDetailsTask} />
+          )}
+
+          {filteredTasks.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-sm text-muted-foreground mb-3">No maintenance tasks found</p>
+              <Button size="sm" onClick={() => setAddOpen(true)}>Create Task</Button>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="equipment" className="mt-3">
+          <EquipmentRegistry equipment={equipment} onView={setDetailsEquipment} />
+        </TabsContent>
+      </Tabs>
+
+      <AddMaintenanceTaskDialog open={addOpen} onOpenChange={setAddOpen} onAdd={task => { setTasks(prev => [...prev, task]); toast({ title: "Task Created", description: task.taskNumber }); }} equipment={equipment} existingCount={tasks.length} />
+
+      <MaintenanceDetailsDialog task={detailsTask} open={!!detailsTask} onOpenChange={o => { if (!o) setDetailsTask(null); }} onStart={handleStart} onComplete={handleComplete} />
+
+      <EquipmentDetailsDialog equipment={detailsEquipment} open={!!detailsEquipment} onOpenChange={o => { if (!o) setDetailsEquipment(null); }} />
     </div>
   );
 }
