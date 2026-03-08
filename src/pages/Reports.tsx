@@ -228,7 +228,7 @@ export default function Reports() {
   const exportInstallationReport = () => {
     generateReportPDF("Installation Schedule Report",
       ['Installation', 'Project', 'Status', 'Start', 'End', 'Team Lead'],
-      installations.map(i => [i.installationNumber, i.projectName, i.status, i.scheduledStartDate, i.scheduledEndDate, i.teamLeadName])
+      installations.map(i => [i.installationNumber, i.projectName || 'N/A', i.status, i.scheduledDate, i.scheduledStartTime || 'N/A', i.teamLead])
     );
   };
   const exportMaintenanceReport = () => {
