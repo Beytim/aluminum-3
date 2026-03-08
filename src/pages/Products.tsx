@@ -98,7 +98,7 @@ export default function Products() {
   const handleExportPDF = () => {
     generateReportPDF("Product Catalog",
       ['Code', 'Name', 'Category', 'Type', 'Cost', 'Price', 'Margin', 'Stock'],
-      filtered.map(p => [p.code, p.name, p.category, p.productType, `ETB ${calcTotalCost(p).toLocaleString()}`, `ETB ${p.sellingPrice.toLocaleString()}`, `${calcMargin(p).toFixed(1)}%`, String(p.currentStock)])
+      filtered.map(p => [p.code, p.name, p.category, p.productType, formatCurrency(calcTotalCost(p)), formatCurrency(p.sellingPrice), `${calcMargin(p).toFixed(1)}%`, String(p.currentStock)])
     );
   };
 
