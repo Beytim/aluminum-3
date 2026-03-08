@@ -39,6 +39,7 @@ export default function Finance() {
   const [paymentInvoice, setPaymentInvoice] = useState<EnhancedInvoice | null>(null);
 
   const { toast } = useToast();
+  const { formatCurrency: fmtCurrency } = useSettings();
 
   const stats = useMemo(() => calculateFinanceStats(invoices, payments, expenses), [invoices, payments, expenses]);
 
