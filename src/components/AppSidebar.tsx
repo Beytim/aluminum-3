@@ -9,38 +9,45 @@ import { useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
+import { useLocalStorage } from "@/lib/localStorage";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
-const modules = [
-  { title: 'nav.dashboard', url: '/', icon: LayoutDashboard },
-  { title: 'nav.products', url: '/products', icon: Package },
-  { title: 'nav.inventory', url: '/inventory', icon: Boxes },
-  { title: 'nav.production', url: '/production', icon: Factory },
-  { title: 'nav.cutting', url: '/cutting', icon: Scissors },
-  { title: 'nav.projects', url: '/projects', icon: FolderKanban },
-  { title: 'nav.customers', url: '/customers', icon: Users },
-  { title: 'Orders', url: '/orders', icon: ShoppingCart },
-  { title: 'nav.quotes', url: '/quotes', icon: FileText },
-  { title: 'nav.installation', url: '/installation', icon: Wrench },
-  { title: 'nav.maintenance', url: '/maintenance', icon: ShieldCheck },
-  { title: 'nav.quality', url: '/quality', icon: ClipboardCheck },
-  { title: 'nav.procurement', url: '/procurement', icon: Truck },
-  { title: 'nav.finance', url: '/finance', icon: DollarSign },
-  { title: 'nav.hr', url: '/hr', icon: UserCog },
-  { title: 'nav.reports', url: '/reports', icon: BarChart3 },
-  { title: 'nav.users', url: '/users', icon: Building2 },
-  { title: 'nav.settings', url: '/settings', icon: Settings },
+const allModules = [
+  { title: 'nav.dashboard', url: '/', icon: LayoutDashboard, moduleId: null },
+  { title: 'nav.products', url: '/products', icon: Package, moduleId: 'products' },
+  { title: 'nav.inventory', url: '/inventory', icon: Boxes, moduleId: 'inventory' },
+  { title: 'nav.production', url: '/production', icon: Factory, moduleId: 'production' },
+  { title: 'nav.cutting', url: '/cutting', icon: Scissors, moduleId: 'cutting' },
+  { title: 'nav.projects', url: '/projects', icon: FolderKanban, moduleId: 'projects' },
+  { title: 'nav.customers', url: '/customers', icon: Users, moduleId: 'customers' },
+  { title: 'Orders', url: '/orders', icon: ShoppingCart, moduleId: 'orders' },
+  { title: 'nav.quotes', url: '/quotes', icon: FileText, moduleId: 'quotes' },
+  { title: 'nav.installation', url: '/installation', icon: Wrench, moduleId: 'installation' },
+  { title: 'nav.maintenance', url: '/maintenance', icon: ShieldCheck, moduleId: 'maintenance' },
+  { title: 'nav.quality', url: '/quality', icon: ClipboardCheck, moduleId: 'quality' },
+  { title: 'nav.procurement', url: '/procurement', icon: Truck, moduleId: 'procurement' },
+  { title: 'nav.finance', url: '/finance', icon: DollarSign, moduleId: 'finance' },
+  { title: 'nav.hr', url: '/hr', icon: UserCog, moduleId: 'hr' },
+  { title: 'nav.reports', url: '/reports', icon: BarChart3, moduleId: 'reports' },
+  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null },
+  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null },
 ];
+
+interface ModuleToggle { id: string; enabled: boolean }
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { t, language, setLanguage } = useI18n();
+  const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
+
+  const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
+  const modules = allModules.filter(m => m.moduleId === null || !disabledIds.has(m.moduleId));
 
   return (
     <Sidebar collapsible="icon">
