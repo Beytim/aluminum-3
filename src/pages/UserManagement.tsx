@@ -73,8 +73,11 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
+  const approvedUsers = useMemo(() => users.filter(u => u.approved), [users]);
+  const pendingUsers = useMemo(() => users.filter(u => !u.approved), [users]);
+
   const filtered = useMemo(() => {
-    return users.filter((u) => {
+    return approvedUsers.filter((u) => {
       if (filters.search) {
         const s = filters.search.toLowerCase();
         if (!(u.full_name?.toLowerCase().includes(s))) return false;
