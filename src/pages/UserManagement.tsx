@@ -133,11 +133,33 @@ export default function UserManagement() {
   };
 
   const handleDelete = async (userId: string) => {
-    toast({ title: "Not allowed", description: "User deletion requires backend admin access.", variant: "destructive" });
+    // Delete roles first, then profile
+    await supabase.from("user_roles").delete().eq("user_id", userId);
+    const { error } = await supabase.from("profiles").delete().eq("id", userId);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      await supabase.from("activity_log").insert({
+        actor_id: currentUser?.id,
+        action: "user_removed",
+        target_user_id: userId,
+        details: {},
+      });
+      toast({ title: "User removed", description: "User profile and roles deleted." });
+      setLogRefresh(prev => prev + 1);
+      fetchUsers();
+    }
   };
 
-  const handleBulkDelete = () => {
-    toast({ title: "Not allowed", description: "Bulk user deletion requires backend admin access.", variant: "destructive" });
+  const handleBulkDelete = async () => {
+    for (const id of selectedIds) {
+      await supabase.from("user_roles").delete().eq("user_id", id);
+      await supabase.from("profiles").delete().eq("id", id);
+    }
+    toast({ title: "Users removed", description: `${selectedIds.length} users deleted.` });
+    setSelectedIds([]);
+    setLogRefresh(prev => prev + 1);
+    fetchUsers();
   };
 
   return (
