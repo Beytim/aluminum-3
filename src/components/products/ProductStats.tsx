@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Package, Layers, AlertTriangle, Box, Wrench, BarChart3 } from "lucide-react";
-import type { ProductStats as Stats } from "@/data/enhancedProductData";
-import { formatETBShort } from "@/data/enhancedProductData";
+import type { ProductStats as Stats } from "@/hooks/useProducts";
+import { formatETBShort } from "@/hooks/useProducts";
 
 interface Props {
   stats: Stats;

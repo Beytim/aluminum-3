@@ -5,21 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import type { EnhancedProduct, ProductCategory, ProductType } from "@/data/enhancedProductData";
+import { useUpdateProduct, type Product } from "@/hooks/useProducts";
 
-const categories: ProductCategory[] = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
-const productTypes: ProductType[] = ['Raw Material', 'Fabricated', 'System', 'Custom'];
+const categories = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
+const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product: EnhancedProduct | null;
-  onSave: (product: EnhancedProduct) => void;
+  product: Product | null;
 }
 
-export default function EditEnhancedProductDialog({ open, onOpenChange, product, onSave }: Props) {
-  const { toast } = useToast();
+export default function EditEnhancedProductDialog({ open, onOpenChange, product }: Props) {
+  const updateProduct = useUpdateProduct();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated',
@@ -33,19 +31,19 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product,
   useEffect(() => {
     if (product) {
       setForm({
-        name: product.name, nameAm: product.nameAm, category: product.category,
-        subcategory: product.subcategory || '', productType: product.productType,
+        name: product.name, nameAm: product.name_am, category: product.category,
+        subcategory: product.subcategory || '', productType: product.product_type,
         profile: product.profile, glass: product.glass,
-        colors: product.colors.join(', '), laborHrs: String(product.laborHrs || ''),
-        sellingPrice: String(product.sellingPrice),
-        alloyType: product.alloyType || '', temper: product.temper || '',
-        currentStock: String(product.currentStock), minStock: String(product.minStock),
-        maxStock: String(product.maxStock), warehouseLocation: product.warehouseLocation || '',
+        colors: (product.colors || []).join(', '), laborHrs: String(product.labor_hrs || ''),
+        sellingPrice: String(product.selling_price),
+        alloyType: product.alloy_type || '', temper: product.temper || '',
+        currentStock: String(product.current_stock), minStock: String(product.min_stock),
+        maxStock: String(product.max_stock), warehouseLocation: product.warehouse_location || '',
         notes: product.notes || '', tags: (product.tags || []).join(', '),
-        profileCost: String(product.profileCost || ''), glassCost: String(product.glassCost || ''),
-        hardwareCost: String(product.hardwareCost || ''), accessoriesCost: String(product.accessoriesCost || ''),
-        fabLaborCost: String(product.fabLaborCost || ''), installLaborCost: String(product.installLaborCost || ''),
-        overheadPercent: String(product.overheadPercent || ''),
+        profileCost: String(product.profile_cost || ''), glassCost: String(product.glass_cost || ''),
+        hardwareCost: String(product.hardware_cost || ''), accessoriesCost: String(product.accessories_cost || ''),
+        fabLaborCost: String(product.fab_labor_cost || ''), installLaborCost: String(product.install_labor_cost || ''),
+        overheadPercent: String(product.overhead_percent || ''),
       });
       setErrors({});
     }
@@ -66,37 +64,43 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product,
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate() || !product) return;
-    const now = new Date().toISOString().split('T')[0];
     const tc = totalCost();
-    const updated: EnhancedProduct = {
-      ...product,
-      name: form.name.trim(), nameAm: form.nameAm.trim(),
-      category: form.category as ProductCategory, subcategory: form.subcategory.trim(),
-      productType: form.productType as ProductType,
-      profile: form.profile.trim(), glass: form.glass.trim(),
+
+    await updateProduct.mutateAsync({
+      id: product.id,
+      name: form.name.trim(),
+      name_am: form.nameAm.trim(),
+      category: form.category as any,
+      subcategory: form.subcategory.trim(),
+      product_type: form.productType as any,
+      profile: form.profile.trim(),
+      glass: form.glass.trim(),
       colors: form.colors.split(',').map(c => c.trim()).filter(Boolean),
-      laborHrs: Number(form.laborHrs) || 0,
-      profileCost: Number(form.profileCost) || 0, glassCost: Number(form.glassCost) || 0,
-      hardwareCost: Number(form.hardwareCost) || 0, accessoriesCost: Number(form.accessoriesCost) || 0,
-      fabLaborCost: Number(form.fabLaborCost) || 0, installLaborCost: Number(form.installLaborCost) || 0,
-      overheadPercent: Number(form.overheadPercent) || 0,
-      materialCost: tc > 0 ? tc : product.materialCost,
-      sellingPrice: Number(form.sellingPrice),
-      alloyType: form.alloyType || undefined, temper: form.temper || undefined,
-      currentStock: Number(form.currentStock) || 0, minStock: Number(form.minStock) || 0,
-      maxStock: Number(form.maxStock) || 0, warehouseLocation: form.warehouseLocation || undefined,
-      notes: form.notes || undefined,
-      tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
-      updatedAt: now, updatedBy: 'Admin',
-    };
-    onSave(updated);
-    toast({ title: "Updated", description: `${updated.name} saved.` });
+      labor_hrs: Number(form.laborHrs) || 0,
+      profile_cost: Number(form.profileCost) || 0,
+      glass_cost: Number(form.glassCost) || 0,
+      hardware_cost: Number(form.hardwareCost) || 0,
+      accessories_cost: Number(form.accessoriesCost) || 0,
+      fab_labor_cost: Number(form.fabLaborCost) || 0,
+      install_labor_cost: Number(form.installLaborCost) || 0,
+      overhead_percent: Number(form.overheadPercent) || 0,
+      material_cost: tc > 0 ? tc : product.material_cost,
+      selling_price: Number(form.sellingPrice),
+      alloy_type: form.alloyType || null,
+      temper: form.temper || null,
+      current_stock: Number(form.currentStock) || 0,
+      min_stock: Number(form.minStock) || 0,
+      max_stock: Number(form.maxStock) || 0,
+      warehouse_location: form.warehouseLocation || null,
+      notes: form.notes || null,
+      tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+    });
     onOpenChange(false);
   };
 
-  const profit = Number(form.sellingPrice) - (totalCost() || product?.materialCost || 0);
+  const profit = Number(form.sellingPrice) - (totalCost() || product?.material_cost || 0);
   const mg = Number(form.sellingPrice) > 0 ? (profit / Number(form.sellingPrice)) * 100 : 0;
 
   const F = (field: string, label: string, opts?: { type?: string; span?: boolean }) => (
@@ -173,7 +177,9 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product,
         </Tabs>
         <DialogFooter className="mt-4">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button size="sm" onClick={handleSubmit}>Save Changes</Button>
+          <Button size="sm" onClick={handleSubmit} disabled={updateProduct.isPending}>
+            {updateProduct.isPending ? "Saving..." : "Save Changes"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

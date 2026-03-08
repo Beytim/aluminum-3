@@ -4,25 +4,28 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pencil, Copy, AlertTriangle, ExternalLink } from "lucide-react";
-import type { EnhancedProduct } from "@/data/enhancedProductData";
-import { calcTotalCost, calcMargin } from "@/data/enhancedProductData";
+import type { Product, ProductBOM, ProductPriceHistory } from "@/hooks/useProducts";
+import { calcTotalCost, calcMargin, useProductBOM, useProductPriceHistory } from "@/hooks/useProducts";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product: EnhancedProduct | null;
-  onEdit: (p: EnhancedProduct) => void;
-  onClone: (p: EnhancedProduct) => void;
+  product: Product | null;
+  onEdit: (p: Product) => void;
+  onClone: (p: Product) => void;
   language: string;
 }
 
 export default function ProductDetailsDialog({ open, onOpenChange, product: p, onEdit, onClone, language }: Props) {
+  const { data: bom = [] } = useProductBOM(p?.id ?? null);
+  const { data: priceHistory = [] } = useProductPriceHistory(p?.id ?? null);
+
   if (!p) return null;
 
   const cost = calcTotalCost(p);
-  const profit = p.sellingPrice - cost;
+  const profit = p.selling_price - cost;
   const mg = calcMargin(p);
-  const isLowStock = p.currentStock <= p.minStock;
+  const isLowStock = p.current_stock <= p.min_stock;
 
   const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
     <div className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
@@ -37,7 +40,7 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
         <DialogHeader>
           <div className="flex items-start justify-between gap-2">
             <div>
-              <DialogTitle className="text-base">{language === 'am' ? p.nameAm : p.name}</DialogTitle>
+              <DialogTitle className="text-base">{language === 'am' ? p.name_am : p.name}</DialogTitle>
               <p className="text-xs text-muted-foreground mt-1">{p.code}</p>
             </div>
             <div className="flex gap-1.5">
@@ -52,21 +55,20 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
         </DialogHeader>
 
         <Tabs defaultValue="basic">
-          <TabsList className="grid w-full grid-cols-5 h-8">
+          <TabsList className="grid w-full grid-cols-4 h-8">
             <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
             <TabsTrigger value="specs" className="text-xs">Specs</TabsTrigger>
             <TabsTrigger value="bom" className="text-xs">BOM</TabsTrigger>
             <TabsTrigger value="pricing" className="text-xs">Pricing</TabsTrigger>
-            <TabsTrigger value="links" className="text-xs">Links</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic" className="mt-3 space-y-1">
             <Row label="Code" value={p.code} />
-            <Row label="Type" value={<Badge variant="secondary" className="text-[10px]">{p.productType}</Badge>} />
+            <Row label="Type" value={<Badge variant="secondary" className="text-[10px]">{p.product_type}</Badge>} />
             <Row label="Category" value={p.category} />
             <Row label="Subcategory" value={p.subcategory || '—'} />
             <Row label="Name (EN)" value={p.name} />
-            <Row label="ስም (AM)" value={p.nameAm} />
+            <Row label="ስም (AM)" value={p.name_am} />
             <Row label="Profile" value={p.profile || '—'} />
             <Row label="Glass" value={p.glass || '—'} />
             <Row label="Colors" value={p.colors.length > 0 ? p.colors.join(', ') : '—'} />
@@ -87,33 +89,23 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
           </TabsContent>
 
           <TabsContent value="specs" className="mt-3 space-y-1">
-            <Row label="Alloy Type" value={p.alloyType || '—'} />
+            <Row label="Alloy Type" value={p.alloy_type || '—'} />
             <Row label="Temper" value={p.temper || '—'} />
             <Row label="Form" value={p.form || '—'} />
             <Row label="Width (mm)" value={p.width?.toLocaleString() || '—'} />
             <Row label="Height/Length (mm)" value={p.length?.toLocaleString() || '—'} />
             <Row label="Thickness (mm)" value={p.thickness || '—'} />
             <Row label="Diameter (mm)" value={p.diameter || '—'} />
-            <Row label="Wall Thickness (mm)" value={p.wallThickness || '—'} />
-            <Row label="Weight/m (kg)" value={p.weightPerMeter || '—'} />
-            <Row label="Weight/pc (kg)" value={p.weightPerPiece || '—'} />
-            <Row label="Labor Hours" value={p.laborHrs || '—'} />
-            <Row label="Inspection Required" value={p.inspectionRequired ? 'Yes' : 'No'} />
-            {p.defectRate !== undefined && <Row label="Defect Rate" value={`${p.defectRate}%`} />}
-            {p.qualityStandards && p.qualityStandards.length > 0 && (
-              <div className="mt-3">
-                <p className="text-xs font-semibold mb-2">Quality Standards</p>
-                {p.qualityStandards.map((qs, i) => (
-                  <div key={i} className="text-[10px] py-1 border-b border-border/30">
-                    <span className="font-medium">{qs.parameter}</span>: {qs.specification} (±{qs.tolerance})
-                  </div>
-                ))}
-              </div>
-            )}
+            <Row label="Wall Thickness (mm)" value={p.wall_thickness || '—'} />
+            <Row label="Weight/m (kg)" value={p.weight_per_meter || '—'} />
+            <Row label="Weight/pc (kg)" value={p.weight_per_piece || '—'} />
+            <Row label="Labor Hours" value={p.labor_hrs || '—'} />
+            <Row label="Inspection Required" value={p.inspection_required ? 'Yes' : 'No'} />
+            {p.defect_rate !== null && <Row label="Defect Rate" value={`${p.defect_rate}%`} />}
           </TabsContent>
 
           <TabsContent value="bom" className="mt-3">
-            {p.bom && p.bom.length > 0 ? (
+            {bom.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -127,19 +119,19 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {p.bom.map(b => (
+                    {bom.map(b => (
                       <TableRow key={b.id}>
-                        <TableCell className="text-xs"><Badge variant="secondary" className="text-[10px]">{b.type}</Badge></TableCell>
+                        <TableCell className="text-xs"><Badge variant="secondary" className="text-[10px]">{b.component_type}</Badge></TableCell>
                         <TableCell className="text-xs">{b.name}</TableCell>
                         <TableCell className="text-xs text-right">{b.quantity}</TableCell>
                         <TableCell className="text-xs">{b.unit}</TableCell>
-                        <TableCell className="text-xs text-right">{b.unitCost.toLocaleString()}</TableCell>
+                        <TableCell className="text-xs text-right">{b.unit_cost.toLocaleString()}</TableCell>
                         <TableCell className="text-xs text-right font-medium">{b.total.toLocaleString()}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-                <div className="text-right text-xs font-semibold pt-2">BOM Total: ETB {p.bom.reduce((s, b) => s + b.total, 0).toLocaleString()}</div>
+                <div className="text-right text-xs font-semibold pt-2">BOM Total: ETB {bom.reduce((s, b) => s + b.total, 0).toLocaleString()}</div>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground text-center py-6">No BOM defined for this product.</p>
@@ -147,102 +139,43 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
           </TabsContent>
 
           <TabsContent value="pricing" className="mt-3 space-y-1">
-            <Row label="Profile Cost" value={`ETB ${p.profileCost.toLocaleString()}`} />
-            <Row label="Glass Cost" value={`ETB ${p.glassCost.toLocaleString()}`} />
-            <Row label="Hardware Cost" value={`ETB ${p.hardwareCost.toLocaleString()}`} />
-            <Row label="Accessories" value={`ETB ${p.accessoriesCost.toLocaleString()}`} />
-            <Row label="Fab Labor" value={`ETB ${p.fabLaborCost.toLocaleString()}`} />
-            <Row label="Install Labor" value={`ETB ${p.installLaborCost.toLocaleString()}`} />
-            <Row label="Overhead" value={`${p.overheadPercent}%`} />
+            <Row label="Profile Cost" value={`ETB ${p.profile_cost.toLocaleString()}`} />
+            <Row label="Glass Cost" value={`ETB ${p.glass_cost.toLocaleString()}`} />
+            <Row label="Hardware Cost" value={`ETB ${p.hardware_cost.toLocaleString()}`} />
+            <Row label="Accessories" value={`ETB ${p.accessories_cost.toLocaleString()}`} />
+            <Row label="Fab Labor" value={`ETB ${p.fab_labor_cost.toLocaleString()}`} />
+            <Row label="Install Labor" value={`ETB ${p.install_labor_cost.toLocaleString()}`} />
+            <Row label="Overhead" value={`${p.overhead_percent}%`} />
             <div className="border-t pt-2 mt-2 space-y-1">
               <Row label="Total Cost" value={<span className="font-semibold">ETB {cost.toLocaleString()}</span>} />
-              <Row label="Selling Price" value={<span className="font-semibold text-primary">ETB {p.sellingPrice.toLocaleString()}</span>} />
+              <Row label="Selling Price" value={<span className="font-semibold text-primary">ETB {p.selling_price.toLocaleString()}</span>} />
               <Row label="Profit" value={<span className={`font-semibold ${profit >= 0 ? 'text-success' : 'text-destructive'}`}>ETB {profit.toLocaleString()} ({mg.toFixed(1)}%)</span>} />
             </div>
             <div className="border-t pt-2 mt-2 space-y-1">
               <Row label="Current Stock" value={
-                <span className="flex items-center gap-1.5">{p.currentStock}{isLowStock && <AlertTriangle className="h-3 w-3 text-destructive" />}</span>
+                <span className="flex items-center gap-1.5">{p.current_stock}{isLowStock && <AlertTriangle className="h-3 w-3 text-destructive" />}</span>
               } />
-              <Row label="Reserved" value={p.reservedStock} />
-              <Row label="Available" value={p.currentStock - p.reservedStock} />
-              <Row label="Min / Max" value={`${p.minStock} / ${p.maxStock}`} />
-              <Row label="Location" value={p.warehouseLocation || '—'} />
-              <Row label="Supplier" value={p.supplierName || '—'} />
-              <Row label="Lead Time" value={p.leadTimeDays ? `${p.leadTimeDays} days` : '—'} />
+              <Row label="Reserved" value={p.reserved_stock} />
+              <Row label="Available" value={p.current_stock - p.reserved_stock} />
+              <Row label="Min / Max" value={`${p.min_stock} / ${p.max_stock}`} />
+              <Row label="Location" value={p.warehouse_location || '—'} />
+              <Row label="Supplier" value={p.supplier_name || '—'} />
+              <Row label="Lead Time" value={p.lead_time_days ? `${p.lead_time_days} days` : '—'} />
             </div>
-            {p.priceHistory && p.priceHistory.length > 0 && (
+            {priceHistory.length > 0 && (
               <div className="border-t pt-2 mt-2">
                 <p className="text-xs font-semibold mb-2">Price History</p>
-                {p.priceHistory.map((ph, i) => (
-                  <div key={i} className="text-[10px] py-1 border-b border-border/30 flex justify-between">
-                    <span>{ph.date}</span>
-                    <span>ETB {ph.sellingPrice.toLocaleString()} {ph.reason && `· ${ph.reason}`}</span>
+                {priceHistory.map((ph) => (
+                  <div key={ph.id} className="text-[10px] py-1 border-b border-border/30 flex justify-between">
+                    <span>{new Date(ph.created_at).toLocaleDateString()}</span>
+                    <span>ETB {ph.selling_price.toLocaleString()} {ph.reason && `· ${ph.reason}`}</span>
                   </div>
                 ))}
               </div>
             )}
           </TabsContent>
-
-          <TabsContent value="links" className="mt-3 space-y-3">
-            {p.linkedProjectIds && p.linkedProjectIds.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold mb-1">Linked Projects</p>
-                <div className="flex gap-1 flex-wrap">
-                  {p.linkedProjectIds.map(id => (
-                    <Badge key={id} variant="outline" className="text-[10px]"><ExternalLink className="h-2.5 w-2.5 mr-1" />{id}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {p.linkedOrderIds && p.linkedOrderIds.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold mb-1">Linked Orders</p>
-                <div className="flex gap-1 flex-wrap">
-                  {p.linkedOrderIds.map(id => (
-                    <Badge key={id} variant="outline" className="text-[10px]"><ExternalLink className="h-2.5 w-2.5 mr-1" />{id}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {p.linkedWorkOrderIds && p.linkedWorkOrderIds.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold mb-1">Linked Work Orders</p>
-                <div className="flex gap-1 flex-wrap">
-                  {p.linkedWorkOrderIds.map(id => (
-                    <Badge key={id} variant="outline" className="text-[10px]"><ExternalLink className="h-2.5 w-2.5 mr-1" />{id}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {p.linkedQuoteIds && p.linkedQuoteIds.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold mb-1">Linked Quotes</p>
-                <div className="flex gap-1 flex-wrap">
-                  {p.linkedQuoteIds.map(id => (
-                    <Badge key={id} variant="outline" className="text-[10px]"><ExternalLink className="h-2.5 w-2.5 mr-1" />{id}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {!p.linkedProjectIds?.length && !p.linkedOrderIds?.length && !p.linkedWorkOrderIds?.length && !p.linkedQuoteIds?.length && (
-              <p className="text-xs text-muted-foreground text-center py-6">No cross-module links found.</p>
-            )}
-            <div className="border-t pt-2 mt-2 space-y-1">
-              <Row label="Created" value={`${p.createdAt} by ${p.createdBy}`} />
-              <Row label="Updated" value={`${p.updatedAt} by ${p.updatedBy}`} />
-            </div>
-          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-xs font-medium text-right">{value}</span>
-    </div>
   );
 }
