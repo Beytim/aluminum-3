@@ -19,8 +19,11 @@ import AddInventoryDialog from "@/components/inventory/AddInventoryDialog";
 import InventoryDetailsDialog from "@/components/inventory/InventoryDetailsDialog";
 import StockMovementDialog from "@/components/inventory/StockMovementDialog";
 
+import { useInventory } from "@/hooks/useInventory";
+
 export default function Inventory() {
-  const [inventory, setInventory] = useLocalStorage<EnhancedInventoryItem[]>('enhanced_inventory', enhancedSampleInventory);
+  const { inventory, isLoading, addItem, deleteItem, addMovement } = useInventory();
+  // We still use local storage for movements and reservations if not fully migrated yet
   const [movements, setMovements] = useLocalStorage<StockMovement[]>('stock_movements', sampleStockMovements);
   const [reservations] = useLocalStorage<StockReservation[]>('stock_reservations', sampleReservations);
 
@@ -71,18 +74,15 @@ export default function Inventory() {
   }, [inventory, search, category, stockFilter, qualityFilter, showRemnants, showLowStock, showQuarantine]);
 
   const handleAdd = (item: EnhancedInventoryItem) => {
-    setInventory(prev => [...prev, item]);
-    toast({ title: 'Item Added', description: `${item.productName} added to inventory` });
+    addItem(item);
   };
 
   const handleDelete = (id: string) => {
-    setInventory(prev => prev.filter(i => i.id !== id));
-    toast({ title: 'Deleted' });
+    deleteItem(id);
   };
 
   const handleBulkDelete = () => {
-    setInventory(prev => prev.filter(i => !selectedIds.includes(i.id)));
-    toast({ title: `${selectedIds.length} items deleted` });
+    selectedIds.forEach(id => deleteItem(id));
     setSelectedIds([]);
   };
 
@@ -105,7 +105,9 @@ export default function Inventory() {
 
   const handleMovementConfirm = (movement: StockMovement, updatedItem: EnhancedInventoryItem) => {
     setMovements(prev => [...prev, movement]);
-    setInventory(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
+    // With DB, the trigger handles stock updates, so we just add the movement
+    // But since the frontend expects movement to trigger a refetch or optimistic update, we can just call our hook
+    addMovement(movement);
     toast({
       title: movement.type === 'receipt' ? 'Stock Received' : 'Stock Issued',
       description: `${Math.abs(movement.quantity)} ${movement.unit} of ${movement.itemName}`,

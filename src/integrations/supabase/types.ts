@@ -175,6 +175,167 @@ export type Database = {
           },
         ]
       }
+      inventory_items: {
+        Row: {
+          batch_number: string | null
+          bin: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_remnant: boolean
+          is_reusable: boolean | null
+          item_code: string
+          notes: string | null
+          original_length: number | null
+          parent_item_id: string | null
+          product_id: string | null
+          quality_status: Database["public"]["Enums"]["inventory_quality_status"]
+          rack: string | null
+          received_date: string | null
+          remaining_length: number | null
+          reserved: number
+          shelf: string | null
+          status: Database["public"]["Enums"]["inventory_item_status"]
+          stock: number
+          supplier_batch: string | null
+          unit_cost: number
+          updated_at: string
+          updated_by: string | null
+          warehouse: string | null
+          zone: string | null
+        }
+        Insert: {
+          batch_number?: string | null
+          bin?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_remnant?: boolean
+          is_reusable?: boolean | null
+          item_code: string
+          notes?: string | null
+          original_length?: number | null
+          parent_item_id?: string | null
+          product_id?: string | null
+          quality_status?: Database["public"]["Enums"]["inventory_quality_status"]
+          rack?: string | null
+          received_date?: string | null
+          remaining_length?: number | null
+          reserved?: number
+          shelf?: string | null
+          status?: Database["public"]["Enums"]["inventory_item_status"]
+          stock?: number
+          supplier_batch?: string | null
+          unit_cost?: number
+          updated_at?: string
+          updated_by?: string | null
+          warehouse?: string | null
+          zone?: string | null
+        }
+        Update: {
+          batch_number?: string | null
+          bin?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_remnant?: boolean
+          is_reusable?: boolean | null
+          item_code?: string
+          notes?: string | null
+          original_length?: number | null
+          parent_item_id?: string | null
+          product_id?: string | null
+          quality_status?: Database["public"]["Enums"]["inventory_quality_status"]
+          rack?: string | null
+          received_date?: string | null
+          remaining_length?: number | null
+          reserved?: number
+          shelf?: string | null
+          status?: Database["public"]["Enums"]["inventory_item_status"]
+          stock?: number
+          supplier_batch?: string | null
+          unit_cost?: number
+          updated_at?: string
+          updated_by?: string | null
+          warehouse?: string | null
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_parent_item_id_fkey"
+            columns: ["parent_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string
+          from_location: string | null
+          id: string
+          inventory_item_id: string
+          movement_number: string
+          new_stock: number
+          notes: string | null
+          previous_stock: number
+          quantity: number
+          source_id: string | null
+          source_type: string | null
+          to_location: string | null
+          type: Database["public"]["Enums"]["inventory_movement_type"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          from_location?: string | null
+          id?: string
+          inventory_item_id: string
+          movement_number: string
+          new_stock: number
+          notes?: string | null
+          previous_stock: number
+          quantity: number
+          source_id?: string | null
+          source_type?: string | null
+          to_location?: string | null
+          type: Database["public"]["Enums"]["inventory_movement_type"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          from_location?: string | null
+          id?: string
+          inventory_item_id?: string
+          movement_number?: string
+          new_stock?: number
+          notes?: string | null
+          previous_stock?: number
+          quantity?: number
+          source_id?: string | null
+          source_type?: string | null
+          to_location?: string | null
+          type?: Database["public"]["Enums"]["inventory_movement_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_bom: {
         Row: {
           component_type: Database["public"]["Enums"]["bom_component_type"]
@@ -710,6 +871,20 @@ export type Database = {
         | "Wholesale"
         | "Fabricator"
         | "Distributor"
+      inventory_item_status: "active" | "inactive" | "discontinued" | "obsolete"
+      inventory_movement_type:
+        | "receipt"
+        | "issue"
+        | "transfer"
+        | "adjustment"
+        | "return"
+        | "damaged"
+        | "count"
+      inventory_quality_status:
+        | "quarantine"
+        | "approved"
+        | "rejected"
+        | "returned"
       payment_terms:
         | "COD"
         | "Net 15"
@@ -903,6 +1078,22 @@ export const Constants = {
         "Wholesale",
         "Fabricator",
         "Distributor",
+      ],
+      inventory_item_status: ["active", "inactive", "discontinued", "obsolete"],
+      inventory_movement_type: [
+        "receipt",
+        "issue",
+        "transfer",
+        "adjustment",
+        "return",
+        "damaged",
+        "count",
+      ],
+      inventory_quality_status: [
+        "quarantine",
+        "approved",
+        "rejected",
+        "returned",
       ],
       payment_terms: [
         "COD",

@@ -58,6 +58,7 @@ export default function InventoryTable({ items, language, selectedIds, onToggleS
           <SortHeader label="Code" field="itemCode" />
           <SortHeader label="Product" field="productName" />
           <SortHeader label="Category" field="category" />
+          <TableHead className="text-xs">Batch No.</TableHead>
           <SortHeader label="Stock" field="stock" />
           <TableHead className="text-xs text-right">Reserved</TableHead>
           <SortHeader label="Available" field="available" />
@@ -87,6 +88,7 @@ export default function InventoryTable({ items, language, selectedIds, onToggleS
                 </div>
               </TableCell>
               <TableCell><Badge variant="secondary" className="text-[10px]">{item.category}</Badge></TableCell>
+              <TableCell className="text-[10px] text-muted-foreground">{item.batchNumber || '-'}</TableCell>
               <TableCell className="text-xs">
                 <div className="w-20">
                   <div className="font-semibold">{item.stock} {item.primaryUnit}</div>
