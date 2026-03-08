@@ -34,8 +34,8 @@ const allModules = [
   { title: 'nav.finance', url: '/finance', icon: DollarSign, moduleId: 'finance' },
   { title: 'nav.hr', url: '/hr', icon: UserCog, moduleId: 'hr' },
   { title: 'nav.reports', url: '/reports', icon: BarChart3, moduleId: 'reports' },
-  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null },
-  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null },
+  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null, adminOnly: true },
+  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null, adminOnly: true },
 ];
 
 interface ModuleToggle { id: string; enabled: boolean }
