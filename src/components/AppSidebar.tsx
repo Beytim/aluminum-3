@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Package, Boxes, Factory, Scissors, FolderKanban,
   Users, FileText, Wrench, ShieldCheck, ClipboardCheck, Truck,
   DollarSign, UserCog, BarChart3, Settings, Globe, Moon, Sun,
-  Search, Building2, ShoppingCart,
+  Search, Building2, ShoppingCart, LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage } from "@/lib/localStorage";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
