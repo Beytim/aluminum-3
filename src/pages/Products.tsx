@@ -34,6 +34,7 @@ export default function Products() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const stats = useMemo(() => calculateProductStats(products), [products]);
 
