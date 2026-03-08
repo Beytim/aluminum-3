@@ -186,7 +186,7 @@ export default function Reports() {
   const exportProductionReport = () => {
     generateReportPDF("Production Schedule Report",
       ['WO#', 'Product', 'Status', 'Stage', 'Priority', 'Due Date'],
-      workOrders.map(w => [w.workOrderNumber, w.productName, w.status, w.currentStage, w.priority, w.dueDate])
+      workOrders.map(w => [w.workOrderNumber, w.productName, w.status, w.currentStage, w.priority, w.scheduledEnd])
     );
   };
   const exportQualityReport = () => {
