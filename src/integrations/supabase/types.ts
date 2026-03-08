@@ -348,7 +348,15 @@ export type Database = {
           weight_per_piece?: number | null
           width?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -374,6 +382,147 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          approved: boolean
+          average_lead_time: number
+          average_order_value: number
+          bank_account: string | null
+          bank_name: string | null
+          business_type: Database["public"]["Enums"]["supplier_business_type"]
+          certifications: string[] | null
+          city: string | null
+          company_name: string
+          company_name_am: string
+          contact_person: string
+          country: string
+          created_at: string
+          created_by: string | null
+          credit_limit: number
+          credit_used: number
+          currency: Database["public"]["Enums"]["proc_currency"]
+          email: string
+          id: string
+          last_order_date: string | null
+          min_order_qty: number | null
+          notes: string | null
+          on_time_delivery_rate: number
+          payment_terms: Database["public"]["Enums"]["payment_terms"]
+          phone: string
+          phone_secondary: string | null
+          position: string | null
+          preferred: boolean
+          product_categories: string[] | null
+          quality_rating: number
+          rating: number
+          response_time_hrs: number
+          shipping_terms: string[] | null
+          status: Database["public"]["Enums"]["supplier_status"]
+          supplier_code: string
+          swift_code: string | null
+          tax_id: string | null
+          total_orders: number
+          total_spent: number
+          trading_name: string | null
+          updated_at: string
+          updated_by: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approved?: boolean
+          average_lead_time?: number
+          average_order_value?: number
+          bank_account?: string | null
+          bank_name?: string | null
+          business_type?: Database["public"]["Enums"]["supplier_business_type"]
+          certifications?: string[] | null
+          city?: string | null
+          company_name: string
+          company_name_am?: string
+          contact_person?: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number
+          credit_used?: number
+          currency?: Database["public"]["Enums"]["proc_currency"]
+          email?: string
+          id?: string
+          last_order_date?: string | null
+          min_order_qty?: number | null
+          notes?: string | null
+          on_time_delivery_rate?: number
+          payment_terms?: Database["public"]["Enums"]["payment_terms"]
+          phone?: string
+          phone_secondary?: string | null
+          position?: string | null
+          preferred?: boolean
+          product_categories?: string[] | null
+          quality_rating?: number
+          rating?: number
+          response_time_hrs?: number
+          shipping_terms?: string[] | null
+          status?: Database["public"]["Enums"]["supplier_status"]
+          supplier_code: string
+          swift_code?: string | null
+          tax_id?: string | null
+          total_orders?: number
+          total_spent?: number
+          trading_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approved?: boolean
+          average_lead_time?: number
+          average_order_value?: number
+          bank_account?: string | null
+          bank_name?: string | null
+          business_type?: Database["public"]["Enums"]["supplier_business_type"]
+          certifications?: string[] | null
+          city?: string | null
+          company_name?: string
+          company_name_am?: string
+          contact_person?: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number
+          credit_used?: number
+          currency?: Database["public"]["Enums"]["proc_currency"]
+          email?: string
+          id?: string
+          last_order_date?: string | null
+          min_order_qty?: number | null
+          notes?: string | null
+          on_time_delivery_rate?: number
+          payment_terms?: Database["public"]["Enums"]["payment_terms"]
+          phone?: string
+          phone_secondary?: string | null
+          position?: string | null
+          preferred?: boolean
+          product_categories?: string[] | null
+          quality_rating?: number
+          rating?: number
+          response_time_hrs?: number
+          shipping_terms?: string[] | null
+          status?: Database["public"]["Enums"]["supplier_status"]
+          supplier_code?: string
+          swift_code?: string | null
+          tax_id?: string | null
+          total_orders?: number
+          total_spent?: number
+          trading_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -416,6 +565,16 @@ export type Database = {
         | "Glass"
         | "Accessory"
         | "Other"
+      payment_terms:
+        | "COD"
+        | "Net 15"
+        | "Net 30"
+        | "Net 45"
+        | "Net 60"
+        | "LC"
+        | "TT Advance"
+        | "TT Partial"
+      proc_currency: "ETB" | "USD" | "EUR" | "CNY" | "GBP" | "AED" | "TRY"
       product_category:
         | "Windows"
         | "Doors"
@@ -435,6 +594,18 @@ export type Database = {
         | "Custom"
       product_status: "Active" | "Inactive" | "Discontinued" | "Draft"
       product_type: "Raw Material" | "Fabricated" | "System" | "Custom"
+      supplier_business_type:
+        | "Manufacturer"
+        | "Distributor"
+        | "Agent"
+        | "Trader"
+        | "Importer"
+      supplier_status:
+        | "Active"
+        | "Inactive"
+        | "Blacklisted"
+        | "Pending"
+        | "Prospect"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -570,6 +741,17 @@ export const Constants = {
         "Accessory",
         "Other",
       ],
+      payment_terms: [
+        "COD",
+        "Net 15",
+        "Net 30",
+        "Net 45",
+        "Net 60",
+        "LC",
+        "TT Advance",
+        "TT Partial",
+      ],
+      proc_currency: ["ETB", "USD", "EUR", "CNY", "GBP", "AED", "TRY"],
       product_category: [
         "Windows",
         "Doors",
@@ -590,6 +772,20 @@ export const Constants = {
       ],
       product_status: ["Active", "Inactive", "Discontinued", "Draft"],
       product_type: ["Raw Material", "Fabricated", "System", "Custom"],
+      supplier_business_type: [
+        "Manufacturer",
+        "Distributor",
+        "Agent",
+        "Trader",
+        "Importer",
+      ],
+      supplier_status: [
+        "Active",
+        "Inactive",
+        "Blacklisted",
+        "Pending",
+        "Prospect",
+      ],
     },
   },
 } as const

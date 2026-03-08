@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calculator } from "lucide-react";
 import { useUpdateProduct, type Product } from "@/hooks/useProducts";
-import { sampleSuppliers } from "@/data/sampleData";
+import { useSuppliers } from "@/hooks/useSuppliers";
 
 const categories = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
 const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
@@ -20,6 +20,7 @@ interface Props {
 
 export default function EditEnhancedProductDialog({ open, onOpenChange, product }: Props) {
   const updateProduct = useUpdateProduct();
+  const { data: dbSuppliers = [] } = useSuppliers();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated',
@@ -71,14 +72,14 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
       setForm(prev => ({ ...prev, supplierId: '', supplierName: '', leadTimeDays: '', moq: '' }));
       return;
     }
-    const supplier = sampleSuppliers.find(s => s.id === supplierId);
+    const supplier = dbSuppliers.find(s => s.id === supplierId);
     if (supplier) {
       setForm(prev => ({
         ...prev,
         supplierId: supplier.id,
-        supplierName: supplier.company,
-        leadTimeDays: String(supplier.leadTime || ''),
-        moq: String(supplier.minOrderQty || ''),
+        supplierName: supplier.company_name,
+        leadTimeDays: String(supplier.average_lead_time || ''),
+        moq: String(supplier.min_order_qty || ''),
       }));
     }
   };
@@ -226,9 +227,9 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
                   <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select supplier" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">— No supplier —</SelectItem>
-                    {sampleSuppliers.map(s => (
+                    {dbSuppliers.map(s => (
                       <SelectItem key={s.id} value={s.id}>
-                        {s.company} ({s.country})
+                        {s.company_name} ({s.country})
                       </SelectItem>
                     ))}
                   </SelectContent>
