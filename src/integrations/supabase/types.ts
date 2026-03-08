@@ -41,6 +41,315 @@ export type Database = {
         }
         Relationships: []
       }
+      product_bom: {
+        Row: {
+          component_type: Database["public"]["Enums"]["bom_component_type"]
+          created_at: string
+          id: string
+          inventory_item_id: string | null
+          name: string
+          product_id: string
+          quantity: number
+          sort_order: number | null
+          total: number
+          unit: string
+          unit_cost: number
+        }
+        Insert: {
+          component_type: Database["public"]["Enums"]["bom_component_type"]
+          created_at?: string
+          id?: string
+          inventory_item_id?: string | null
+          name: string
+          product_id: string
+          quantity?: number
+          sort_order?: number | null
+          total?: number
+          unit?: string
+          unit_cost?: number
+        }
+        Update: {
+          component_type?: Database["public"]["Enums"]["bom_component_type"]
+          created_at?: string
+          id?: string
+          inventory_item_id?: string | null
+          name?: string
+          product_id?: string
+          quantity?: number
+          sort_order?: number | null
+          total?: number
+          unit?: string
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_bom_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_price_history: {
+        Row: {
+          changed_by: string | null
+          changed_by_name: string | null
+          cost_price: number
+          created_at: string
+          id: string
+          product_id: string
+          reason: string | null
+          selling_price: number
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_name?: string | null
+          cost_price: number
+          created_at?: string
+          id?: string
+          product_id: string
+          reason?: string | null
+          selling_price: number
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_name?: string | null
+          cost_price?: number
+          created_at?: string
+          id?: string
+          product_id?: string
+          reason?: string | null
+          selling_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_price_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_quality_standards: {
+        Row: {
+          created_at: string
+          id: string
+          parameter: string
+          product_id: string
+          specification: string
+          test_method: string | null
+          tolerance: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parameter: string
+          product_id: string
+          specification: string
+          test_method?: string | null
+          tolerance?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parameter?: string
+          product_id?: string
+          specification?: string
+          test_method?: string | null
+          tolerance?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_quality_standards_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          accessories_cost: number
+          alloy_type: string | null
+          batch_number: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          code: string
+          colors: string[] | null
+          created_at: string
+          created_by: string | null
+          current_stock: number
+          date_received: string | null
+          defect_rate: number | null
+          diameter: number | null
+          effective_date: string | null
+          fab_labor_cost: number
+          form: string | null
+          glass: string | null
+          glass_cost: number
+          hardware_cost: number
+          height: number | null
+          id: string
+          inspection_required: boolean
+          install_labor_cost: number
+          labor_hrs: number
+          lead_time_days: number | null
+          length: number | null
+          markup_percent: number | null
+          material_cost: number
+          max_stock: number
+          mill_certificate: boolean | null
+          min_stock: number
+          moq: number | null
+          name: string
+          name_am: string
+          notes: string | null
+          overhead_percent: number
+          product_type: Database["public"]["Enums"]["product_type"]
+          profile: string | null
+          profile_cost: number
+          purchase_price: number | null
+          reserved_stock: number
+          selling_price: number
+          status: Database["public"]["Enums"]["product_status"]
+          subcategory: string | null
+          supplier_id: string | null
+          supplier_name: string | null
+          tags: string[] | null
+          temper: string | null
+          thickness: number | null
+          unit: string
+          updated_at: string
+          updated_by: string | null
+          version: string
+          wall_thickness: number | null
+          warehouse_location: string | null
+          weight_per_meter: number | null
+          weight_per_piece: number | null
+          width: number | null
+        }
+        Insert: {
+          accessories_cost?: number
+          alloy_type?: string | null
+          batch_number?: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          code: string
+          colors?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          current_stock?: number
+          date_received?: string | null
+          defect_rate?: number | null
+          diameter?: number | null
+          effective_date?: string | null
+          fab_labor_cost?: number
+          form?: string | null
+          glass?: string | null
+          glass_cost?: number
+          hardware_cost?: number
+          height?: number | null
+          id?: string
+          inspection_required?: boolean
+          install_labor_cost?: number
+          labor_hrs?: number
+          lead_time_days?: number | null
+          length?: number | null
+          markup_percent?: number | null
+          material_cost?: number
+          max_stock?: number
+          mill_certificate?: boolean | null
+          min_stock?: number
+          moq?: number | null
+          name: string
+          name_am?: string
+          notes?: string | null
+          overhead_percent?: number
+          product_type?: Database["public"]["Enums"]["product_type"]
+          profile?: string | null
+          profile_cost?: number
+          purchase_price?: number | null
+          reserved_stock?: number
+          selling_price?: number
+          status?: Database["public"]["Enums"]["product_status"]
+          subcategory?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          tags?: string[] | null
+          temper?: string | null
+          thickness?: number | null
+          unit?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: string
+          wall_thickness?: number | null
+          warehouse_location?: string | null
+          weight_per_meter?: number | null
+          weight_per_piece?: number | null
+          width?: number | null
+        }
+        Update: {
+          accessories_cost?: number
+          alloy_type?: string | null
+          batch_number?: string | null
+          category?: Database["public"]["Enums"]["product_category"]
+          code?: string
+          colors?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          current_stock?: number
+          date_received?: string | null
+          defect_rate?: number | null
+          diameter?: number | null
+          effective_date?: string | null
+          fab_labor_cost?: number
+          form?: string | null
+          glass?: string | null
+          glass_cost?: number
+          hardware_cost?: number
+          height?: number | null
+          id?: string
+          inspection_required?: boolean
+          install_labor_cost?: number
+          labor_hrs?: number
+          lead_time_days?: number | null
+          length?: number | null
+          markup_percent?: number | null
+          material_cost?: number
+          max_stock?: number
+          mill_certificate?: boolean | null
+          min_stock?: number
+          moq?: number | null
+          name?: string
+          name_am?: string
+          notes?: string | null
+          overhead_percent?: number
+          product_type?: Database["public"]["Enums"]["product_type"]
+          profile?: string | null
+          profile_cost?: number
+          purchase_price?: number | null
+          reserved_stock?: number
+          selling_price?: number
+          status?: Database["public"]["Enums"]["product_status"]
+          subcategory?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          tags?: string[] | null
+          temper?: string | null
+          thickness?: number | null
+          unit?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: string
+          wall_thickness?: number | null
+          warehouse_location?: string | null
+          weight_per_meter?: number | null
+          weight_per_piece?: number | null
+          width?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approved: boolean
@@ -101,6 +410,31 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "user"
+      bom_component_type:
+        | "Profile"
+        | "Hardware"
+        | "Glass"
+        | "Accessory"
+        | "Other"
+      product_category:
+        | "Windows"
+        | "Doors"
+        | "Curtain Walls"
+        | "Handrails"
+        | "Louvers"
+        | "Partitions"
+        | "Sheet"
+        | "Plate"
+        | "Bar/Rod"
+        | "Tube/Pipe"
+        | "Angle"
+        | "Channel"
+        | "Beam"
+        | "Profile"
+        | "Coil"
+        | "Custom"
+      product_status: "Active" | "Inactive" | "Discontinued" | "Draft"
+      product_type: "Raw Material" | "Fabricated" | "System" | "Custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -229,6 +563,33 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "user"],
+      bom_component_type: [
+        "Profile",
+        "Hardware",
+        "Glass",
+        "Accessory",
+        "Other",
+      ],
+      product_category: [
+        "Windows",
+        "Doors",
+        "Curtain Walls",
+        "Handrails",
+        "Louvers",
+        "Partitions",
+        "Sheet",
+        "Plate",
+        "Bar/Rod",
+        "Tube/Pipe",
+        "Angle",
+        "Channel",
+        "Beam",
+        "Profile",
+        "Coil",
+        "Custom",
+      ],
+      product_status: ["Active", "Inactive", "Discontinued", "Draft"],
+      product_type: ["Raw Material", "Fabricated", "System", "Custom"],
     },
   },
 } as const
