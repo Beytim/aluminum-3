@@ -26,6 +26,7 @@ interface Props {
 export default function AddEnhancedProductDialog({ open, onOpenChange, existingCount }: Props) {
   const addProduct = useAddProduct();
   const saveBOM = useSaveBOM();
+  const { data: dbSuppliers = [] } = useSuppliers();
   const [tab, setTab] = useState("basic");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
