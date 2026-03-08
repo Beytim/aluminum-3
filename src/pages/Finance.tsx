@@ -82,7 +82,7 @@ export default function Finance() {
         ...inv, totalPaid: newPaid, totalPaidInETB: newPaidETB, balance: newBalance, balanceInETB: newBalETB,
         status: newBalance <= 0 ? 'Paid' : 'Partial', isFullyPaid: newBalance <= 0,
         paidDate: newBalance <= 0 ? payment.date : undefined,
-        activityLog: [...inv.activityLog, { date: payment.date, user: 'USR-001', userName: 'Admin', action: `Payment recorded ${formatCurrency(payment.amount, payment.currency)}` }],
+        activityLog: [...inv.activityLog, { date: payment.date, user: 'USR-001', userName: 'Admin', action: `Payment recorded ${fmtCurrency(payment.amount)}` }],
       };
     }));
     toast({ title: "Payment Recorded", description: `${payment.paymentNumber} - ${formatCurrency(payment.amount, payment.currency)}` });
