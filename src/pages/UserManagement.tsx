@@ -159,7 +159,16 @@ export default function UserManagement() {
       </div>
 
       {/* Stats */}
-      <UserStats users={users} />
+      <UserStats users={approvedUsers} />
+
+      {/* Pending Approvals */}
+      {isAdmin && pendingUsers.length > 0 && (
+        <PendingApprovals
+          pendingUsers={pendingUsers}
+          onRefresh={fetchUsers}
+          currentUserId={currentUser?.id}
+        />
+      )}
 
       {/* Filters */}
       <UserFilters filters={filters} onChange={setFilters} />
