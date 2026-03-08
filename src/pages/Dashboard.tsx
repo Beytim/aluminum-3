@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, PackagePlus, ClipboardList, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
+import { useSettings } from "@/lib/settingsContext";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 
 // Enhanced data imports
@@ -27,11 +28,12 @@ import ModuleSummaryCard from "@/components/dashboard/ModuleSummaryCard";
 import DashboardAlerts from "@/components/dashboard/DashboardAlerts";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 
-const fmtETB = (v: number) => v >= 1_000_000 ? `ETB ${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `ETB ${(v / 1_000).toFixed(0)}K` : `ETB ${v}`;
+// Currency formatting from global settings context
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t, language } = useI18n();
+  const { formatCurrencyShort: fmtETB } = useSettings();
 
   // Load all module data
   const [products] = useLocalStorage<EnhancedProduct[]>(STORAGE_KEYS.PRODUCTS, enhancedSampleProducts);

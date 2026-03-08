@@ -27,15 +27,18 @@ import { sampleEnhancedSuppliers, sampleEnhancedPOs, sampleReorderSuggestions, c
 import { sampleEnhancedInvoices, sampleEnhancedPayments, sampleExpenses, calculateFinanceStats, type EnhancedInvoice, type EnhancedPayment, type Expense } from "@/data/enhancedFinanceData";
 import { sampleEnhancedEmployees, sampleLeaveRequests, samplePayrolls, calculateHRStats, type EnhancedEmployee, type LeaveRequest, type Payroll } from "@/data/enhancedHRData";
 
+import { useSettings } from "@/lib/settingsContext";
+
 // Report components
 import ReportKPIs, { type ReportKPI } from "@/components/reports/ReportKPIs";
 import ReportCardGrid, { type ReportCard } from "@/components/reports/ReportCardGrid";
 import CrossModuleCharts from "@/components/reports/CrossModuleCharts";
 
-const fmtETB = (v: number) => v >= 1_000_000 ? `ETB ${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `ETB ${(v / 1_000).toFixed(0)}K` : `ETB ${v}`;
+// fmtETB replaced by useSettings().formatCurrencyShort below
 
 export default function Reports() {
   const { t } = useI18n();
+  const { formatCurrencyShort: fmtETB, formatCurrency } = useSettings();
   const [activeTab, setActiveTab] = useState("overview");
 
   // Load all module data

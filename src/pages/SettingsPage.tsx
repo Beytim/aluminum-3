@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
+import { useSettings } from "@/lib/settingsContext";
 import { useLocalStorage, STORAGE_KEYS, clearAllStorage } from "@/lib/localStorage";
 
 interface CompanySettings {
@@ -175,6 +176,7 @@ const defaultModules: ModuleConfig[] = [
 export default function SettingsPage() {
   const { toast } = useToast();
   const { t, language, setLanguage } = useI18n();
+  const { settings: appSettings, updateSettings: updateAppSettings, resetSettings: resetAppSettings } = useSettings();
 
   const [company, setCompany] = useLocalStorage<CompanySettings>('settings_company', defaultCompany);
   const [preferences, setPreferences] = useLocalStorage<UserPreferences>('settings_preferences', defaultPreferences);
@@ -183,13 +185,27 @@ export default function SettingsPage() {
   const [modules, setModules] = useLocalStorage<ModuleConfig[]>('settings_modules', defaultModules);
 
   const updateCompany = (key: keyof CompanySettings, value: string) => setCompany(prev => ({ ...prev, [key]: value }));
-  const updatePref = (key: keyof UserPreferences, value: string | number | boolean) => setPreferences(prev => ({ ...prev, [key]: value }));
+  const updatePref = (key: keyof UserPreferences, value: string | number | boolean) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+    // Sync to global settings context for live updates
+    const settingsKeyMap: Record<string, string> = {
+      language: 'language', theme: 'theme', currency: 'currency',
+      weightUnit: 'weightUnit', lengthUnit: 'lengthUnit', areaUnit: 'areaUnit',
+      dateFormat: 'dateFormat', timeFormat: 'timeFormat', pageSize: 'pageSize',
+      defaultView: 'defaultView', compactMode: 'compactMode',
+      animationsEnabled: 'animationsEnabled',
+    };
+    if (settingsKeyMap[key]) {
+      updateAppSettings({ [settingsKeyMap[key]]: value } as any);
+    }
+    // Language is handled by i18n context
+    if (key === 'language') setLanguage(value as 'en' | 'am');
+  };
   const updateNotif = (key: keyof NotificationSettings, value: boolean | string) => setNotifications(prev => ({ ...prev, [key]: value }));
   const updatePricing = (key: keyof PricingDefaults, value: number) => setPricing(prev => ({ ...prev, [key]: value }));
   const toggleModule = (id: string) => setModules(prev => prev.map(m => m.id === id ? { ...m, enabled: !m.enabled } : m));
 
   const handleSave = () => {
-    if (preferences.language !== language) setLanguage(preferences.language as 'en' | 'am');
     toast({ title: "Settings Saved", description: "All your preferences have been updated successfully." });
   };
 
@@ -199,6 +215,8 @@ export default function SettingsPage() {
     setNotifications(defaultNotifications);
     setPricing(defaultPricing);
     setModules(defaultModules);
+    resetAppSettings();
+    setLanguage('en');
     toast({ title: "Settings Reset", description: "All settings restored to defaults." });
   };
 
