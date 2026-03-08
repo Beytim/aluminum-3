@@ -38,6 +38,7 @@ import CrossModuleCharts from "@/components/reports/CrossModuleCharts";
 
 export default function Reports() {
   const { t } = useI18n();
+  const { formatCurrencyShort: fmtETB, formatCurrency } = useSettings();
   const [activeTab, setActiveTab] = useState("overview");
 
   // Load all module data
