@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, PackagePlus, ClipboardList, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
+import { useSettings } from "@/lib/settingsContext";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 
 // Enhanced data imports
