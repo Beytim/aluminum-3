@@ -48,8 +48,12 @@ export function AppSidebar() {
   const { user, profile, roles, signOut } = useAuth();
   const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
 
+  const isAdmin = roles.includes("admin");
   const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
-  const modules = allModules.filter(m => m.moduleId === null || !disabledIds.has(m.moduleId));
+  const modules = allModules.filter(m =>
+    (m.moduleId === null || !disabledIds.has(m.moduleId)) &&
+    (!(m as any).adminOnly || isAdmin)
+  );
 
   return (
     <Sidebar collapsible="icon">
