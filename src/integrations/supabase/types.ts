@@ -41,6 +41,140 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          address: string | null
+          city: string | null
+          code: string
+          contact: string
+          created_at: string
+          created_by: string | null
+          credit_limit: number | null
+          customer_since: string | null
+          email: string | null
+          health_score: number | null
+          health_status: string | null
+          id: string
+          language: Database["public"]["Enums"]["customer_language"] | null
+          last_activity_date: string | null
+          last_activity_type: string | null
+          name: string
+          name_am: string
+          notes: string | null
+          outstanding: number | null
+          payment_terms: string | null
+          phone: string
+          phone_secondary: string | null
+          preferred_contact:
+            | Database["public"]["Enums"]["preferred_contact"]
+            | null
+          projects_count: number | null
+          referred_by: string | null
+          segments: string[] | null
+          shipping_address: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["customer_status"]
+          sub_city: string | null
+          tags: string[] | null
+          tax_id: string | null
+          total_value: number | null
+          type: Database["public"]["Enums"]["customer_type"]
+          updated_at: string
+          updated_by: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          code: string
+          contact: string
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number | null
+          customer_since?: string | null
+          email?: string | null
+          health_score?: number | null
+          health_status?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["customer_language"] | null
+          last_activity_date?: string | null
+          last_activity_type?: string | null
+          name: string
+          name_am?: string
+          notes?: string | null
+          outstanding?: number | null
+          payment_terms?: string | null
+          phone: string
+          phone_secondary?: string | null
+          preferred_contact?:
+            | Database["public"]["Enums"]["preferred_contact"]
+            | null
+          projects_count?: number | null
+          referred_by?: string | null
+          segments?: string[] | null
+          shipping_address?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["customer_status"]
+          sub_city?: string | null
+          tags?: string[] | null
+          tax_id?: string | null
+          total_value?: number | null
+          type?: Database["public"]["Enums"]["customer_type"]
+          updated_at?: string
+          updated_by?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          code?: string
+          contact?: string
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number | null
+          customer_since?: string | null
+          email?: string | null
+          health_score?: number | null
+          health_status?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["customer_language"] | null
+          last_activity_date?: string | null
+          last_activity_type?: string | null
+          name?: string
+          name_am?: string
+          notes?: string | null
+          outstanding?: number | null
+          payment_terms?: string | null
+          phone?: string
+          phone_secondary?: string | null
+          preferred_contact?:
+            | Database["public"]["Enums"]["preferred_contact"]
+            | null
+          projects_count?: number | null
+          referred_by?: string | null
+          segments?: string[] | null
+          shipping_address?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["customer_status"]
+          sub_city?: string | null
+          tags?: string[] | null
+          tax_id?: string | null
+          total_value?: number | null
+          type?: Database["public"]["Enums"]["customer_type"]
+          updated_at?: string
+          updated_by?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_bom: {
         Row: {
           component_type: Database["public"]["Enums"]["bom_component_type"]
@@ -565,6 +699,17 @@ export type Database = {
         | "Glass"
         | "Accessory"
         | "Other"
+      customer_language: "en" | "am" | "both"
+      customer_status: "Active" | "Inactive"
+      customer_type:
+        | "Individual"
+        | "Company"
+        | "Contractor"
+        | "Developer"
+        | "Retail"
+        | "Wholesale"
+        | "Fabricator"
+        | "Distributor"
       payment_terms:
         | "COD"
         | "Net 15"
@@ -574,6 +719,12 @@ export type Database = {
         | "LC"
         | "TT Advance"
         | "TT Partial"
+      preferred_contact:
+        | "phone"
+        | "email"
+        | "whatsapp"
+        | "in-person"
+        | "telegram"
       proc_currency: "ETB" | "USD" | "EUR" | "CNY" | "GBP" | "AED" | "TRY"
       product_category:
         | "Windows"
@@ -741,6 +892,18 @@ export const Constants = {
         "Accessory",
         "Other",
       ],
+      customer_language: ["en", "am", "both"],
+      customer_status: ["Active", "Inactive"],
+      customer_type: [
+        "Individual",
+        "Company",
+        "Contractor",
+        "Developer",
+        "Retail",
+        "Wholesale",
+        "Fabricator",
+        "Distributor",
+      ],
       payment_terms: [
         "COD",
         "Net 15",
@@ -750,6 +913,13 @@ export const Constants = {
         "LC",
         "TT Advance",
         "TT Partial",
+      ],
+      preferred_contact: [
+        "phone",
+        "email",
+        "whatsapp",
+        "in-person",
+        "telegram",
       ],
       proc_currency: ["ETB", "USD", "EUR", "CNY", "GBP", "AED", "TRY"],
       product_category: [
