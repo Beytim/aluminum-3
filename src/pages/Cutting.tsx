@@ -32,6 +32,7 @@ export default function Cutting() {
   });
   const { t } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const stats = useMemo(() => calculateCuttingStats(jobs), [jobs]);
 
