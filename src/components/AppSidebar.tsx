@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Package, Boxes, Factory, Scissors, FolderKanban,
   Users, FileText, Wrench, ShieldCheck, ClipboardCheck, Truck,
   DollarSign, UserCog, BarChart3, Settings, Globe, Moon, Sun,
-  Search, Building2, ShoppingCart,
+  Search, Building2, ShoppingCart, LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage } from "@/lib/localStorage";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
@@ -44,6 +45,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { t, language, setLanguage } = useI18n();
+  const { user, profile, roles, signOut } = useAuth();
   const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
 
   const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
@@ -121,12 +123,19 @@ export function AppSidebar() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-medium text-sidebar-accent-foreground">
-              AD
+              {(profile?.full_name || user?.email || "U").slice(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">Admin User</p>
-              <p className="text-[10px] text-sidebar-foreground/50">admin@aluerp.com</p>
+              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">
+                {profile?.full_name || user?.email || "User"}
+              </p>
+              <p className="text-[10px] text-sidebar-foreground/50">
+                {roles.length > 0 ? roles.join(", ") : "user"}
+              </p>
             </div>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={signOut}>
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </SidebarFooter>
       )}

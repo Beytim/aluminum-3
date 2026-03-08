@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { I18nProvider } from "@/lib/i18n";
 import { SettingsProvider } from "@/lib/settingsContext";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Inventory from "./pages/Inventory";
@@ -36,29 +39,38 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AppLayout>
+            <AuthProvider>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/production" element={<Production />} />
-                <Route path="/cutting" element={<Cutting />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/quotes" element={<Quotes />} />
-                <Route path="/installation" element={<Installation />} />
-                <Route path="/maintenance" element={<Maintenance />} />
-                <Route path="/quality" element={<Quality />} />
-                <Route path="/procurement" element={<Procurement />} />
-                <Route path="/finance" element={<Finance />} />
-                <Route path="/hr" element={<HR />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/users" element={<UserManagement />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/products" element={<Products />} />
+                        <Route path="/inventory" element={<Inventory />} />
+                        <Route path="/production" element={<Production />} />
+                        <Route path="/cutting" element={<Cutting />} />
+                        <Route path="/projects" element={<Projects />} />
+                        <Route path="/customers" element={<Customers />} />
+                        <Route path="/orders" element={<Orders />} />
+                        <Route path="/quotes" element={<Quotes />} />
+                        <Route path="/installation" element={<Installation />} />
+                        <Route path="/maintenance" element={<Maintenance />} />
+                        <Route path="/quality" element={<Quality />} />
+                        <Route path="/procurement" element={<Procurement />} />
+                        <Route path="/finance" element={<Finance />} />
+                        <Route path="/hr" element={<HR />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/users" element={<UserManagement />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
               </Routes>
-            </AppLayout>
+            </AuthProvider>
           </BrowserRouter>
         </I18nProvider>
       </SettingsProvider>
