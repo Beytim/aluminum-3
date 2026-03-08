@@ -87,10 +87,16 @@ interface PricingDefaults {
 interface ModuleConfig {
   id: string;
   name: string;
-  icon: React.ElementType;
   enabled: boolean;
   description: string;
 }
+
+const moduleIcons: Record<string, React.ElementType> = {
+  products: Package, inventory: Warehouse, production: Factory, cutting: Scissors,
+  projects: HardHat, customers: Users, orders: ShoppingCart, quotes: FileText,
+  installation: Wrench, maintenance: Wrench, quality: ClipboardCheck,
+  procurement: Truck, finance: DollarSign, hr: Users, reports: BarChart3,
+};
 
 const defaultCompany: CompanySettings = {
   name: "AluERP Manufacturing PLC",
