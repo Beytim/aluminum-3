@@ -204,7 +204,7 @@ export default function UserManagement() {
                   users={filtered}
                   selectedIds={selectedIds}
                   onSelectIds={setSelectedIds}
-                  onView={(u) => setViewUser(u)}
+                  onView={(u) => setViewUser(u as any)}
                   onChangeRole={handleRoleChange}
                   onDelete={handleDelete}
                   isAdmin={isAdmin}
