@@ -4,6 +4,7 @@ import { Plus, LayoutGrid, List, Calculator } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { enhancedSampleCuttingJobs, calculateCuttingStats } from "@/data/enhancedProductionData";
 import type { EnhancedCuttingJob } from "@/data/enhancedProductionData";
 import { CuttingStats } from "@/components/cutting/CuttingStats";
