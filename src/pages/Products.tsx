@@ -4,6 +4,7 @@ import { Plus, Grid3X3, List, Download } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { generateReportPDF } from "@/lib/pdfExport";
 import {
   enhancedSampleProducts, calculateProductStats, calcTotalCost, calcMargin,
@@ -33,6 +34,7 @@ export default function Products() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const stats = useMemo(() => calculateProductStats(products), [products]);
 
@@ -96,14 +98,14 @@ export default function Products() {
   const handleExportPDF = () => {
     generateReportPDF("Product Catalog",
       ['Code', 'Name', 'Category', 'Type', 'Cost', 'Price', 'Margin', 'Stock'],
-      filtered.map(p => [p.code, p.name, p.category, p.productType, `ETB ${calcTotalCost(p).toLocaleString()}`, `ETB ${p.sellingPrice.toLocaleString()}`, `${calcMargin(p).toFixed(1)}%`, String(p.currentStock)])
+      filtered.map(p => [p.code, p.name, p.category, p.productType, formatCurrency(calcTotalCost(p)), formatCurrency(p.sellingPrice), `${calcMargin(p).toFixed(1)}%`, String(p.currentStock)])
     );
   };
 
   const handleBulkExport = () => {
     const sel = products.filter(p => selectedIds.has(p.id));
     generateReportPDF("Selected Products", ['Code', 'Name', 'Type', 'Cost', 'Price', 'Margin'],
-      sel.map(p => [p.code, p.name, p.productType, `ETB ${calcTotalCost(p).toLocaleString()}`, `ETB ${p.sellingPrice.toLocaleString()}`, `${calcMargin(p).toFixed(1)}%`])
+      sel.map(p => [p.code, p.name, p.productType, formatCurrency(calcTotalCost(p)), formatCurrency(p.sellingPrice), `${calcMargin(p).toFixed(1)}%`])
     );
   };
 
@@ -115,7 +117,7 @@ export default function Products() {
 
   const handleExportOne = (p: EnhancedProduct) => {
     generateReportPDF(p.name, ['Field', 'Value'], [
-      ['Code', p.code], ['Name', p.name], ['Category', p.category], ['Type', p.productType], ['Price', `ETB ${p.sellingPrice}`]
+      ['Code', p.code], ['Name', p.name], ['Category', p.category], ['Type', p.productType], ['Price', formatCurrency(p.sellingPrice)]
     ]);
   };
 

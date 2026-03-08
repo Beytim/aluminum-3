@@ -5,6 +5,7 @@ import { Plus, Download, Grid3X3, List } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { generateReportPDF } from "@/lib/pdfExport";
 import { sampleCustomers, sampleProducts } from "@/data/sampleData";
 import type { Customer, Product } from "@/data/sampleData";
@@ -40,6 +41,7 @@ export default function Projects() {
 
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrencyShort } = useSettings();
 
   const managers = useMemo(() => [...new Set(projects.map(p => p.projectManager))], [projects]);
 
@@ -85,7 +87,7 @@ export default function Projects() {
     const data = (selectedIds.size > 0 ? projects.filter(p => selectedIds.has(p.id)) : filtered);
     generateReportPDF("Project Status Report",
       ['#', 'Project', 'Customer', 'Type', 'Status', 'Value', 'Progress'],
-      data.map(p => [p.projectNumber, p.name, p.customerName, p.type, p.status, formatETBShort(p.value), `${p.progress}%`])
+      data.map(p => [p.projectNumber, p.name, p.customerName, p.type, p.status, formatCurrencyShort(p.value), `${p.progress}%`])
     );
   };
 
@@ -109,7 +111,7 @@ export default function Projects() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t('nav.projects')}</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">{projects.length} projects · {stats.activeProjects} active · {formatETBShort(stats.totalValue)} total value</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{projects.length} projects · {stats.activeProjects} active · {formatCurrencyShort(stats.totalValue)} total value</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <div className="flex border rounded-md">

@@ -5,6 +5,7 @@ import { Plus, LayoutGrid, List, Download, Boxes } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import {
   enhancedSampleInventory, sampleStockMovements, sampleReservations,
   calculateInventoryStats, type EnhancedInventoryItem, type StockMovement, type StockReservation,
@@ -42,6 +43,7 @@ export default function Inventory() {
 
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const stats = useMemo(() => calculateInventoryStats(inventory, movements), [inventory, movements]);
 
@@ -130,7 +132,7 @@ export default function Inventory() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('inventory.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {inventory.length} items · {stats.totalValue > 0 ? `Value: ETB ${stats.totalValue.toLocaleString()}` : ''}
+            {inventory.length} items · {stats.totalValue > 0 ? `Value: ${formatCurrency(stats.totalValue)}` : ''}
             {lowStockCount > 0 && <span className="text-destructive font-medium ml-2">· {lowStockCount} need attention</span>}
           </p>
         </div>

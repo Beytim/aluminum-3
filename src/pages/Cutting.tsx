@@ -4,6 +4,7 @@ import { Plus, LayoutGrid, List, Calculator } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { enhancedSampleCuttingJobs, calculateCuttingStats } from "@/data/enhancedProductionData";
 import type { EnhancedCuttingJob } from "@/data/enhancedProductionData";
 import { CuttingStats } from "@/components/cutting/CuttingStats";
@@ -31,6 +32,7 @@ export default function Cutting() {
   });
   const { t } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const stats = useMemo(() => calculateCuttingStats(jobs), [jobs]);
 
@@ -129,7 +131,7 @@ export default function Cutting() {
     const csv = [
       'Job #,Material,Work Order,Project,Customer,Status,Priority,Cuts,Stock,Waste,Waste%,Efficiency,Machine,Assignee,Cost',
       ...data.map(j =>
-        `${j.jobNumber},${j.materialName},${j.workOrderNumber || ''},${j.projectName || ''},${j.customerName || ''},${j.status},${j.priority},${j.totalCuts},${j.stockLength}x${j.stocksUsed},${j.waste}mm,${j.wastePercent}%,${j.efficiency}%,${j.machine},${j.assignee},ETB ${j.totalCost}`
+        `${j.jobNumber},${j.materialName},${j.workOrderNumber || ''},${j.projectName || ''},${j.customerName || ''},${j.status},${j.priority},${j.totalCuts},${j.stockLength}x${j.stocksUsed},${j.waste}mm,${j.wastePercent}%,${j.efficiency}%,${j.machine},${j.assignee},${formatCurrency(j.totalCost)}`
       )
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });

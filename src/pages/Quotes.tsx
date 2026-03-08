@@ -5,6 +5,7 @@ import { Plus, Download, Grid3X3, List } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { generateReportPDF } from "@/lib/pdfExport";
 import { sampleCustomers, sampleProducts } from "@/data/sampleData";
 import type { Customer, Product } from "@/data/sampleData";
@@ -37,6 +38,7 @@ export default function Quotes() {
 
   const { t } = useI18n();
   const { toast } = useToast();
+  const { formatCurrencyShort, formatCurrency } = useSettings();
 
   const customerNames = useMemo(() => [...new Set(quotes.map(q => q.customerName))], [quotes]);
 
@@ -92,7 +94,7 @@ export default function Quotes() {
     const data = selectedIds.size > 0 ? quotes.filter(q => selectedIds.has(q.id)) : filtered;
     generateReportPDF("Quote Report",
       ['#', 'Title', 'Customer', 'Project', 'Items', 'Total', 'Margin', 'Status', 'Expiry'],
-      data.map(q => [q.quoteNumber, q.title, q.customerName, q.projectName, String(q.items.reduce((s, i) => s + i.quantity, 0)), formatETBCompact(q.total), `${q.profitMargin}%`, q.status, q.expiryDate])
+      data.map(q => [q.quoteNumber, q.title, q.customerName, q.projectName, String(q.items.reduce((s, i) => s + i.quantity, 0)), formatCurrencyShort(q.total), `${q.profitMargin}%`, q.status, q.expiryDate])
     );
   };
 
@@ -114,7 +116,7 @@ export default function Quotes() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t('nav.quotes')}</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">{quotes.length} quotes · {stats.pendingQuotes} pending · {formatETBCompact(stats.totalValue)} total value</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{quotes.length} quotes · {stats.pendingQuotes} pending · {formatCurrencyShort(stats.totalValue)} total value</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <div className="flex border rounded-md">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Receipt, CreditCard, TrendingDown } from "lucide-react";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import {
   type EnhancedInvoice, type EnhancedPayment, type Expense,
   sampleEnhancedInvoices, sampleEnhancedPayments, sampleExpenses,
@@ -38,6 +39,7 @@ export default function Finance() {
   const [paymentInvoice, setPaymentInvoice] = useState<EnhancedInvoice | null>(null);
 
   const { toast } = useToast();
+  const { formatCurrency: fmtCurrency } = useSettings();
 
   const stats = useMemo(() => calculateFinanceStats(invoices, payments, expenses), [invoices, payments, expenses]);
 
@@ -80,10 +82,10 @@ export default function Finance() {
         ...inv, totalPaid: newPaid, totalPaidInETB: newPaidETB, balance: newBalance, balanceInETB: newBalETB,
         status: newBalance <= 0 ? 'Paid' : 'Partial', isFullyPaid: newBalance <= 0,
         paidDate: newBalance <= 0 ? payment.date : undefined,
-        activityLog: [...inv.activityLog, { date: payment.date, user: 'USR-001', userName: 'Admin', action: `Payment recorded ${formatCurrency(payment.amount, payment.currency)}` }],
+        activityLog: [...inv.activityLog, { date: payment.date, user: 'USR-001', userName: 'Admin', action: `Payment recorded ${fmtCurrency(payment.amount)}` }],
       };
     }));
-    toast({ title: "Payment Recorded", description: `${payment.paymentNumber} - ${formatCurrency(payment.amount, payment.currency)}` });
+    toast({ title: "Payment Recorded", description: `${payment.paymentNumber} - ${fmtCurrency(payment.amount)}` });
   };
 
   const handleAddExpense = (exp: Expense) => {

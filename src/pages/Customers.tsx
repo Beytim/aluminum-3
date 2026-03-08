@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { generateReportPDF } from "@/lib/pdfExport";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { enhancedCustomers } from "@/data/enhancedCustomerData";
 import type { EnhancedCustomer } from "@/data/customerTypes";
 import { sampleQuotes, sampleProducts } from "@/data/sampleData";
@@ -34,6 +35,7 @@ export default function Customers() {
   const [viewCustomer, setViewCustomer] = useState<EnhancedCustomer | null>(null);
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const cities = useMemo(() => {
     const set = new Set(customers.map(c => c.location?.subCity).filter(Boolean) as string[]);
@@ -71,7 +73,7 @@ export default function Customers() {
     const data = (selectedIds.length > 0 ? filtered.filter(c => selectedIds.includes(c.id)) : filtered);
     generateReportPDF("Customer List",
       ['Code', 'Name', 'Contact', 'Type', 'Phone', 'Projects', 'Total Value', 'Outstanding', 'Health'],
-      data.map(c => [c.code, c.name, c.contact, c.type, c.phone, String(c.projects), `ETB ${c.totalValue.toLocaleString()}`, `ETB ${c.outstanding.toLocaleString()}`, `${c.healthScore} (${c.healthStatus})`])
+      data.map(c => [c.code, c.name, c.contact, c.type, c.phone, String(c.projects), formatCurrency(c.totalValue), formatCurrency(c.outstanding), `${c.healthScore} (${c.healthStatus})`])
     );
   };
 
