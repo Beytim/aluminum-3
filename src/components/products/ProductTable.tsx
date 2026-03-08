@@ -76,8 +76,8 @@ export default function ProductTable({
                       {mg.toFixed(0)}%
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs text-right">ETB {calcTotalCost(p).toLocaleString()}</TableCell>
-                  <TableCell className="text-xs text-right font-semibold">ETB {p.selling_price.toLocaleString()}</TableCell>
+                  <TableCell className="text-xs text-right">ETB {(calcTotalCost(p) || 0).toLocaleString()}</TableCell>
+                  <TableCell className="text-xs text-right font-semibold">ETB {(p.selling_price || 0).toLocaleString()}</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <Badge variant={p.status === 'Active' ? 'outline' : 'secondary'}
                       className={`text-[10px] ${p.status === 'Active' ? 'text-success border-success/30' : ''}`}>
