@@ -14,6 +14,7 @@ import { UserCard } from "@/components/users/UserCard";
 import { UserDetailsDialog } from "@/components/users/UserDetailsDialog";
 import { UserBulkActions } from "@/components/users/UserBulkActions";
 import { ActivityLog } from "@/components/users/ActivityLog";
+import { PendingApprovals } from "@/components/users/PendingApprovals";
 
 type AppRole = "admin" | "manager" | "user";
 
@@ -23,6 +24,7 @@ interface UserWithRole {
   avatar_url: string | null;
   roles: AppRole[];
   created_at: string;
+  approved: boolean;
 }
 
 export default function UserManagement() {
@@ -41,7 +43,7 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     setLoading(true);
     const [profileRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("id, full_name, avatar_url, created_at"),
+      supabase.from("profiles").select("id, full_name, avatar_url, created_at, approved"),
       supabase.from("user_roles").select("user_id, role"),
     ]);
 
@@ -60,6 +62,7 @@ export default function UserManagement() {
           avatar_url: p.avatar_url,
           roles: roleMap.get(p.id) || ["user"],
           created_at: p.created_at,
+          approved: p.approved ?? false,
         }))
       );
     }
@@ -70,8 +73,11 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
+  const approvedUsers = useMemo(() => users.filter(u => u.approved), [users]);
+  const pendingUsers = useMemo(() => users.filter(u => !u.approved), [users]);
+
   const filtered = useMemo(() => {
-    return users.filter((u) => {
+    return approvedUsers.filter((u) => {
       if (filters.search) {
         const s = filters.search.toLowerCase();
         if (!(u.full_name?.toLowerCase().includes(s))) return false;
@@ -153,7 +159,16 @@ export default function UserManagement() {
       </div>
 
       {/* Stats */}
-      <UserStats users={users} />
+      <UserStats users={approvedUsers} />
+
+      {/* Pending Approvals */}
+      {isAdmin && pendingUsers.length > 0 && (
+        <PendingApprovals
+          pendingUsers={pendingUsers}
+          onRefresh={fetchUsers}
+          currentUserId={currentUser?.id}
+        />
+      )}
 
       {/* Filters */}
       <UserFilters filters={filters} onChange={setFilters} />
@@ -198,7 +213,7 @@ export default function UserManagement() {
                   users={filtered}
                   selectedIds={selectedIds}
                   onSelectIds={setSelectedIds}
-                  onView={(u) => setViewUser(u)}
+                  onView={(u) => setViewUser(u as any)}
                   onChangeRole={handleRoleChange}
                   onDelete={handleDelete}
                   isAdmin={isAdmin}
@@ -212,7 +227,7 @@ export default function UserManagement() {
                 <UserCard
                   key={u.id}
                   user={u}
-                  onView={(u) => setViewUser(u)}
+                  onView={(u) => setViewUser(u as any)}
                   onChangeRole={handleRoleChange}
                   isAdmin={isAdmin}
                   currentUserId={currentUser?.id}
