@@ -234,7 +234,7 @@ export default function Reports() {
   const exportMaintenanceReport = () => {
     generateReportPDF("Maintenance Report",
       ['Task', 'Equipment', 'Type', 'Priority', 'Status', 'Due Date'],
-      maintenanceTasks.map(m => [m.taskNumber, m.equipmentName, m.maintenanceType, m.priority, m.status, m.scheduledDate])
+      maintenanceTasks.map(m => [m.taskNumber, m.equipmentName, m.type, m.priority, m.status, m.scheduledDate])
     );
   };
   const exportProductReport = () => {
