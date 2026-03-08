@@ -41,6 +41,7 @@ export default function Projects() {
 
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrencyShort } = useSettings();
 
   const managers = useMemo(() => [...new Set(projects.map(p => p.projectManager))], [projects]);
 
