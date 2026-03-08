@@ -625,8 +625,11 @@ export default function SettingsPage() {
                     }`}
                     onClick={() => toggleModule(mod.id)}
                   >
-                    <div className={`p-2 rounded-md ${mod.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                      <mod.icon className="h-4 w-4" />
+                    {(() => { const Icon = moduleIcons[mod.id] || Package; return (
+                      <div className={`p-2 rounded-md ${mod.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                    ); })()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
