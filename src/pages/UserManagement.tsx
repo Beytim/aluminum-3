@@ -43,7 +43,7 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     setLoading(true);
     const [profileRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("id, full_name, avatar_url, created_at"),
+      supabase.from("profiles").select("id, full_name, avatar_url, created_at, approved"),
       supabase.from("user_roles").select("user_id, role"),
     ]);
 
@@ -62,6 +62,7 @@ export default function UserManagement() {
           avatar_url: p.avatar_url,
           roles: roleMap.get(p.id) || ["user"],
           created_at: p.created_at,
+          approved: p.approved ?? false,
         }))
       );
     }
