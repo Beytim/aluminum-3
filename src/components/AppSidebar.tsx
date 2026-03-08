@@ -17,7 +17,9 @@ import {
   SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
-const allModules = [
+type RequiredRole = "admin" | "manager" | null;
+
+const allModules: { title: string; url: string; icon: any; moduleId: string | null; requiredRole?: RequiredRole }[] = [
   { title: 'nav.dashboard', url: '/', icon: LayoutDashboard, moduleId: null },
   { title: 'nav.products', url: '/products', icon: Package, moduleId: 'products' },
   { title: 'nav.inventory', url: '/inventory', icon: Boxes, moduleId: 'inventory' },
@@ -31,11 +33,11 @@ const allModules = [
   { title: 'nav.maintenance', url: '/maintenance', icon: ShieldCheck, moduleId: 'maintenance' },
   { title: 'nav.quality', url: '/quality', icon: ClipboardCheck, moduleId: 'quality' },
   { title: 'nav.procurement', url: '/procurement', icon: Truck, moduleId: 'procurement' },
-  { title: 'nav.finance', url: '/finance', icon: DollarSign, moduleId: 'finance' },
-  { title: 'nav.hr', url: '/hr', icon: UserCog, moduleId: 'hr' },
+  { title: 'nav.finance', url: '/finance', icon: DollarSign, moduleId: 'finance', requiredRole: 'manager' },
+  { title: 'nav.hr', url: '/hr', icon: UserCog, moduleId: 'hr', requiredRole: 'manager' },
   { title: 'nav.reports', url: '/reports', icon: BarChart3, moduleId: 'reports' },
-  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null, adminOnly: true },
-  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null, adminOnly: true },
+  { title: 'nav.users', url: '/users', icon: Building2, moduleId: null, requiredRole: 'admin' },
+  { title: 'nav.settings', url: '/settings', icon: Settings, moduleId: null, requiredRole: 'admin' },
 ];
 
 interface ModuleToggle { id: string; enabled: boolean }
@@ -49,11 +51,14 @@ export function AppSidebar() {
   const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
 
   const isAdmin = roles.includes("admin");
+  const isManager = roles.includes("manager");
   const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
-  const modules = allModules.filter(m =>
-    (m.moduleId === null || !disabledIds.has(m.moduleId)) &&
-    (!(m as any).adminOnly || isAdmin)
-  );
+  const modules = allModules.filter(m => {
+    if (m.moduleId && disabledIds.has(m.moduleId)) return false;
+    if (m.requiredRole === 'admin' && !isAdmin) return false;
+    if (m.requiredRole === 'manager' && !isAdmin && !isManager) return false;
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon">

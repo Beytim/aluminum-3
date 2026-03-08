@@ -9,6 +9,7 @@ import { SettingsProvider } from "@/lib/settingsContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
+import { ManagerRoute } from "@/components/ManagerRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
@@ -60,8 +61,8 @@ const App = () => (
                         <Route path="/maintenance" element={<Maintenance />} />
                         <Route path="/quality" element={<Quality />} />
                         <Route path="/procurement" element={<Procurement />} />
-                        <Route path="/finance" element={<Finance />} />
-                        <Route path="/hr" element={<HR />} />
+                        <Route path="/finance" element={<ManagerRoute><Finance /></ManagerRoute>} />
+                        <Route path="/hr" element={<ManagerRoute><HR /></ManagerRoute>} />
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
                         <Route path="/settings" element={<AdminRoute><SettingsPage /></AdminRoute>} />
