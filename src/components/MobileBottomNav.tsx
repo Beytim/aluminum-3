@@ -1,13 +1,16 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FolderKanban, Factory, DollarSign } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useLocalStorage } from "@/lib/localStorage";
 
-const navItems = [
-  { path: "/", icon: LayoutDashboard, labelKey: "nav.dashboard" },
-  { path: "/projects", icon: FolderKanban, labelKey: "nav.projects" },
-  { path: "/production", icon: Factory, labelKey: "nav.production" },
-  { path: "/finance", icon: DollarSign, labelKey: "nav.finance" },
+const allNavItems = [
+  { path: "/", icon: LayoutDashboard, labelKey: "nav.dashboard", moduleId: null },
+  { path: "/projects", icon: FolderKanban, labelKey: "nav.projects", moduleId: "projects" },
+  { path: "/production", icon: Factory, labelKey: "nav.production", moduleId: "production" },
+  { path: "/finance", icon: DollarSign, labelKey: "nav.finance", moduleId: "finance" },
 ];
+
+interface ModuleToggle { id: string; enabled: boolean }
 
 export function MobileBottomNav() {
   const location = useLocation();
