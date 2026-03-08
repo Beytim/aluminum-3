@@ -199,7 +199,7 @@ export default function Dashboard() {
             { label: 'Active', value: projectStats.activeProjects },
             { label: 'Total Value', value: fmtETB(projectStats.totalValue) },
             { label: 'Completed', value: projectStats.completedProjects, color: 'text-success' },
-            { label: 'At Risk', value: projectStats.behindSchedule || 0, color: (projectStats.behindSchedule || 0) > 0 ? 'text-warning' : 'text-foreground' },
+            { label: 'At Risk', value: projectStats.atRiskProjects, color: projectStats.atRiskProjects > 0 ? 'text-warning' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="Customers" icon={Users} route="/customers" accentColor="bg-chart-5" items={[
             { label: 'Active', value: customers.filter(c => c.status === 'Active').length },
