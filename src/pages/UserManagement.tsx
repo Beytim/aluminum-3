@@ -14,6 +14,7 @@ import { UserCard } from "@/components/users/UserCard";
 import { UserDetailsDialog } from "@/components/users/UserDetailsDialog";
 import { UserBulkActions } from "@/components/users/UserBulkActions";
 import { ActivityLog } from "@/components/users/ActivityLog";
+import { PendingApprovals } from "@/components/users/PendingApprovals";
 
 type AppRole = "admin" | "manager" | "user";
 
