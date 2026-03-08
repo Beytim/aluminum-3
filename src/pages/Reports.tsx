@@ -222,7 +222,7 @@ export default function Reports() {
   const exportSupplierReport = () => {
     generateReportPDF("Supplier Performance Report",
       ['Supplier', 'Category', 'Rating', 'Lead Time', 'Total POs', 'Status'],
-      suppliers.map(s => [s.name, s.category, `${s.rating}/5`, `${s.averageLeadTimeDays} days`, String(s.totalPOs), s.status])
+      suppliers.map(s => [s.companyName, s.productCategories[0] || 'N/A', `${s.rating}/5`, `${s.averageLeadTime} days`, String(s.performance.totalOrders), s.status])
     );
   };
   const exportInstallationReport = () => {
