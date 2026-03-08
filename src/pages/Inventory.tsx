@@ -19,8 +19,11 @@ import AddInventoryDialog from "@/components/inventory/AddInventoryDialog";
 import InventoryDetailsDialog from "@/components/inventory/InventoryDetailsDialog";
 import StockMovementDialog from "@/components/inventory/StockMovementDialog";
 
+import { useInventory } from "@/hooks/useInventory";
+
 export default function Inventory() {
-  const [inventory, setInventory] = useLocalStorage<EnhancedInventoryItem[]>('enhanced_inventory', enhancedSampleInventory);
+  const { inventory, isLoading, addItem, deleteItem, addMovement } = useInventory();
+  // We still use local storage for movements and reservations if not fully migrated yet
   const [movements, setMovements] = useLocalStorage<StockMovement[]>('stock_movements', sampleStockMovements);
   const [reservations] = useLocalStorage<StockReservation[]>('stock_reservations', sampleReservations);
 
