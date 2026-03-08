@@ -1,145 +1,222 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ClipboardCheck, CheckCircle, XCircle, AlertCircle, Plus, Trash2 } from "lucide-react";
-import { sampleQualityChecks } from "@/data/sampleData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { QualityCheck } from "@/data/sampleData";
-
-const resultIcon = {
-  Pass: <CheckCircle className="h-4 w-4 text-success" />,
-  Fail: <XCircle className="h-4 w-4 text-destructive" />,
-  Conditional: <AlertCircle className="h-4 w-4 text-warning" />,
-};
-
-const resultColor: Record<string, string> = {
-  Pass: 'bg-success/10 text-success',
-  Fail: 'bg-destructive/10 text-destructive',
-  Conditional: 'bg-warning/10 text-warning',
-};
+import {
+  sampleEnhancedInspections, sampleNCRs, sampleComplaints,
+  calculateQualityStats,
+  type EnhancedInspection, type NCR, type CustomerComplaint,
+} from "@/data/enhancedQualityData";
+import QualityStats from "@/components/quality/QualityStats";
+import QualityFilters from "@/components/quality/QualityFilters";
+import QualityBulkActions from "@/components/quality/QualityBulkActions";
+import InspectionTable from "@/components/quality/InspectionTable";
+import NCRTable from "@/components/quality/NCRTable";
+import ComplaintTable from "@/components/quality/ComplaintTable";
+import DefectAnalysis from "@/components/quality/DefectAnalysis";
+import AddInspectionDialog from "@/components/quality/AddInspectionDialog";
+import InspectionDetailsDialog from "@/components/quality/InspectionDetailsDialog";
+import AddNCRDialog from "@/components/quality/AddNCRDialog";
+import NCRDetailsDialog from "@/components/quality/NCRDetailsDialog";
 
 export default function Quality() {
-  const [checks, setChecks] = useLocalStorage<QualityCheck[]>(STORAGE_KEYS.QUALITY_CHECKS, sampleQualityChecks);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useI18n();
   const { toast } = useToast();
-  const [form, setForm] = useState({ workOrderId: '', productName: '', inspector: '', result: '', defects: '', notes: '' });
 
-  const passRate = checks.length > 0 ? ((checks.filter(q => q.result === 'Pass').length / checks.length) * 100).toFixed(0) : '0';
+  const [inspections, setInspections] = useLocalStorage<EnhancedInspection[]>(STORAGE_KEYS.INSPECTIONS, sampleEnhancedInspections);
+  const [ncrs, setNCRs] = useLocalStorage<NCR[]>(STORAGE_KEYS.NCRS, sampleNCRs);
+  const [complaints, setComplaints] = useLocalStorage<CustomerComplaint[]>(STORAGE_KEYS.CUSTOMER_COMPLAINTS, sampleComplaints);
 
-  const handleAdd = () => {
-    if (!form.productName.trim() || !form.result) return;
-    const qc: QualityCheck = {
-      id: `QC-${String(checks.length + 1).padStart(3, '0')}`,
-      workOrderId: form.workOrderId || 'N/A',
-      productName: form.productName.trim(),
-      inspector: form.inspector || 'Inspector',
-      date: new Date().toISOString().split('T')[0],
-      result: form.result as QualityCheck['result'],
-      defects: form.defects ? form.defects.split(',').map(d => d.trim()).filter(Boolean) : [],
-      notes: form.notes,
-    };
-    setChecks(prev => [...prev, qc]);
-    toast({ title: "Quality Check Added", description: qc.id });
-    setForm({ workOrderId: '', productName: '', inspector: '', result: '', defects: '', notes: '' });
-    setDialogOpen(false);
+  const [tab, setTab] = useState('inspections');
+  const [search, setSearch] = useState('');
+  const [quickFilter, setQuickFilter] = useState('all');
+  const [selectedInsp, setSelectedInsp] = useState<string[]>([]);
+  const [selectedNCR, setSelectedNCR] = useState<string[]>([]);
+
+  const [addInspOpen, setAddInspOpen] = useState(false);
+  const [addNCROpen, setAddNCROpen] = useState(false);
+  const [viewInsp, setViewInsp] = useState<EnhancedInspection | null>(null);
+  const [viewNCR, setViewNCR] = useState<NCR | null>(null);
+
+  const stats = useMemo(() => calculateQualityStats(inspections, ncrs, complaints), [inspections, ncrs, complaints]);
+
+  // Filter inspections
+  const filteredInsp = useMemo(() => {
+    let list = inspections;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(i => i.inspectionNumber.toLowerCase().includes(q) || i.productName?.toLowerCase().includes(q) || i.inspectorName.toLowerCase().includes(q));
+    }
+    if (quickFilter !== 'all') {
+      if (['pass', 'fail', 'conditional', 'rework', 'scrap'].includes(quickFilter)) {
+        list = list.filter(i => i.result === quickFilter);
+      } else if (['incoming', 'in_process', 'final'].includes(quickFilter)) {
+        list = list.filter(i => i.type === quickFilter);
+      }
+    }
+    return list;
+  }, [inspections, search, quickFilter]);
+
+  // Filter NCRs
+  const filteredNCR = useMemo(() => {
+    let list = ncrs;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(n => n.ncrNumber.toLowerCase().includes(q) || n.title.toLowerCase().includes(q) || n.productName?.toLowerCase().includes(q));
+    }
+    if (quickFilter !== 'all') {
+      list = list.filter(n => n.status === quickFilter);
+    }
+    return list;
+  }, [ncrs, search, quickFilter]);
+
+  // Filter complaints
+  const filteredComplaints = useMemo(() => {
+    let list = complaints;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(c => c.complaintNumber.toLowerCase().includes(q) || c.customerName.toLowerCase().includes(q) || c.subject.toLowerCase().includes(q));
+    }
+    if (quickFilter !== 'all') {
+      list = list.filter(c => c.resolutionStatus === quickFilter);
+    }
+    return list;
+  }, [complaints, search, quickFilter]);
+
+  const handleTabChange = (t: string) => {
+    setTab(t);
+    setSearch('');
+    setQuickFilter('all');
+    setSelectedInsp([]);
+    setSelectedNCR([]);
   };
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('nav.quality')}</h1>
-          <p className="text-sm text-muted-foreground">{checks.length} inspections · Pass rate: {passRate}%</p>
+          <p className="text-sm text-muted-foreground">
+            {inspections.length} inspections · {stats.passRate}% pass rate · {stats.openNCRs} open NCRs
+          </p>
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Check</Button>
+        <div className="flex gap-2">
+          {tab === 'inspections' && <Button size="sm" onClick={() => setAddInspOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Inspection</Button>}
+          {tab === 'ncrs' && <Button size="sm" onClick={() => setAddNCROpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New NCR</Button>}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {(['Pass', 'Conditional', 'Fail'] as const).map(result => {
-          const count = checks.filter(q => q.result === result).length;
-          return (
-            <Card key={result} className="shadow-card">
-              <CardContent className="p-4 flex items-center gap-3">
-                {resultIcon[result]}
-                <div><p className="text-xs text-muted-foreground">{result}</p><p className="text-xl font-bold">{count}</p></div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {/* Stats */}
+      <QualityStats stats={stats} />
 
-      <Card className="shadow-card">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs">ID</TableHead>
-                <TableHead className="text-xs">Work Order</TableHead>
-                <TableHead className="text-xs">Product</TableHead>
-                <TableHead className="text-xs">Inspector</TableHead>
-                <TableHead className="text-xs">{t('common.date')}</TableHead>
-                <TableHead className="text-xs">Result</TableHead>
-                <TableHead className="text-xs">Defects</TableHead>
-                <TableHead className="text-xs">Notes</TableHead>
-                <TableHead className="text-xs"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {checks.map(qc => (
-                <TableRow key={qc.id}>
-                  <TableCell className="text-xs font-mono">{qc.id}</TableCell>
-                  <TableCell className="text-xs font-mono">{qc.workOrderId}</TableCell>
-                  <TableCell className="text-xs font-medium">{qc.productName}</TableCell>
-                  <TableCell className="text-xs">{qc.inspector}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{qc.date}</TableCell>
-                  <TableCell>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${resultColor[qc.result]}`}>{qc.result}</span>
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {qc.defects.length > 0 ? qc.defects.map(d => (
-                      <Badge key={d} variant="destructive" className="text-[10px] mr-1 mb-0.5">{d}</Badge>
-                    )) : <span className="text-muted-foreground">—</span>}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{qc.notes}</TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setChecks(prev => prev.filter(c => c.id !== qc.id)); toast({ title: "Deleted" }); }}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Tabs */}
+      <Tabs value={tab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="inspections" className="text-xs">Inspections ({inspections.length})</TabsTrigger>
+          <TabsTrigger value="ncrs" className="text-xs">NCRs ({ncrs.length})</TabsTrigger>
+          <TabsTrigger value="complaints" className="text-xs">Complaints ({complaints.length})</TabsTrigger>
+          <TabsTrigger value="reports" className="text-xs">Reports</TabsTrigger>
+        </TabsList>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>New Quality Check</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><Label className="text-xs">Work Order ID</Label><Input value={form.workOrderId} onChange={e => setForm(p => ({ ...p, workOrderId: e.target.value }))} /></div>
-            <div><Label className="text-xs">Product *</Label><Input value={form.productName} onChange={e => setForm(p => ({ ...p, productName: e.target.value }))} /></div>
-            <div><Label className="text-xs">Inspector</Label><Input value={form.inspector} onChange={e => setForm(p => ({ ...p, inspector: e.target.value }))} /></div>
-            <div><Label className="text-xs">Result *</Label>
-              <Select value={form.result} onValueChange={v => setForm(p => ({ ...p, result: v }))}><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent><SelectItem value="Pass">Pass</SelectItem><SelectItem value="Conditional">Conditional</SelectItem><SelectItem value="Fail">Fail</SelectItem></SelectContent>
-              </Select>
-            </div>
-            <div className="sm:col-span-2"><Label className="text-xs">Defects (comma-separated)</Label><Input value={form.defects} onChange={e => setForm(p => ({ ...p, defects: e.target.value }))} /></div>
-            <div className="sm:col-span-2"><Label className="text-xs">Notes</Label><Input value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} /></div>
+        {/* Filters */}
+        {tab !== 'reports' && (
+          <div className="mt-3">
+            <QualityFilters
+              tab={tab as any}
+              search={search}
+              onSearchChange={setSearch}
+              quickFilter={quickFilter}
+              onQuickFilterChange={setQuickFilter}
+            />
           </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button><Button onClick={handleAdd}>Add</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+
+        {/* Bulk actions */}
+        {tab === 'inspections' && selectedInsp.length > 0 && (
+          <div className="mt-2">
+            <QualityBulkActions
+              count={selectedInsp.length}
+              onClear={() => setSelectedInsp([])}
+              onDelete={() => {
+                setInspections(prev => prev.filter(i => !selectedInsp.includes(i.id)));
+                setSelectedInsp([]);
+                toast({ title: `Deleted ${selectedInsp.length} inspections` });
+              }}
+              onExport={() => toast({ title: "Exported", description: `${selectedInsp.length} inspections` })}
+            />
+          </div>
+        )}
+        {tab === 'ncrs' && selectedNCR.length > 0 && (
+          <div className="mt-2">
+            <QualityBulkActions
+              count={selectedNCR.length}
+              onClear={() => setSelectedNCR([])}
+              onDelete={() => {
+                setNCRs(prev => prev.filter(n => !selectedNCR.includes(n.id)));
+                setSelectedNCR([]);
+                toast({ title: `Deleted ${selectedNCR.length} NCRs` });
+              }}
+              onExport={() => toast({ title: "Exported", description: `${selectedNCR.length} NCRs` })}
+            />
+          </div>
+        )}
+
+        <TabsContent value="inspections" className="mt-3">
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <InspectionTable
+                inspections={filteredInsp}
+                selected={selectedInsp}
+                onSelect={setSelectedInsp}
+                onView={setViewInsp}
+                onDelete={id => { setInspections(prev => prev.filter(i => i.id !== id)); toast({ title: "Deleted" }); }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ncrs" className="mt-3">
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <NCRTable
+                ncrs={filteredNCR}
+                selected={selectedNCR}
+                onSelect={setSelectedNCR}
+                onView={setViewNCR}
+                onDelete={id => { setNCRs(prev => prev.filter(n => n.id !== id)); toast({ title: "Deleted" }); }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="complaints" className="mt-3">
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <ComplaintTable
+                complaints={filteredComplaints}
+                onDelete={id => { setComplaints(prev => prev.filter(c => c.id !== id)); toast({ title: "Deleted" }); }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-3">
+          <DefectAnalysis stats={stats} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialogs */}
+      <AddInspectionDialog open={addInspOpen} onOpenChange={setAddInspOpen} existingCount={inspections.length}
+        onAdd={insp => { setInspections(prev => [...prev, insp]); toast({ title: "Inspection Added", description: insp.inspectionNumber }); }} />
+      <InspectionDetailsDialog inspection={viewInsp} open={!!viewInsp} onOpenChange={() => setViewInsp(null)} />
+      <AddNCRDialog open={addNCROpen} onOpenChange={setAddNCROpen} existingCount={ncrs.length}
+        onAdd={ncr => { setNCRs(prev => [...prev, ncr]); toast({ title: "NCR Created", description: ncr.ncrNumber }); }} />
+      <NCRDetailsDialog ncr={viewNCR} open={!!viewNCR} onOpenChange={() => setViewNCR(null)} />
     </div>
   );
 }
