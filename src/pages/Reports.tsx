@@ -216,7 +216,7 @@ export default function Reports() {
   const exportHRReport = () => {
     generateReportPDF("HR & Payroll Report",
       ['Employee', 'Department', 'Position', 'Status', 'Employment'],
-      employees.map(e => [e.name, e.department, e.position, e.status, e.employmentType])
+      employees.map(e => [e.fullName, e.department, e.position, e.status, e.employmentType])
     );
   };
   const exportSupplierReport = () => {
