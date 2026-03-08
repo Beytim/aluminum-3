@@ -1,44 +1,86 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Briefcase, Trash2 } from "lucide-react";
-import { sampleEmployees } from "@/data/sampleData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Calendar } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { Employee } from "@/data/sampleData";
+import {
+  sampleEnhancedEmployees, sampleLeaveRequests, samplePayrolls,
+  calculateHRStats,
+  type EnhancedEmployee, type LeaveRequest, type Payroll,
+} from "@/data/enhancedHRData";
+import HRStats from "@/components/hr/HRStats";
+import HRFilters from "@/components/hr/HRFilters";
+import HRBulkActions from "@/components/hr/HRBulkActions";
+import EmployeeTable from "@/components/hr/EmployeeTable";
+import LeaveTable from "@/components/hr/LeaveTable";
+import PayrollTable from "@/components/hr/PayrollTable";
+import AddEmployeeDialog from "@/components/hr/AddEmployeeDialog";
+import EmployeeDetailsDialog from "@/components/hr/EmployeeDetailsDialog";
+import LeaveRequestDialog from "@/components/hr/LeaveRequestDialog";
 
 export default function HR() {
-  const [employees, setEmployees] = useLocalStorage<Employee[]>(STORAGE_KEYS.EMPLOYEES, sampleEmployees);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const { t, language } = useI18n();
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: '', nameAm: '', position: '', department: '', email: '', phone: '', salary: '' });
 
-  const departments = [...new Set(employees.map(e => e.department))];
-  const totalPayroll = employees.reduce((s, e) => s + e.salary, 0);
+  const [employees, setEmployees] = useLocalStorage<EnhancedEmployee[]>(STORAGE_KEYS.ENHANCED_EMPLOYEES, sampleEnhancedEmployees);
+  const [leaveRequests, setLeaveRequests] = useLocalStorage<LeaveRequest[]>(STORAGE_KEYS.LEAVE_REQUESTS, sampleLeaveRequests);
+  const [payrolls, setPayrolls] = useLocalStorage<Payroll[]>(STORAGE_KEYS.PAYROLLS, samplePayrolls);
 
-  const handleAdd = () => {
-    if (!form.name.trim() || !form.department) return;
-    const emp: Employee = {
-      id: `EMP-${String(employees.length + 1).padStart(3, '0')}`,
-      name: form.name.trim(), nameAm: form.nameAm.trim() || form.name.trim(),
-      position: form.position || 'Staff', department: form.department,
-      email: form.email, phone: form.phone,
-      hireDate: new Date().toISOString().split('T')[0],
-      status: 'active', salary: Number(form.salary) || 0, performance: 80,
-    };
-    setEmployees(prev => [...prev, emp]);
-    toast({ title: "Employee Added", description: emp.name });
-    setForm({ name: '', nameAm: '', position: '', department: '', email: '', phone: '', salary: '' });
-    setDialogOpen(false);
+  const [tab, setTab] = useState('employees');
+  const [search, setSearch] = useState('');
+  const [quickFilter, setQuickFilter] = useState('all');
+  const [selectedEmp, setSelectedEmp] = useState<string[]>([]);
+
+  const [addEmpOpen, setAddEmpOpen] = useState(false);
+  const [addLeaveOpen, setAddLeaveOpen] = useState(false);
+  const [viewEmp, setViewEmp] = useState<EnhancedEmployee | null>(null);
+
+  const stats = useMemo(() => calculateHRStats(employees, leaveRequests, payrolls), [employees, leaveRequests, payrolls]);
+
+  const filteredEmployees = useMemo(() => {
+    let list = employees;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(e => e.fullName.toLowerCase().includes(q) || e.employeeNumber.toLowerCase().includes(q) || e.workEmail.toLowerCase().includes(q) || e.position.toLowerCase().includes(q));
+    }
+    if (quickFilter !== 'all') {
+      list = list.filter(e => e.status === quickFilter);
+    }
+    return list;
+  }, [employees, search, quickFilter]);
+
+  const filteredLeave = useMemo(() => {
+    let list = leaveRequests;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(l => l.requestNumber.toLowerCase().includes(q) || l.employeeName.toLowerCase().includes(q));
+    }
+    if (quickFilter !== 'all') {
+      list = list.filter(l => l.status === quickFilter);
+    }
+    return list;
+  }, [leaveRequests, search, quickFilter]);
+
+  const filteredPayroll = useMemo(() => {
+    let list = payrolls;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(p => p.payrollNumber.toLowerCase().includes(q) || p.employeeName.toLowerCase().includes(q));
+    }
+    if (quickFilter !== 'all') {
+      list = list.filter(p => p.status === quickFilter);
+    }
+    return list;
+  }, [payrolls, search, quickFilter]);
+
+  const handleTabChange = (t: string) => {
+    setTab(t);
+    setSearch('');
+    setQuickFilter('all');
+    setSelectedEmp([]);
   };
 
   return (
@@ -46,102 +88,106 @@ export default function HR() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('hr.title')}</h1>
-          <p className="text-sm text-muted-foreground">{employees.length} {t('hr.employees').toLowerCase()} · Payroll: ETB {totalPayroll.toLocaleString()}/mo</p>
+          <p className="text-sm text-muted-foreground">
+            {employees.length} employees · {stats.activeEmployees} active · {stats.pendingLeaveRequests} pending leave
+          </p>
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />Add Employee</Button>
+        <div className="flex gap-2">
+          {tab === 'employees' && <Button size="sm" onClick={() => setAddEmpOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />Add Employee</Button>}
+          {tab === 'leave' && <Button size="sm" onClick={() => setAddLeaveOpen(true)}><Calendar className="h-3.5 w-3.5 mr-1.5" />Leave Request</Button>}
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {departments.map(dept => {
-          const count = employees.filter(e => e.department === dept).length;
-          return (
-            <Card key={dept} className="shadow-card">
-              <CardContent className="p-3 flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <div><p className="text-[10px] text-muted-foreground">{dept}</p><p className="text-sm font-bold">{count}</p></div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <HRStats stats={stats} />
 
-      <Card className="shadow-card">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs">ID</TableHead>
-                <TableHead className="text-xs">{t('common.name')}</TableHead>
-                <TableHead className="text-xs">Position</TableHead>
-                <TableHead className="text-xs">Department</TableHead>
-                <TableHead className="text-xs">Hire Date</TableHead>
-                <TableHead className="text-xs text-right">Salary</TableHead>
-                <TableHead className="text-xs">Performance</TableHead>
-                <TableHead className="text-xs">{t('common.status')}</TableHead>
-                <TableHead className="text-xs"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {employees.map(emp => (
-                <TableRow key={emp.id}>
-                  <TableCell className="text-xs font-mono">{emp.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                        {emp.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium">{language === 'am' ? emp.nameAm : emp.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{emp.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs">{emp.position}</TableCell>
-                  <TableCell><Badge variant="secondary" className="text-[10px]">{emp.department}</Badge></TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{emp.hireDate}</TableCell>
-                  <TableCell className="text-xs text-right font-medium">ETB {emp.salary.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Progress value={emp.performance} className="h-1.5 w-16" />
-                      <span className="text-[10px] font-medium">{emp.performance}%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={emp.status === 'active' ? 'outline' : 'secondary'} className={`text-[10px] ${emp.status === 'active' ? 'text-success border-success/30' : 'text-warning border-warning/30'}`}>
-                      {emp.status === 'active' ? 'Active' : 'On Leave'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEmployees(prev => prev.filter(e => e.id !== emp.id)); toast({ title: "Deleted" }); }}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <Tabs value={tab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="employees" className="text-xs">Employees ({employees.length})</TabsTrigger>
+          <TabsTrigger value="leave" className="text-xs">Leave ({leaveRequests.length})</TabsTrigger>
+          <TabsTrigger value="payroll" className="text-xs">Payroll ({payrolls.length})</TabsTrigger>
+        </TabsList>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Add Employee</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><Label className="text-xs">Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
-            <div><Label className="text-xs">ስም (AM)</Label><Input value={form.nameAm} onChange={e => setForm(p => ({ ...p, nameAm: e.target.value }))} /></div>
-            <div><Label className="text-xs">Position</Label><Input value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} /></div>
-            <div><Label className="text-xs">Department *</Label>
-              <Select value={form.department} onValueChange={v => setForm(p => ({ ...p, department: v }))}><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{['Production', 'Sales', 'Finance', 'Installation', 'Quality', 'Admin'].map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label className="text-xs">Email</Label><Input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
-            <div><Label className="text-xs">Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
-            <div><Label className="text-xs">Salary (ETB)</Label><Input type="number" value={form.salary} onChange={e => setForm(p => ({ ...p, salary: e.target.value }))} /></div>
+        {/* Filters */}
+        <div className="mt-3">
+          <HRFilters tab={tab} search={search} onSearchChange={setSearch} quickFilter={quickFilter} onQuickFilterChange={setQuickFilter} />
+        </div>
+
+        {/* Bulk actions */}
+        {tab === 'employees' && selectedEmp.length > 0 && (
+          <div className="mt-2">
+            <HRBulkActions
+              count={selectedEmp.length}
+              onClear={() => setSelectedEmp([])}
+              onDelete={() => { setEmployees(prev => prev.filter(e => !selectedEmp.includes(e.id))); setSelectedEmp([]); toast({ title: `Deleted ${selectedEmp.length} employees` }); }}
+              onExport={() => toast({ title: "Exported", description: `${selectedEmp.length} employees` })}
+            />
           </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button><Button onClick={handleAdd}>Add</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+
+        <TabsContent value="employees" className="mt-3">
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <EmployeeTable
+                employees={filteredEmployees}
+                selected={selectedEmp}
+                onSelect={setSelectedEmp}
+                onView={setViewEmp}
+                onDelete={id => { setEmployees(prev => prev.filter(e => e.id !== id)); toast({ title: "Deleted" }); }}
+                language={language}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="leave" className="mt-3">
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <LeaveTable
+                requests={filteredLeave}
+                onApprove={id => {
+                  setLeaveRequests(prev => prev.map(l => l.id === id ? { ...l, status: 'approved', approvedBy: 'EMP-001', approvedByName: 'Abebe Tekle', approvedDate: new Date().toISOString().split('T')[0], updatedAt: new Date().toISOString().split('T')[0] } : l));
+                  toast({ title: "Leave Approved" });
+                }}
+                onReject={id => {
+                  setLeaveRequests(prev => prev.map(l => l.id === id ? { ...l, status: 'rejected', updatedAt: new Date().toISOString().split('T')[0] } : l));
+                  toast({ title: "Leave Rejected" });
+                }}
+                onDelete={id => { setLeaveRequests(prev => prev.filter(l => l.id !== id)); toast({ title: "Deleted" }); }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payroll" className="mt-3">
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <PayrollTable
+                payrolls={filteredPayroll}
+                onApprove={id => {
+                  setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: 'approved', approvedBy: 'EMP-001', approvedByName: 'Abebe Tekle', approvedAt: new Date().toISOString().split('T')[0], updatedAt: new Date().toISOString().split('T')[0] } : p));
+                  toast({ title: "Payroll Approved" });
+                }}
+                onPay={id => {
+                  setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: 'paid', paidAt: new Date().toISOString().split('T')[0], updatedAt: new Date().toISOString().split('T')[0] } : p));
+                  toast({ title: "Payment Processed" });
+                }}
+              />
+            </CardContent>
+          </Card>
+          <div className="mt-3 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+            <strong>Payroll Summary:</strong> Total Net Pay: ETB {filteredPayroll.reduce((s, p) => s + p.netPay, 0).toLocaleString()} · 
+            Total Tax: ETB {filteredPayroll.reduce((s, p) => s + p.incomeTax, 0).toLocaleString()} · 
+            Total Pension: ETB {filteredPayroll.reduce((s, p) => s + p.pension, 0).toLocaleString()}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialogs */}
+      <AddEmployeeDialog open={addEmpOpen} onOpenChange={setAddEmpOpen} existingCount={employees.length}
+        onAdd={emp => { setEmployees(prev => [...prev, emp]); toast({ title: "Employee Added", description: emp.fullName }); }} />
+      <EmployeeDetailsDialog employee={viewEmp} open={!!viewEmp} onOpenChange={() => setViewEmp(null)} language={language} />
+      <LeaveRequestDialog open={addLeaveOpen} onOpenChange={setAddLeaveOpen} employees={employees} existingCount={leaveRequests.length}
+        onAdd={req => { setLeaveRequests(prev => [...prev, req]); toast({ title: "Leave Request Submitted", description: req.requestNumber }); }} />
     </div>
   );
 }
