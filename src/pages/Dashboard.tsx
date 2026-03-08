@@ -33,6 +33,7 @@ import DashboardCharts from "@/components/dashboard/DashboardCharts";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t, language } = useI18n();
+  const { formatCurrencyShort: fmtETB } = useSettings();
 
   // Load all module data
   const [products] = useLocalStorage<EnhancedProduct[]>(STORAGE_KEYS.PRODUCTS, enhancedSampleProducts);

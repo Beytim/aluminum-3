@@ -34,7 +34,7 @@ import ReportKPIs, { type ReportKPI } from "@/components/reports/ReportKPIs";
 import ReportCardGrid, { type ReportCard } from "@/components/reports/ReportCardGrid";
 import CrossModuleCharts from "@/components/reports/CrossModuleCharts";
 
-const fmtETB = (v: number) => v >= 1_000_000 ? `ETB ${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `ETB ${(v / 1_000).toFixed(0)}K` : `ETB ${v}`;
+// fmtETB replaced by useSettings().formatCurrencyShort below
 
 export default function Reports() {
   const { t } = useI18n();
