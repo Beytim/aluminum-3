@@ -1,259 +1,167 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Star, Globe, Trash2, ChevronRight, Ship, Plane, TruckIcon } from "lucide-react";
-import { sampleSuppliers, samplePurchaseOrders } from "@/data/sampleData";
-import { useI18n } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Plus, Users, FileText, Package, AlertTriangle } from "lucide-react";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { Supplier, PurchaseOrder } from "@/data/sampleData";
+import {
+  type EnhancedSupplier, type EnhancedPurchaseOrder, type ReorderSuggestion, type POStatus,
+  sampleEnhancedSuppliers, sampleEnhancedPOs, sampleReorderSuggestions,
+  calculateProcurementStats,
+} from "@/data/enhancedProcurementData";
 
-const poStatusColor: Record<string, string> = {
-  Draft: 'bg-muted text-muted-foreground', Sent: 'bg-info/10 text-info',
-  Confirmed: 'bg-primary/10 text-primary', Shipped: 'bg-warning/10 text-warning',
-  Received: 'bg-success/10 text-success', 'Partially Received': 'bg-warning/10 text-warning',
-  Cancelled: 'bg-destructive/10 text-destructive',
-};
-
-const shippingIcon: Record<string, any> = { Sea: Ship, Air: Plane, Land: TruckIcon };
+import ProcurementStatsComponent from "@/components/procurement/ProcurementStats";
+import ProcurementFilters from "@/components/procurement/ProcurementFilters";
+import ProcurementBulkActions from "@/components/procurement/ProcurementBulkActions";
+import SupplierTable from "@/components/procurement/SupplierTable";
+import PurchaseOrderTable from "@/components/procurement/PurchaseOrderTable";
+import ReorderSuggestions from "@/components/procurement/ReorderSuggestions";
+import AddSupplierDialog from "@/components/procurement/AddSupplierDialog";
+import SupplierDetailsDialog from "@/components/procurement/SupplierDetailsDialog";
+import AddPurchaseOrderDialog from "@/components/procurement/AddPurchaseOrderDialog";
+import PODetailsDialog from "@/components/procurement/PODetailsDialog";
 
 export default function Procurement() {
-  const [suppliers, setSuppliers] = useLocalStorage<Supplier[]>(STORAGE_KEYS.SUPPLIERS, sampleSuppliers);
-  const [purchaseOrders, setPurchaseOrders] = useLocalStorage<PurchaseOrder[]>(STORAGE_KEYS.PURCHASE_ORDERS, samplePurchaseOrders);
-  const [supplierDialog, setSupplierDialog] = useState(false);
-  const [poDialog, setPoDialog] = useState(false);
-  const { t } = useI18n();
+  const [suppliers, setSuppliers] = useLocalStorage<EnhancedSupplier[]>(STORAGE_KEYS.SUPPLIERS, sampleEnhancedSuppliers);
+  const [purchaseOrders, setPurchaseOrders] = useLocalStorage<EnhancedPurchaseOrder[]>(STORAGE_KEYS.PURCHASE_ORDERS, sampleEnhancedPOs);
+  const [reorders] = useLocalStorage<ReorderSuggestion[]>('reorder_suggestions', sampleReorderSuggestions);
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [filters, setFilters] = useState({ search: '', status: '', supplierStatus: '', quickFilter: 'all' });
+  const [activeTab, setActiveTab] = useState('suppliers');
+
+  const [addSupplierOpen, setAddSupplierOpen] = useState(false);
+  const [addPOOpen, setAddPOOpen] = useState(false);
+  const [detailsSupplier, setDetailsSupplier] = useState<EnhancedSupplier | null>(null);
+  const [detailsPO, setDetailsPO] = useState<EnhancedPurchaseOrder | null>(null);
+  const [preSelectedSupplier, setPreSelectedSupplier] = useState<string>('');
+
   const { toast } = useToast();
+  const stats = useMemo(() => calculateProcurementStats(suppliers, purchaseOrders, reorders), [suppliers, purchaseOrders, reorders]);
 
-  const [supForm, setSupForm] = useState({ company: '', contact: '', phone: '', email: '', country: '', leadTime: '', paymentTerms: '', website: '', minOrderQty: '', notes: '' });
-  const [poForm, setPoForm] = useState({ supplierId: '', expectedDelivery: '', shippingMethod: '', notes: '' });
+  const filteredSuppliers = useMemo(() => {
+    let result = [...suppliers];
+    if (filters.search) {
+      const s = filters.search.toLowerCase();
+      result = result.filter(sup => sup.companyName.toLowerCase().includes(s) || sup.supplierCode.toLowerCase().includes(s) || sup.contactPerson.toLowerCase().includes(s));
+    }
+    if (filters.supplierStatus) result = result.filter(sup => sup.status === filters.supplierStatus);
+    switch (filters.quickFilter) {
+      case 'active': result = result.filter(s => s.status === 'Active'); break;
+      case 'preferred': result = result.filter(s => s.preferred); break;
+      case 'highRated': result = result.filter(s => s.rating >= 4); break;
+    }
+    return result;
+  }, [suppliers, filters]);
 
-  const totalPOValue = purchaseOrders.reduce((s, po) => s + po.total, 0);
-  const pendingPOs = purchaseOrders.filter(po => !['Received', 'Cancelled'].includes(po.status)).length;
-
-  const handleAddSupplier = () => {
-    if (!supForm.company.trim()) return;
-    const supplier: Supplier = {
-      id: `SUP-${String(suppliers.length + 1).padStart(3, '0')}`,
-      company: supForm.company.trim(), contact: supForm.contact.trim(),
-      phone: supForm.phone, email: supForm.email, website: supForm.website,
-      country: supForm.country || 'Ethiopia', address: '',
-      leadTime: Number(supForm.leadTime) || 7, minOrderQty: Number(supForm.minOrderQty) || 0,
-      rating: 3, preferred: false,
-      paymentTerms: supForm.paymentTerms || 'Net 30', certifications: [], notes: supForm.notes,
-    };
-    setSuppliers(prev => [...prev, supplier]);
-    toast({ title: "Supplier Added", description: supplier.company });
-    setSupForm({ company: '', contact: '', phone: '', email: '', country: '', leadTime: '', paymentTerms: '', website: '', minOrderQty: '', notes: '' });
-    setSupplierDialog(false);
-  };
-
-  const handleAddPO = () => {
-    const supplier = suppliers.find(s => s.id === poForm.supplierId);
-    if (!supplier) return;
-    const po: PurchaseOrder = {
-      id: `PO-${String(purchaseOrders.length + 1).padStart(3, '0')}`,
-      supplierId: supplier.id, supplierName: supplier.company,
-      orderDate: new Date().toISOString().split('T')[0],
-      expectedDelivery: poForm.expectedDelivery || new Date().toISOString().split('T')[0],
-      status: 'Draft', items: [], subtotal: 0, shipping: 0, total: 0, paid: 0,
-      shippingMethod: (poForm.shippingMethod || undefined) as PurchaseOrder['shippingMethod'],
-      notes: poForm.notes,
-    };
-    setPurchaseOrders(prev => [...prev, po]);
-    toast({ title: "PO Created", description: po.id });
-    setPoForm({ supplierId: '', expectedDelivery: '', shippingMethod: '', notes: '' });
-    setPoDialog(false);
-  };
+  const filteredPOs = useMemo(() => {
+    let result = [...purchaseOrders];
+    if (filters.search) {
+      const s = filters.search.toLowerCase();
+      result = result.filter(po => po.poNumber.toLowerCase().includes(s) || po.supplierName.toLowerCase().includes(s) || (po.projectName || '').toLowerCase().includes(s));
+    }
+    if (filters.status) result = result.filter(po => po.status === filters.status);
+    switch (filters.quickFilter) {
+      case 'draft': result = result.filter(po => po.status === 'Draft'); break;
+      case 'confirmed': result = result.filter(po => po.status === 'Confirmed'); break;
+      case 'shipped': result = result.filter(po => po.status === 'Shipped'); break;
+      case 'received': result = result.filter(po => po.status === 'Received'); break;
+      case 'overdue': result = result.filter(po => po.isOverdue); break;
+    }
+    return result;
+  }, [purchaseOrders, filters]);
 
   const advancePO = (id: string) => {
-    const flow: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Confirmed', 'Shipped', 'Received'];
+    const flow: POStatus[] = ['Draft', 'Sent', 'Confirmed', 'Shipped', 'Received'];
     setPurchaseOrders(prev => prev.map(po => {
       if (po.id !== id) return po;
       const idx = flow.indexOf(po.status);
-      if (idx >= 0 && idx < flow.length - 1) return { ...po, status: flow[idx + 1] };
+      if (idx >= 0 && idx < flow.length - 1) {
+        const newStatus = flow[idx + 1];
+        return { ...po, status: newStatus, activityLog: [...po.activityLog, { date: new Date().toISOString().split('T')[0], user: 'USR-001', userName: 'Admin', action: `Status → ${newStatus}` }] };
+      }
       return po;
     }));
     toast({ title: "PO Status Updated" });
+  };
+
+  const handleCreatePOFromSupplier = (s: EnhancedSupplier) => {
+    setPreSelectedSupplier(s.id);
+    setAddPOOpen(true);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('nav.procurement')}</h1>
-          <p className="text-sm text-muted-foreground">{suppliers.length} suppliers · {purchaseOrders.length} POs · ETB {totalPOValue.toLocaleString()} total</p>
+          <h1 className="text-2xl font-bold text-foreground">Procurement</h1>
+          <p className="text-sm text-muted-foreground">Supplier management, purchase orders & receiving</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setPoDialog(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New PO</Button>
-          <Button size="sm" onClick={() => setSupplierDialog(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />Add Supplier</Button>
+          <Button size="sm" variant="outline" onClick={() => setAddPOOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New PO</Button>
+          <Button size="sm" onClick={() => setAddSupplierOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />Add Supplier</Button>
         </div>
       </div>
 
-      <Tabs defaultValue="suppliers">
+      <ProcurementStatsComponent stats={stats} />
+
+      <Tabs value={activeTab} onValueChange={v => { setActiveTab(v); setSelectedIds([]); setFilters({ search: '', status: '', supplierStatus: '', quickFilter: 'all' }); }}>
         <TabsList>
-          <TabsTrigger value="suppliers">Suppliers ({suppliers.length})</TabsTrigger>
-          <TabsTrigger value="purchase-orders">Purchase Orders ({purchaseOrders.length})</TabsTrigger>
+          <TabsTrigger value="suppliers" className="gap-1"><Users className="h-3.5 w-3.5" />Suppliers ({suppliers.length})</TabsTrigger>
+          <TabsTrigger value="purchase-orders" className="gap-1"><FileText className="h-3.5 w-3.5" />Purchase Orders ({purchaseOrders.length})</TabsTrigger>
+          <TabsTrigger value="reorder" className="gap-1"><AlertTriangle className="h-3.5 w-3.5" />Reorder ({reorders.filter(r => r.status === 'Pending').length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="suppliers">
+        <TabsContent value="suppliers" className="space-y-3">
+          <ProcurementFilters filters={filters} onFiltersChange={setFilters} resultCount={filteredSuppliers.length} tab="suppliers" />
+          <ProcurementBulkActions count={selectedIds.length} onExport={() => toast({ title: "Exported" })} onDelete={() => { setSuppliers(prev => prev.filter(s => !selectedIds.includes(s.id))); setSelectedIds([]); toast({ title: "Deleted" }); }} onClear={() => setSelectedIds([])} />
           <Card className="shadow-card">
             <CardContent className="p-0 overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">ID</TableHead>
-                    <TableHead className="text-xs">Company</TableHead>
-                    <TableHead className="text-xs">Contact</TableHead>
-                    <TableHead className="text-xs">Country</TableHead>
-                    <TableHead className="text-xs">Lead Time</TableHead>
-                    <TableHead className="text-xs">Min Qty</TableHead>
-                    <TableHead className="text-xs">Rating</TableHead>
-                    <TableHead className="text-xs">Terms</TableHead>
-                    <TableHead className="text-xs">Certs</TableHead>
-                    <TableHead className="text-xs">Preferred</TableHead>
-                    <TableHead className="text-xs"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {suppliers.map(s => (
-                    <TableRow key={s.id}>
-                      <TableCell className="text-xs font-mono">{s.id}</TableCell>
-                      <TableCell className="text-xs font-medium">{s.company}</TableCell>
-                      <TableCell>
-                        <div><p className="text-xs">{s.contact}</p><p className="text-[10px] text-muted-foreground">{s.email}</p></div>
-                      </TableCell>
-                      <TableCell><div className="flex items-center gap-1 text-xs"><Globe className="h-3 w-3 text-muted-foreground" />{s.country}</div></TableCell>
-                      <TableCell className="text-xs">{s.leadTime} days</TableCell>
-                      <TableCell className="text-xs">{s.minOrderQty || '—'}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} className={`h-3 w-3 ${i < s.rating ? 'text-warning fill-warning' : 'text-muted'}`} />
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-xs">{s.paymentTerms}</TableCell>
-                      <TableCell><div className="flex flex-wrap gap-1">{s.certifications.map(c => <Badge key={c} variant="outline" className="text-[10px]">{c}</Badge>)}</div></TableCell>
-                      <TableCell>{s.preferred && <Badge className="text-[10px] bg-success/10 text-success border-0">Preferred</Badge>}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSuppliers(prev => prev.filter(x => x.id !== s.id)); toast({ title: "Deleted" }); }}>
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <SupplierTable
+                suppliers={filteredSuppliers}
+                selectedIds={selectedIds}
+                onSelectToggle={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
+                onSelectAll={() => setSelectedIds(prev => prev.length === filteredSuppliers.length ? [] : filteredSuppliers.map(s => s.id))}
+                onView={setDetailsSupplier}
+                onCreatePO={handleCreatePOFromSupplier}
+                onDelete={id => { setSuppliers(prev => prev.filter(s => s.id !== id)); toast({ title: "Supplier Deleted" }); }}
+              />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="purchase-orders">
+        <TabsContent value="purchase-orders" className="space-y-3">
+          <ProcurementFilters filters={filters} onFiltersChange={setFilters} resultCount={filteredPOs.length} tab="purchase-orders" />
+          <ProcurementBulkActions count={selectedIds.length} onExport={() => toast({ title: "Exported" })} onDelete={() => { setPurchaseOrders(prev => prev.filter(p => !selectedIds.includes(p.id))); setSelectedIds([]); toast({ title: "Deleted" }); }} onClear={() => setSelectedIds([])} />
           <Card className="shadow-card">
             <CardContent className="p-0 overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">PO #</TableHead>
-                    <TableHead className="text-xs">Supplier</TableHead>
-                    <TableHead className="text-xs">Order Date</TableHead>
-                    <TableHead className="text-xs">Expected</TableHead>
-                    <TableHead className="text-xs">Shipping</TableHead>
-                    <TableHead className="text-xs text-center">Items</TableHead>
-                    <TableHead className="text-xs text-right">Total</TableHead>
-                    <TableHead className="text-xs text-right">Paid</TableHead>
-                    <TableHead className="text-xs">{t('common.status')}</TableHead>
-                    <TableHead className="text-xs text-right">{t('common.actions')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {purchaseOrders.map(po => (
-                    <TableRow key={po.id}>
-                      <TableCell className="text-xs font-mono font-medium">{po.id}</TableCell>
-                      <TableCell className="text-xs">{po.supplierName}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{po.orderDate}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{po.expectedDelivery}</TableCell>
-                      <TableCell className="text-xs">{po.shippingMethod ? <Badge variant="outline" className="text-[10px]">{po.shippingMethod}</Badge> : '—'}</TableCell>
-                      <TableCell className="text-xs text-center">{po.items.length}</TableCell>
-                      <TableCell className="text-xs text-right font-semibold">ETB {po.total.toLocaleString()}</TableCell>
-                      <TableCell className="text-xs text-right text-success">ETB {po.paid.toLocaleString()}</TableCell>
-                      <TableCell><span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${poStatusColor[po.status]}`}>{po.status}</span></TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-1 justify-end">
-                          {!['Received', 'Cancelled'].includes(po.status) && (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => advancePO(po.id)}>
-                              <ChevronRight className="h-3 w-3" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setPurchaseOrders(prev => prev.filter(x => x.id !== po.id)); toast({ title: "Deleted" }); }}>
-                            <Trash2 className="h-3 w-3 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <PurchaseOrderTable
+                purchaseOrders={filteredPOs}
+                selectedIds={selectedIds}
+                onSelectToggle={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
+                onSelectAll={() => setSelectedIds(prev => prev.length === filteredPOs.length ? [] : filteredPOs.map(p => p.id))}
+                onView={setDetailsPO}
+                onAdvance={advancePO}
+                onDelete={id => { setPurchaseOrders(prev => prev.filter(p => p.id !== id)); toast({ title: "PO Deleted" }); }}
+              />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="reorder">
+          <ReorderSuggestions
+            suggestions={reorders}
+            onCreatePO={s => { setPreSelectedSupplier(s.preferredSupplierId || ''); setAddPOOpen(true); }}
+            onDismiss={() => {}}
+          />
         </TabsContent>
       </Tabs>
 
-      {/* Add Supplier Dialog */}
-      <Dialog open={supplierDialog} onOpenChange={setSupplierDialog}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Add Supplier</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><Label className="text-xs">Company *</Label><Input value={supForm.company} onChange={e => setSupForm(p => ({ ...p, company: e.target.value }))} /></div>
-            <div><Label className="text-xs">Contact</Label><Input value={supForm.contact} onChange={e => setSupForm(p => ({ ...p, contact: e.target.value }))} /></div>
-            <div><Label className="text-xs">Phone</Label><Input value={supForm.phone} onChange={e => setSupForm(p => ({ ...p, phone: e.target.value }))} /></div>
-            <div><Label className="text-xs">Email</Label><Input value={supForm.email} onChange={e => setSupForm(p => ({ ...p, email: e.target.value }))} /></div>
-            <div><Label className="text-xs">Website</Label><Input value={supForm.website} onChange={e => setSupForm(p => ({ ...p, website: e.target.value }))} /></div>
-            <div><Label className="text-xs">Country</Label><Input value={supForm.country} onChange={e => setSupForm(p => ({ ...p, country: e.target.value }))} placeholder="Ethiopia" /></div>
-            <div><Label className="text-xs">Lead Time (days)</Label><Input type="number" value={supForm.leadTime} onChange={e => setSupForm(p => ({ ...p, leadTime: e.target.value }))} /></div>
-            <div><Label className="text-xs">Min Order Qty</Label><Input type="number" value={supForm.minOrderQty} onChange={e => setSupForm(p => ({ ...p, minOrderQty: e.target.value }))} /></div>
-            <div><Label className="text-xs">Payment Terms</Label><Input value={supForm.paymentTerms} onChange={e => setSupForm(p => ({ ...p, paymentTerms: e.target.value }))} placeholder="Net 30" /></div>
-            <div><Label className="text-xs">Notes</Label><Input value={supForm.notes} onChange={e => setSupForm(p => ({ ...p, notes: e.target.value }))} /></div>
-          </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setSupplierDialog(false)}>Cancel</Button><Button onClick={handleAddSupplier}>Add Supplier</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add PO Dialog */}
-      <Dialog open={poDialog} onOpenChange={setPoDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>New Purchase Order</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2"><Label className="text-xs">Supplier *</Label>
-              <Select value={poForm.supplierId} onValueChange={v => setPoForm(p => ({ ...p, supplierId: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger>
-                <SelectContent>{suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.company}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label className="text-xs">Expected Delivery</Label><Input type="date" value={poForm.expectedDelivery} onChange={e => setPoForm(p => ({ ...p, expectedDelivery: e.target.value }))} /></div>
-            <div><Label className="text-xs">Shipping Method</Label>
-              <Select value={poForm.shippingMethod} onValueChange={v => setPoForm(p => ({ ...p, shippingMethod: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Sea">Sea</SelectItem>
-                  <SelectItem value="Air">Air</SelectItem>
-                  <SelectItem value="Land">Land</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="sm:col-span-2"><Label className="text-xs">Notes</Label><Input value={poForm.notes} onChange={e => setPoForm(p => ({ ...p, notes: e.target.value }))} /></div>
-          </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setPoDialog(false)}>Cancel</Button><Button onClick={handleAddPO}>Create PO</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddSupplierDialog open={addSupplierOpen} onOpenChange={setAddSupplierOpen} onAdd={sup => { setSuppliers(prev => [...prev, sup]); toast({ title: "Supplier Added", description: sup.companyName }); }} supplierCount={suppliers.length} />
+      <SupplierDetailsDialog supplier={detailsSupplier} purchaseOrders={purchaseOrders} open={!!detailsSupplier} onOpenChange={() => setDetailsSupplier(null)} />
+      <AddPurchaseOrderDialog open={addPOOpen} onOpenChange={o => { setAddPOOpen(o); if (!o) setPreSelectedSupplier(''); }} onAdd={po => { setPurchaseOrders(prev => [...prev, po]); toast({ title: "PO Created", description: po.poNumber }); }} suppliers={suppliers} poCount={purchaseOrders.length} preSelectedSupplierId={preSelectedSupplier} />
+      <PODetailsDialog po={detailsPO} open={!!detailsPO} onOpenChange={() => setDetailsPO(null)} />
     </div>
   );
 }
