@@ -25,6 +25,7 @@ import LeaveRequestDialog from "@/components/hr/LeaveRequestDialog";
 export default function HR() {
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const [employees, setEmployees] = useLocalStorage<EnhancedEmployee[]>(STORAGE_KEYS.ENHANCED_EMPLOYEES, sampleEnhancedEmployees);
   const [leaveRequests, setLeaveRequests] = useLocalStorage<LeaveRequest[]>(STORAGE_KEYS.LEAVE_REQUESTS, sampleLeaveRequests);
