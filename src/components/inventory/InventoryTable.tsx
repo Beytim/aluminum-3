@@ -58,6 +58,7 @@ export default function InventoryTable({ items, language, selectedIds, onToggleS
           <SortHeader label="Code" field="itemCode" />
           <SortHeader label="Product" field="productName" />
           <SortHeader label="Category" field="category" />
+          <TableHead className="text-xs">Batch No.</TableHead>
           <SortHeader label="Stock" field="stock" />
           <TableHead className="text-xs text-right">Reserved</TableHead>
           <SortHeader label="Available" field="available" />
