@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calculator } from "lucide-react";
 import { useUpdateProduct, type Product } from "@/hooks/useProducts";
-import { sampleSuppliers } from "@/data/sampleData";
+import { useSuppliers } from "@/hooks/useSuppliers";
 
 const categories = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
 const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
