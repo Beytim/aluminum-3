@@ -18,11 +18,12 @@ export function MobileBottomNav() {
   const { t } = useI18n();
   const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
   const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
-  const navItems = allNavItems.filter(m => m.moduleId === null || !disabledIds.has(m.moduleId));
+  const filteredNavItems = allNavItems.filter(m => m.moduleId === null || !disabledIds.has(m.moduleId));
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card border-t border-border">
       <div className="flex items-center justify-around h-14">
-        {navItems.map((item) => {
+        {filteredNavItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <button
