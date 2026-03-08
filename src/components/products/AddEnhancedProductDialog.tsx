@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Calculator } from "lucide-react";
 import { useAddProduct, useSaveBOM } from "@/hooks/useProducts";
+import { sampleSuppliers } from "@/data/sampleData";
 
 const categories = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
 const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
@@ -41,6 +42,22 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
 
   const [bom, setBom] = useState<BOMRow[]>([]);
 
+  // Auto-calculate cost fields from BOM
+  useEffect(() => {
+    if (bom.length === 0) return;
+    const costByType: Record<string, number> = {};
+    for (const row of bom) {
+      costByType[row.type] = (costByType[row.type] || 0) + row.total;
+    }
+    setForm(prev => ({
+      ...prev,
+      profileCost: String(costByType['Profile'] || Number(prev.profileCost) || 0),
+      glassCost: String(costByType['Glass'] || Number(prev.glassCost) || 0),
+      hardwareCost: String(costByType['Hardware'] || Number(prev.hardwareCost) || 0),
+      accessoriesCost: String(costByType['Accessory'] || Number(prev.accessoriesCost) || 0),
+    }));
+  }, [bom]);
+
   const totalCost = () => {
     const sub = [form.profileCost, form.glassCost, form.hardwareCost, form.accessoriesCost, form.fabLaborCost, form.installLaborCost].reduce((s, v) => s + (Number(v) || 0), 0);
     return sub + (sub * ((Number(form.overheadPercent) || 0) / 100));
@@ -50,6 +67,31 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
   const margin = () => {
     const sp = Number(form.sellingPrice) || 0;
     return sp > 0 ? ((profit() / sp) * 100) : 0;
+  };
+
+  // Auto-suggest selling price (cost + 30% markup)
+  const suggestSellingPrice = () => {
+    const tc = totalCost();
+    if (tc > 0) {
+      setForm(prev => ({ ...prev, sellingPrice: String(Math.round(tc * 1.3)) }));
+    }
+  };
+
+  const handleSupplierChange = (supplierId: string) => {
+    if (supplierId === '__none__') {
+      setForm(prev => ({ ...prev, supplierId: '', supplierName: '', leadTimeDays: '', moq: '' }));
+      return;
+    }
+    const supplier = sampleSuppliers.find(s => s.id === supplierId);
+    if (supplier) {
+      setForm(prev => ({
+        ...prev,
+        supplierId: supplier.id,
+        supplierName: supplier.company,
+        leadTimeDays: String(supplier.leadTime || ''),
+        moq: String(supplier.minOrderQty || ''),
+      }));
+    }
   };
 
   const validate = () => {
@@ -101,7 +143,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
       material_cost: tc > 0 ? tc : Number(form.sellingPrice) * 0.6,
       selling_price: Number(form.sellingPrice),
       purchase_price: null,
-      markup_percent: null,
+      markup_percent: margin() > 0 ? Number(margin().toFixed(1)) : null,
       current_stock: Number(form.currentStock) || 0,
       min_stock: Number(form.minStock) || 0,
       max_stock: Number(form.maxStock) || 0,
@@ -124,7 +166,6 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
       updated_by: null,
     });
 
-    // Save BOM if any
     if (bom.length > 0 && result) {
       await saveBOM.mutateAsync({
         productId: result.id,
@@ -153,10 +194,10 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
     setTab("basic");
   };
 
-  const F = (field: string, label: string, opts?: { type?: string; placeholder?: string; required?: boolean; span?: boolean }) => (
+  const F = (field: string, label: string, opts?: { type?: string; placeholder?: string; required?: boolean; span?: boolean; disabled?: boolean }) => (
     <div className={opts?.span ? 'sm:col-span-2' : ''}>
       <Label className="text-xs">{label}{opts?.required ? ' *' : ''}</Label>
-      <Input type={opts?.type || 'text'} value={(form as any)[field]} onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))} placeholder={opts?.placeholder} className={`h-8 text-xs ${errors[field] ? 'border-destructive' : ''}`} />
+      <Input type={opts?.type || 'text'} value={(form as any)[field]} onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))} placeholder={opts?.placeholder} disabled={opts?.disabled} className={`h-8 text-xs ${errors[field] ? 'border-destructive' : ''} ${opts?.disabled ? 'bg-muted' : ''}`} />
       {errors[field] && <p className="text-[10px] text-destructive mt-0.5">{errors[field]}</p>}
     </div>
   );
@@ -223,9 +264,14 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
           </TabsContent>
 
           <TabsContent value="bom" className="space-y-3 mt-3">
-            <Button size="sm" variant="outline" onClick={() => setBom(prev => [...prev, { id: `BOM-${Date.now()}`, type: 'Profile', name: '', quantity: 0, unit: 'm', unitCost: 0, total: 0 }])} className="h-7 text-xs">
-              <Plus className="h-3 w-3 mr-1" />Add Component
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button size="sm" variant="outline" onClick={() => setBom(prev => [...prev, { id: `BOM-${Date.now()}`, type: 'Profile', name: '', quantity: 0, unit: 'm', unitCost: 0, total: 0 }])} className="h-7 text-xs">
+                <Plus className="h-3 w-3 mr-1" />Add Component
+              </Button>
+              {bom.length > 0 && (
+                <p className="text-[10px] text-muted-foreground">💡 BOM totals auto-fill cost breakdown in Pricing tab</p>
+              )}
+            </div>
             {bom.length > 0 && (
               <div className="overflow-x-auto">
                 <Table>
@@ -266,7 +312,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
           </TabsContent>
 
           <TabsContent value="pricing" className="space-y-3 mt-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase">Cost Breakdown</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase">Cost Breakdown {bom.length > 0 && <span className="text-primary font-normal">(auto-filled from BOM)</span>}</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {F('profileCost', 'Profile Cost (ETB)', { type: 'number' })}
               {F('glassCost', 'Glass Cost (ETB)', { type: 'number' })}
@@ -278,7 +324,16 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
             </div>
             <div className="border-t pt-3 space-y-2">
               <div className="flex justify-between text-xs"><span className="text-muted-foreground">Total Cost:</span><span className="font-semibold">ETB {totalCost().toLocaleString()}</span></div>
-              {F('sellingPrice', 'Selling Price (ETB)', { type: 'number', required: true })}
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  {F('sellingPrice', 'Selling Price (ETB)', { type: 'number', required: true })}
+                </div>
+                {totalCost() > 0 && (
+                  <Button type="button" size="sm" variant="outline" className="h-8 text-xs mb-0.5" onClick={suggestSellingPrice} title="Auto-suggest price (cost + 30%)">
+                    <Calculator className="h-3 w-3 mr-1" />+30%
+                  </Button>
+                )}
+              </div>
               <div className="flex justify-between text-xs"><span className="text-muted-foreground">Profit:</span><span className={`font-semibold ${profit() >= 0 ? 'text-success' : 'text-destructive'}`}>ETB {profit().toLocaleString()} ({margin().toFixed(1)}%)</span></div>
             </div>
             <div className="border-t pt-3">
@@ -288,8 +343,22 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
                 {F('minStock', 'Min Stock', { type: 'number' })}
                 {F('maxStock', 'Max Stock', { type: 'number' })}
                 {F('warehouseLocation', 'Location', { placeholder: 'A-1-1' })}
-                {F('supplierName', 'Supplier')}
-                {F('leadTimeDays', 'Lead Time (days)', { type: 'number' })}
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">Supplier</Label>
+                  <Select value={form.supplierId || '__none__'} onValueChange={handleSupplierChange}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select supplier" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— No supplier —</SelectItem>
+                      {sampleSuppliers.map(s => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.company} ({s.country})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {F('leadTimeDays', 'Lead Time (days)', { type: 'number', disabled: !!form.supplierId })}
+                {F('moq', 'MOQ', { type: 'number', disabled: !!form.supplierId })}
               </div>
             </div>
           </TabsContent>
