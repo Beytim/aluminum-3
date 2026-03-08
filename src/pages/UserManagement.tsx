@@ -114,8 +114,15 @@ export default function UserManagement() {
       await supabase.from("user_roles").delete().eq("user_id", id);
       await supabase.from("user_roles").insert({ user_id: id, role });
     }
+    // Log bulk action
+    await supabase.from("activity_log").insert({
+      actor_id: currentUser?.id,
+      action: "bulk_role_change",
+      details: { to_role: role, count: selectedIds.length, user_ids: selectedIds },
+    });
     toast({ title: "Roles updated", description: `${selectedIds.length} users set to ${role}.` });
     setSelectedIds([]);
+    setLogRefresh(prev => prev + 1);
     fetchUsers();
   };
 
