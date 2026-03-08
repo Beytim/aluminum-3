@@ -33,6 +33,7 @@ const allModules: { title: string; url: string; icon: any; moduleId: string | nu
   { title: 'nav.maintenance', url: '/maintenance', icon: ShieldCheck, moduleId: 'maintenance' },
   { title: 'nav.quality', url: '/quality', icon: ClipboardCheck, moduleId: 'quality' },
   { title: 'nav.procurement', url: '/procurement', icon: Truck, moduleId: 'procurement' },
+  { title: 'Suppliers', url: '/suppliers', icon: Building2, moduleId: 'procurement' },
   { title: 'nav.finance', url: '/finance', icon: DollarSign, moduleId: 'finance', requiredRole: 'manager' },
   { title: 'nav.hr', url: '/hr', icon: UserCog, moduleId: 'hr', requiredRole: 'manager' },
   { title: 'nav.reports', url: '/reports', icon: BarChart3, moduleId: 'reports' },
