@@ -5,6 +5,7 @@ import { Plus, Download, Grid3X3, List } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/lib/settingsContext";
 import { generateReportPDF } from "@/lib/pdfExport";
 import { sampleCustomers, sampleProducts } from "@/data/sampleData";
 import type { Customer, Product } from "@/data/sampleData";
