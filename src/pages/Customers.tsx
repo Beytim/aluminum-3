@@ -35,6 +35,7 @@ export default function Customers() {
   const [viewCustomer, setViewCustomer] = useState<EnhancedCustomer | null>(null);
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const cities = useMemo(() => {
     const set = new Set(customers.map(c => c.location?.subCity).filter(Boolean) as string[]);
