@@ -1,139 +1,145 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Plus, Trash2 } from "lucide-react";
-import { sampleInvoices, samplePayments } from "@/data/sampleData";
-import { useI18n } from "@/lib/i18n";
+import { Plus, Receipt, CreditCard, TrendingDown } from "lucide-react";
 import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { Invoice, Payment } from "@/data/sampleData";
+import {
+  type EnhancedInvoice, type EnhancedPayment, type Expense,
+  sampleEnhancedInvoices, sampleEnhancedPayments, sampleExpenses,
+  calculateFinanceStats, formatCurrency,
+} from "@/data/enhancedFinanceData";
 
-const invStatusColor: Record<string, string> = {
-  Paid: 'bg-success/10 text-success',
-  Partial: 'bg-warning/10 text-warning',
-  Overdue: 'bg-destructive/10 text-destructive',
-};
+import FinanceStatsComponent from "@/components/finance/FinanceStats";
+import FinanceFilters from "@/components/finance/FinanceFilters";
+import FinanceBulkActions from "@/components/finance/FinanceBulkActions";
+import InvoiceTable from "@/components/finance/InvoiceTable";
+import PaymentTable from "@/components/finance/PaymentTable";
+import ExpenseTable from "@/components/finance/ExpenseTable";
+import AgingReport from "@/components/finance/AgingReport";
+import CashFlowChart from "@/components/finance/CashFlowChart";
+import ProfitLossChart from "@/components/finance/ProfitLossChart";
+import AddInvoiceDialog from "@/components/finance/AddInvoiceDialog";
+import InvoiceDetailsDialog from "@/components/finance/InvoiceDetailsDialog";
+import RecordPaymentDialog from "@/components/finance/RecordPaymentDialog";
+import AddExpenseDialog from "@/components/finance/AddExpenseDialog";
 
 export default function Finance() {
-  const [invoices, setInvoices] = useLocalStorage<Invoice[]>(STORAGE_KEYS.INVOICES, sampleInvoices);
-  const [payments, setPayments] = useLocalStorage<Payment[]>(STORAGE_KEYS.PAYMENTS, samplePayments);
-  const [payDialogOpen, setPayDialogOpen] = useState(false);
-  const { t } = useI18n();
+  const [invoices, setInvoices] = useLocalStorage<EnhancedInvoice[]>(STORAGE_KEYS.INVOICES, sampleEnhancedInvoices);
+  const [payments, setPayments] = useLocalStorage<EnhancedPayment[]>(STORAGE_KEYS.PAYMENTS, sampleEnhancedPayments);
+  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', sampleExpenses);
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [filters, setFilters] = useState({ search: '', status: '', currency: '', quickFilter: 'all' });
+  const [addInvoiceOpen, setAddInvoiceOpen] = useState(false);
+  const [addExpenseOpen, setAddExpenseOpen] = useState(false);
+  const [detailsInvoice, setDetailsInvoice] = useState<EnhancedInvoice | null>(null);
+  const [paymentInvoice, setPaymentInvoice] = useState<EnhancedInvoice | null>(null);
+
   const { toast } = useToast();
 
-  const [payForm, setPayForm] = useState({ invoiceId: '', amount: '', method: '', reference: '', customerName: '' });
+  const stats = useMemo(() => calculateFinanceStats(invoices, payments, expenses), [invoices, payments, expenses]);
 
-  const totalReceivable = invoices.reduce((s, i) => s + i.balance, 0);
-  const totalPaid = invoices.reduce((s, i) => s + i.paid, 0);
-  const overdueCount = invoices.filter(i => i.status === 'Overdue').length;
+  const filteredInvoices = useMemo(() => {
+    let result = [...invoices];
+    if (filters.search) {
+      const s = filters.search.toLowerCase();
+      result = result.filter(i => i.invoiceNumber.toLowerCase().includes(s) || i.customerName.toLowerCase().includes(s) || (i.projectName || '').toLowerCase().includes(s));
+    }
+    if (filters.status) result = result.filter(i => i.status === filters.status);
+    if (filters.currency) result = result.filter(i => i.currency === filters.currency);
+    switch (filters.quickFilter) {
+      case 'unpaid': result = result.filter(i => !['Paid', 'Cancelled'].includes(i.status)); break;
+      case 'partial': result = result.filter(i => i.status === 'Partial'); break;
+      case 'paid': result = result.filter(i => i.status === 'Paid'); break;
+      case 'overdue': result = result.filter(i => i.isOverdue); break;
+      case 'thisMonth': {
+        const now = new Date();
+        result = result.filter(i => { const d = new Date(i.issueDate); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+        break;
+      }
+    }
+    return result;
+  }, [invoices, filters]);
 
-  const handleAddPayment = () => {
-    if (!payForm.invoiceId || !payForm.amount || Number(payForm.amount) <= 0) return;
-    const payment: Payment = {
-      id: `PAY-${String(payments.length + 1).padStart(3, '0')}`,
-      invoiceId: payForm.invoiceId,
-      date: new Date().toISOString().split('T')[0],
-      customerName: payForm.customerName,
-      amount: Number(payForm.amount),
-      method: (payForm.method || 'Cash') as Payment['method'],
-      reference: payForm.reference || `REF-${Date.now()}`,
-    };
+  const handleAddInvoice = (inv: EnhancedInvoice) => {
+    setInvoices(prev => [...prev, inv]);
+    toast({ title: "Invoice Created", description: inv.invoiceNumber });
+  };
+
+  const handleRecordPayment = (payment: EnhancedPayment) => {
     setPayments(prev => [...prev, payment]);
-
-    // Update invoice
     setInvoices(prev => prev.map(inv => {
-      if (inv.id !== payForm.invoiceId) return inv;
-      const newPaid = inv.paid + Number(payForm.amount);
-      const newBalance = Math.max(0, inv.amount - newPaid);
-      return { ...inv, paid: newPaid, balance: newBalance, status: newBalance <= 0 ? 'Paid' : 'Partial' };
+      if (inv.id !== payment.invoiceId) return inv;
+      const newPaid = inv.totalPaid + payment.amount;
+      const newBalance = Math.max(0, inv.total - newPaid);
+      const newPaidETB = inv.totalPaidInETB + payment.amountInETB;
+      const newBalETB = Math.max(0, inv.totalInETB - newPaidETB);
+      return {
+        ...inv, totalPaid: newPaid, totalPaidInETB: newPaidETB, balance: newBalance, balanceInETB: newBalETB,
+        status: newBalance <= 0 ? 'Paid' : 'Partial', isFullyPaid: newBalance <= 0,
+        paidDate: newBalance <= 0 ? payment.date : undefined,
+        activityLog: [...inv.activityLog, { date: payment.date, user: 'USR-001', userName: 'Admin', action: `Payment recorded ${formatCurrency(payment.amount, payment.currency)}` }],
+      };
     }));
+    toast({ title: "Payment Recorded", description: `${payment.paymentNumber} - ${formatCurrency(payment.amount, payment.currency)}` });
+  };
 
-    toast({ title: "Payment Recorded", description: `${payment.id} - ETB ${payment.amount.toLocaleString()}` });
-    setPayForm({ invoiceId: '', amount: '', method: '', reference: '', customerName: '' });
-    setPayDialogOpen(false);
+  const handleAddExpense = (exp: Expense) => {
+    setExpenses(prev => [...prev, exp]);
+    toast({ title: "Expense Recorded", description: exp.expenseNumber });
+  };
+
+  const handleDeleteInvoice = (id: string) => {
+    setInvoices(prev => prev.filter(i => i.id !== id));
+    setSelectedIds(prev => prev.filter(i => i !== id));
+    toast({ title: "Invoice Deleted" });
+  };
+
+  const handleBulkDelete = () => {
+    setInvoices(prev => prev.filter(i => !selectedIds.includes(i.id)));
+    setSelectedIds([]);
+    toast({ title: `${selectedIds.length} invoices deleted` });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('finance.title')}</h1>
-          <p className="text-sm text-muted-foreground">Financial overview</p>
+          <h1 className="text-2xl font-bold text-foreground">Finance</h1>
+          <p className="text-sm text-muted-foreground">Invoicing, payments, and financial reporting</p>
         </div>
-        <Button size="sm" onClick={() => setPayDialogOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />Record Payment</Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setAddExpenseOpen(true)}><TrendingDown className="h-3.5 w-3.5 mr-1.5" />Add Expense</Button>
+          <Button size="sm" onClick={() => setAddInvoiceOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Invoice</Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="shadow-card">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center"><CheckCircle className="h-5 w-5 text-success" /></div>
-            <div><p className="text-xs text-muted-foreground">Total Collected</p><p className="text-xl font-bold">ETB {totalPaid.toLocaleString()}</p></div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center"><TrendingUp className="h-5 w-5 text-warning" /></div>
-            <div><p className="text-xs text-muted-foreground">Receivable</p><p className="text-xl font-bold">ETB {totalReceivable.toLocaleString()}</p></div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-destructive/10 flex items-center justify-center"><AlertTriangle className="h-5 w-5 text-destructive" /></div>
-            <div><p className="text-xs text-muted-foreground">Overdue</p><p className="text-xl font-bold">{overdueCount} invoices</p></div>
-          </CardContent>
-        </Card>
-      </div>
+      <FinanceStatsComponent stats={stats} />
 
       <Tabs defaultValue="invoices">
         <TabsList>
-          <TabsTrigger value="invoices">{t('finance.invoices')}</TabsTrigger>
-          <TabsTrigger value="payments">{t('finance.payments')}</TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-1"><Receipt className="h-3.5 w-3.5" />Invoices</TabsTrigger>
+          <TabsTrigger value="payments" className="gap-1"><CreditCard className="h-3.5 w-3.5" />Payments</TabsTrigger>
+          <TabsTrigger value="expenses" className="gap-1"><TrendingDown className="h-3.5 w-3.5" />Expenses</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="invoices">
+        <TabsContent value="invoices" className="space-y-3">
+          <FinanceFilters filters={filters} onFiltersChange={setFilters} resultCount={filteredInvoices.length} />
+          <FinanceBulkActions count={selectedIds.length} onExport={() => toast({ title: "Exported" })} onDelete={handleBulkDelete} onClear={() => setSelectedIds([])} />
           <Card className="shadow-card">
             <CardContent className="p-0 overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">Invoice #</TableHead>
-                    <TableHead className="text-xs">Project</TableHead>
-                    <TableHead className="text-xs">Customer</TableHead>
-                    <TableHead className="text-xs text-right">{t('common.amount')}</TableHead>
-                    <TableHead className="text-xs text-right">Paid</TableHead>
-                    <TableHead className="text-xs text-right">Balance</TableHead>
-                    <TableHead className="text-xs">Due Date</TableHead>
-                    <TableHead className="text-xs">{t('common.status')}</TableHead>
-                    <TableHead className="text-xs"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invoices.map(inv => (
-                    <TableRow key={inv.id}>
-                      <TableCell className="text-xs font-mono">{inv.id}</TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">{inv.projectId}</TableCell>
-                      <TableCell className="text-xs">{inv.customerName}</TableCell>
-                      <TableCell className="text-xs text-right">ETB {inv.amount.toLocaleString()}</TableCell>
-                      <TableCell className="text-xs text-right text-success">ETB {inv.paid.toLocaleString()}</TableCell>
-                      <TableCell className="text-xs text-right font-semibold">{inv.balance > 0 ? `ETB ${inv.balance.toLocaleString()}` : '—'}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{inv.dueDate}</TableCell>
-                      <TableCell><span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${invStatusColor[inv.status]}`}>{inv.status}</span></TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setInvoices(prev => prev.filter(i => i.id !== inv.id)); toast({ title: "Deleted" }); }}>
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <InvoiceTable
+                invoices={filteredInvoices}
+                selectedIds={selectedIds}
+                onSelectToggle={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
+                onSelectAll={() => setSelectedIds(prev => prev.length === filteredInvoices.length ? [] : filteredInvoices.map(i => i.id))}
+                onView={setDetailsInvoice}
+                onRecordPayment={setPaymentInvoice}
+                onDelete={handleDeleteInvoice}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -141,75 +147,30 @@ export default function Finance() {
         <TabsContent value="payments">
           <Card className="shadow-card">
             <CardContent className="p-0 overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">ID</TableHead>
-                    <TableHead className="text-xs">Invoice</TableHead>
-                    <TableHead className="text-xs">{t('common.date')}</TableHead>
-                    <TableHead className="text-xs">Customer</TableHead>
-                    <TableHead className="text-xs text-right">{t('common.amount')}</TableHead>
-                    <TableHead className="text-xs">Method</TableHead>
-                    <TableHead className="text-xs">Reference</TableHead>
-                    <TableHead className="text-xs"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map(pay => (
-                    <TableRow key={pay.id}>
-                      <TableCell className="text-xs font-mono">{pay.id}</TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">{pay.invoiceId}</TableCell>
-                      <TableCell className="text-xs">{pay.date}</TableCell>
-                      <TableCell className="text-xs">{pay.customerName}</TableCell>
-                      <TableCell className="text-xs text-right font-semibold text-success">ETB {pay.amount.toLocaleString()}</TableCell>
-                      <TableCell><Badge variant="secondary" className="text-[10px]">{pay.method}</Badge></TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">{pay.reference}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setPayments(prev => prev.filter(p => p.id !== pay.id)); toast({ title: "Deleted" }); }}>
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <PaymentTable payments={payments} onDelete={id => { setPayments(prev => prev.filter(p => p.id !== id)); toast({ title: "Payment Deleted" }); }} />
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="expenses">
+          <Card className="shadow-card">
+            <CardContent className="p-0 overflow-x-auto">
+              <ExpenseTable expenses={expenses} onDelete={id => { setExpenses(prev => prev.filter(e => e.id !== id)); toast({ title: "Expense Deleted" }); }} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-4">
+          <AgingReport invoices={invoices} />
+          <CashFlowChart payments={payments} expenses={expenses} />
+          <ProfitLossChart invoices={invoices} expenses={expenses} />
+        </TabsContent>
       </Tabs>
 
-      <Dialog open={payDialogOpen} onOpenChange={setPayDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Invoice *</Label>
-              <Select value={payForm.invoiceId} onValueChange={v => {
-                const inv = invoices.find(i => i.id === v);
-                setPayForm(p => ({ ...p, invoiceId: v, customerName: inv?.customerName || '' }));
-              }}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{invoices.filter(i => i.balance > 0).map(i => <SelectItem key={i.id} value={i.id}>{i.id} - {i.customerName}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label className="text-xs">Amount (ETB) *</Label><Input type="number" value={payForm.amount} onChange={e => setPayForm(p => ({ ...p, amount: e.target.value }))} /></div>
-            <div>
-              <Label className="text-xs">Method</Label>
-              <Select value={payForm.method} onValueChange={v => setPayForm(p => ({ ...p, method: v }))}>
-                <SelectTrigger><SelectValue placeholder="Cash" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="TeleBirr">TeleBirr</SelectItem>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Cheque">Cheque</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div><Label className="text-xs">Reference</Label><Input value={payForm.reference} onChange={e => setPayForm(p => ({ ...p, reference: e.target.value }))} /></div>
-          </div>
-          <DialogFooter className="mt-4"><Button variant="outline" onClick={() => setPayDialogOpen(false)}>Cancel</Button><Button onClick={handleAddPayment}>Record</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddInvoiceDialog open={addInvoiceOpen} onOpenChange={setAddInvoiceOpen} onAdd={handleAddInvoice} invoiceCount={invoices.length} />
+      <InvoiceDetailsDialog invoice={detailsInvoice} payments={payments} open={!!detailsInvoice} onOpenChange={() => setDetailsInvoice(null)} onRecordPayment={() => { setPaymentInvoice(detailsInvoice); setDetailsInvoice(null); }} />
+      <RecordPaymentDialog invoice={paymentInvoice} open={!!paymentInvoice} onOpenChange={() => setPaymentInvoice(null)} onRecord={handleRecordPayment} paymentCount={payments.length} />
+      <AddExpenseDialog open={addExpenseOpen} onOpenChange={setAddExpenseOpen} onAdd={handleAddExpense} expenseCount={expenses.length} />
     </div>
   );
 }
