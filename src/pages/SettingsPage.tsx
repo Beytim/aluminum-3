@@ -215,6 +215,8 @@ export default function SettingsPage() {
     setNotifications(defaultNotifications);
     setPricing(defaultPricing);
     setModules(defaultModules);
+    resetAppSettings();
+    setLanguage('en');
     toast({ title: "Settings Reset", description: "All settings restored to defaults." });
   };
 
