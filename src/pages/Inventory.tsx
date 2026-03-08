@@ -43,6 +43,7 @@ export default function Inventory() {
 
   const { t, language } = useI18n();
   const { toast } = useToast();
+  const { formatCurrency } = useSettings();
 
   const stats = useMemo(() => calculateInventoryStats(inventory, movements), [inventory, movements]);
 
