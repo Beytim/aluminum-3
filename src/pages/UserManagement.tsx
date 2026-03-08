@@ -24,6 +24,7 @@ interface UserWithRole {
   avatar_url: string | null;
   roles: AppRole[];
   created_at: string;
+  approved: boolean;
 }
 
 export default function UserManagement() {
