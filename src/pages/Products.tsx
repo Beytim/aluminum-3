@@ -85,9 +85,10 @@ export default function Products() {
   };
 
   const handleClone = async (p: Product) => {
+    const { id, created_at, updated_at, ...rest } = p;
     const code = `${p.code}-COPY`;
     await addProduct.mutateAsync({
-      ...p,
+      ...rest,
       code,
       name: `${p.name} (Copy)`,
       name_am: `${p.name_am} (ቅጂ)`,
