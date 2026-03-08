@@ -174,7 +174,7 @@ export default function Reports() {
   const exportFinanceReport = () => {
     generateReportPDF("Financial Summary Report",
       ['Invoice', 'Customer', 'Amount (ETB)', 'Paid (ETB)', 'Balance', 'Status'],
-      invoices.map(i => [i.invoiceNumber, i.customerName, i.totalInETB.toLocaleString(), i.paidAmountInETB.toLocaleString(), (i.totalInETB - i.paidAmountInETB).toLocaleString(), i.status])
+      invoices.map(i => [i.invoiceNumber, i.customerName, i.totalInETB.toLocaleString(), i.totalPaidInETB.toLocaleString(), i.balanceInETB.toLocaleString(), i.status])
     );
   };
   const exportProjectReport = () => {
