@@ -94,7 +94,7 @@ export default function Quotes() {
     const data = selectedIds.size > 0 ? quotes.filter(q => selectedIds.has(q.id)) : filtered;
     generateReportPDF("Quote Report",
       ['#', 'Title', 'Customer', 'Project', 'Items', 'Total', 'Margin', 'Status', 'Expiry'],
-      data.map(q => [q.quoteNumber, q.title, q.customerName, q.projectName, String(q.items.reduce((s, i) => s + i.quantity, 0)), formatETBCompact(q.total), `${q.profitMargin}%`, q.status, q.expiryDate])
+      data.map(q => [q.quoteNumber, q.title, q.customerName, q.projectName, String(q.items.reduce((s, i) => s + i.quantity, 0)), formatCurrencyShort(q.total), `${q.profitMargin}%`, q.status, q.expiryDate])
     );
   };
 

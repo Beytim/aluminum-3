@@ -132,7 +132,7 @@ export default function Inventory() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('inventory.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {inventory.length} items · {stats.totalValue > 0 ? `Value: ETB ${stats.totalValue.toLocaleString()}` : ''}
+            {inventory.length} items · {stats.totalValue > 0 ? `Value: ${formatCurrency(stats.totalValue)}` : ''}
             {lowStockCount > 0 && <span className="text-destructive font-medium ml-2">· {lowStockCount} need attention</span>}
           </p>
         </div>

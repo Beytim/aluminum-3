@@ -117,7 +117,7 @@ export default function Products() {
 
   const handleExportOne = (p: EnhancedProduct) => {
     generateReportPDF(p.name, ['Field', 'Value'], [
-      ['Code', p.code], ['Name', p.name], ['Category', p.category], ['Type', p.productType], ['Price', `ETB ${p.sellingPrice}`]
+      ['Code', p.code], ['Name', p.name], ['Category', p.category], ['Type', p.productType], ['Price', formatCurrency(p.sellingPrice)]
     ]);
   };
 

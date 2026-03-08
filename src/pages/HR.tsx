@@ -177,9 +177,9 @@ export default function HR() {
             </CardContent>
           </Card>
           <div className="mt-3 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
-            <strong>Payroll Summary:</strong> Total Net Pay: ETB {filteredPayroll.reduce((s, p) => s + p.netPay, 0).toLocaleString()} · 
-            Total Tax: ETB {filteredPayroll.reduce((s, p) => s + p.incomeTax, 0).toLocaleString()} · 
-            Total Pension: ETB {filteredPayroll.reduce((s, p) => s + p.pension, 0).toLocaleString()}
+            <strong>Payroll Summary:</strong> Total Net Pay: {formatCurrency(filteredPayroll.reduce((s, p) => s + p.netPay, 0))} · 
+            Total Tax: {formatCurrency(filteredPayroll.reduce((s, p) => s + p.incomeTax, 0))} · 
+            Total Pension: {formatCurrency(filteredPayroll.reduce((s, p) => s + p.pension, 0))}
           </div>
         </TabsContent>
       </Tabs>

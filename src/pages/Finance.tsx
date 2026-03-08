@@ -85,7 +85,7 @@ export default function Finance() {
         activityLog: [...inv.activityLog, { date: payment.date, user: 'USR-001', userName: 'Admin', action: `Payment recorded ${fmtCurrency(payment.amount)}` }],
       };
     }));
-    toast({ title: "Payment Recorded", description: `${payment.paymentNumber} - ${formatCurrency(payment.amount, payment.currency)}` });
+    toast({ title: "Payment Recorded", description: `${payment.paymentNumber} - ${fmtCurrency(payment.amount)}` });
   };
 
   const handleAddExpense = (exp: Expense) => {

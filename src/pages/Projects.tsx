@@ -87,7 +87,7 @@ export default function Projects() {
     const data = (selectedIds.size > 0 ? projects.filter(p => selectedIds.has(p.id)) : filtered);
     generateReportPDF("Project Status Report",
       ['#', 'Project', 'Customer', 'Type', 'Status', 'Value', 'Progress'],
-      data.map(p => [p.projectNumber, p.name, p.customerName, p.type, p.status, formatETBShort(p.value), `${p.progress}%`])
+      data.map(p => [p.projectNumber, p.name, p.customerName, p.type, p.status, formatCurrencyShort(p.value), `${p.progress}%`])
     );
   };
 

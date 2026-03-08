@@ -73,7 +73,7 @@ export default function Customers() {
     const data = (selectedIds.length > 0 ? filtered.filter(c => selectedIds.includes(c.id)) : filtered);
     generateReportPDF("Customer List",
       ['Code', 'Name', 'Contact', 'Type', 'Phone', 'Projects', 'Total Value', 'Outstanding', 'Health'],
-      data.map(c => [c.code, c.name, c.contact, c.type, c.phone, String(c.projects), `ETB ${c.totalValue.toLocaleString()}`, `ETB ${c.outstanding.toLocaleString()}`, `${c.healthScore} (${c.healthStatus})`])
+      data.map(c => [c.code, c.name, c.contact, c.type, c.phone, String(c.projects), formatCurrency(c.totalValue), formatCurrency(c.outstanding), `${c.healthScore} (${c.healthStatus})`])
     );
   };
 
