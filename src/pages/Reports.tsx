@@ -198,7 +198,7 @@ export default function Reports() {
   const exportInventoryReport = () => {
     generateReportPDF("Inventory Valuation Report",
       ['Code', 'Name', 'Category', 'Stock', 'Unit Cost', 'Total Value', 'Status'],
-      inventory.map(i => [i.sku, i.name, i.category, String(i.currentStock), `ETB ${i.unitCost.toLocaleString()}`, `ETB ${(i.currentStock * i.unitCost).toLocaleString()}`, i.status])
+      inventory.map(i => [i.itemCode, i.productName, i.category, String(i.stock), `ETB ${i.unitCost.toLocaleString()}`, `ETB ${(i.stock * i.unitCost).toLocaleString()}`, i.status])
     );
   };
   const exportCustomerReport = () => {
