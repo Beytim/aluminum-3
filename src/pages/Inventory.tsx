@@ -74,18 +74,15 @@ export default function Inventory() {
   }, [inventory, search, category, stockFilter, qualityFilter, showRemnants, showLowStock, showQuarantine]);
 
   const handleAdd = (item: EnhancedInventoryItem) => {
-    setInventory(prev => [...prev, item]);
-    toast({ title: 'Item Added', description: `${item.productName} added to inventory` });
+    addItem(item);
   };
 
   const handleDelete = (id: string) => {
-    setInventory(prev => prev.filter(i => i.id !== id));
-    toast({ title: 'Deleted' });
+    deleteItem(id);
   };
 
   const handleBulkDelete = () => {
-    setInventory(prev => prev.filter(i => !selectedIds.includes(i.id)));
-    toast({ title: `${selectedIds.length} items deleted` });
+    selectedIds.forEach(id => deleteItem(id));
     setSelectedIds([]);
   };
 
