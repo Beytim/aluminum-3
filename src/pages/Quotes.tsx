@@ -38,6 +38,7 @@ export default function Quotes() {
 
   const { t } = useI18n();
   const { toast } = useToast();
+  const { formatCurrencyShort, formatCurrency } = useSettings();
 
   const customerNames = useMemo(() => [...new Set(quotes.map(q => q.customerName))], [quotes]);
 
