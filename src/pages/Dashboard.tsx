@@ -28,7 +28,7 @@ import ModuleSummaryCard from "@/components/dashboard/ModuleSummaryCard";
 import DashboardAlerts from "@/components/dashboard/DashboardAlerts";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 
-const fmtETB = (v: number) => v >= 1_000_000 ? `ETB ${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `ETB ${(v / 1_000).toFixed(0)}K` : `ETB ${v}`;
+// Currency formatting from global settings context
 
 export default function Dashboard() {
   const navigate = useNavigate();
