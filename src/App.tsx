@@ -29,6 +29,7 @@ import Reports from "./pages/Reports";
 import UserManagement from "./pages/UserManagement";
 import SettingsPage from "./pages/SettingsPage";
 import Orders from "./pages/Orders";
+import Suppliers from "./pages/Suppliers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
                         <Route path="/maintenance" element={<Maintenance />} />
                         <Route path="/quality" element={<Quality />} />
                         <Route path="/procurement" element={<Procurement />} />
+                        <Route path="/suppliers" element={<Suppliers />} />
                         <Route path="/finance" element={<ManagerRoute><Finance /></ManagerRoute>} />
                         <Route path="/hr" element={<ManagerRoute><HR /></ManagerRoute>} />
                         <Route path="/reports" element={<Reports />} />
