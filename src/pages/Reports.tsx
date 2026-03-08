@@ -180,7 +180,7 @@ export default function Reports() {
   const exportProjectReport = () => {
     generateReportPDF("Project Status Report",
       ['Project', 'Customer', 'Status', 'Progress', 'Budget (ETB)', 'Spent (ETB)'],
-      projects.map(p => [p.name, p.customerName, p.status, `${p.progress}%`, p.budget.toLocaleString(), p.actualSpent.toLocaleString()])
+      projects.map(p => [p.name, p.customerName, p.status, `${p.progress}%`, p.value.toLocaleString(), p.totalCost.toLocaleString()])
     );
   };
   const exportProductionReport = () => {
