@@ -221,7 +221,7 @@ export function useAddProduct() {
     mutationFn: async (product: Omit<Product, "id" | "created_at" | "updated_at">) => {
       const { data, error } = await supabase
         .from("products")
-        .insert({ ...product, created_by: user?.id, updated_by: user?.id })
+        .insert({ ...product, created_by: user?.id, updated_by: user?.id } as any)
         .select()
         .single();
       if (error) throw error;
