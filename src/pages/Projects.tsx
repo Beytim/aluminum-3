@@ -111,7 +111,7 @@ export default function Projects() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t('nav.projects')}</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">{projects.length} projects · {stats.activeProjects} active · {formatETBShort(stats.totalValue)} total value</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{projects.length} projects · {stats.activeProjects} active · {formatCurrencyShort(stats.totalValue)} total value</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <div className="flex border rounded-md">
