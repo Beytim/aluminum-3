@@ -70,13 +70,22 @@ export default function Suppliers() {
     setSelectedIds(new Set());
   };
 
+  const handleToggleStatus = (s: Supplier) => {
+    const newStatus = s.status === 'Active' ? 'Inactive' : 'Active';
+    updateSupplier.mutate({ id: s.id, status: newStatus as any });
+  };
+
   const handleBulkToggleStatus = () => {
-    const sel = suppliers.filter(s => selectedIds.has(s.id));
-    sel.forEach(s => {
-      const newStatus = s.status === 'Active' ? 'Inactive' : 'Active';
-      updateSupplier.mutate({ id: s.id, status: newStatus as any });
-    });
+    suppliers.filter(s => selectedIds.has(s.id)).forEach(handleToggleStatus);
     setSelectedIds(new Set());
+  };
+
+  const handleExportOne = (s: Supplier) => {
+    generateReportPDF(s.company_name, ['Field', 'Value'], [
+      ['Code', s.supplier_code], ['Company', s.company_name], ['Country', s.country],
+      ['Contact', s.contact_person], ['Type', s.business_type], ['Rating', s.rating.toFixed(1)],
+      ['Lead Time', `${s.average_lead_time}d`], ['Status', s.status],
+    ]);
   };
 
   const handleExportPDF = () => {
