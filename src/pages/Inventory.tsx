@@ -105,7 +105,9 @@ export default function Inventory() {
 
   const handleMovementConfirm = (movement: StockMovement, updatedItem: EnhancedInventoryItem) => {
     setMovements(prev => [...prev, movement]);
-    setInventory(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
+    // With DB, the trigger handles stock updates, so we just add the movement
+    // But since the frontend expects movement to trigger a refetch or optimistic update, we can just call our hook
+    addMovement(movement);
     toast({
       title: movement.type === 'receipt' ? 'Stock Received' : 'Stock Issued',
       description: `${Math.abs(movement.quantity)} ${movement.unit} of ${movement.itemName}`,
