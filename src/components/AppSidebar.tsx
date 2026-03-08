@@ -51,11 +51,14 @@ export function AppSidebar() {
   const [moduleSettings] = useLocalStorage<ModuleToggle[]>('settings_modules', []);
 
   const isAdmin = roles.includes("admin");
+  const isManager = roles.includes("manager");
   const disabledIds = new Set(moduleSettings.filter(m => !m.enabled).map(m => m.id));
-  const modules = allModules.filter(m =>
-    (m.moduleId === null || !disabledIds.has(m.moduleId)) &&
-    (!(m as any).adminOnly || isAdmin)
-  );
+  const modules = allModules.filter(m => {
+    if (m.moduleId && disabledIds.has(m.moduleId)) return false;
+    if (m.requiredRole === 'admin' && !isAdmin) return false;
+    if (m.requiredRole === 'manager' && !isAdmin && !isManager) return false;
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon">
