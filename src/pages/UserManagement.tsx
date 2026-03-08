@@ -218,7 +218,7 @@ export default function UserManagement() {
                 <UserCard
                   key={u.id}
                   user={u}
-                  onView={(u) => setViewUser(u)}
+                  onView={(u) => setViewUser(u as any)}
                   onChangeRole={handleRoleChange}
                   isAdmin={isAdmin}
                   currentUserId={currentUser?.id}
