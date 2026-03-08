@@ -86,7 +86,7 @@ export default function Reports() {
     { icon: Factory, label: 'Work Orders', value: String(workOrders.length), sub: `${productionStats.activeWorkOrders} active`, trend: 'up', trendValue: `${productionStats.onTimeRate.toFixed(0)}% on-time`, color: 'bg-chart-3' },
     { icon: Shield, label: 'Quality', value: `${qualityStats.passRate.toFixed(0)}%`, sub: `${qualityStats.openNCRs} open NCRs`, trend: qualityStats.passRate >= 90 ? 'up' : 'down', trendValue: `${qualityStats.totalInspections} inspections`, color: 'bg-success' },
     { icon: Warehouse, label: 'Inventory', value: fmtETB(inventoryStats.totalValue), sub: `${inventory.length} items`, trend: inventoryStats.lowStockItems > 0 ? 'down' : 'up', trendValue: `${inventoryStats.lowStockItems} low stock`, color: 'bg-chart-4' },
-    { icon: UserCheck, label: 'Workforce', value: String(hrStats.activeEmployees), sub: `${hrStats.presentToday} present`, trend: 'neutral', trendValue: `Payroll: ${fmtETB(hrStats.totalPayrollCost)}`, color: 'bg-chart-5' },
+    { icon: UserCheck, label: 'Workforce', value: String(hrStats.activeEmployees), sub: `${hrStats.presentToday} present`, trend: 'neutral', trendValue: `Payroll: ${fmtETB(hrStats.totalPayrollThisMonth)}`, color: 'bg-chart-5' },
   ];
 
   // Chart data
