@@ -13,6 +13,7 @@ import { UserTable } from "@/components/users/UserTable";
 import { UserCard } from "@/components/users/UserCard";
 import { UserDetailsDialog } from "@/components/users/UserDetailsDialog";
 import { UserBulkActions } from "@/components/users/UserBulkActions";
+import { ActivityLog } from "@/components/users/ActivityLog";
 
 type AppRole = "admin" | "manager" | "user";
 
