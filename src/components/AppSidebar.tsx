@@ -123,12 +123,19 @@ export function AppSidebar() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-medium text-sidebar-accent-foreground">
-              AD
+              {(profile?.full_name || user?.email || "U").slice(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">Admin User</p>
-              <p className="text-[10px] text-sidebar-foreground/50">admin@aluerp.com</p>
+              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">
+                {profile?.full_name || user?.email || "User"}
+              </p>
+              <p className="text-[10px] text-sidebar-foreground/50">
+                {roles.length > 0 ? roles.join(", ") : "user"}
+              </p>
             </div>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={signOut}>
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </SidebarFooter>
       )}
