@@ -20,6 +20,7 @@ interface Props {
 
 export default function EditEnhancedProductDialog({ open, onOpenChange, product }: Props) {
   const updateProduct = useUpdateProduct();
+  const { data: dbSuppliers = [] } = useSuppliers();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated',
