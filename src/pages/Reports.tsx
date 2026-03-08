@@ -240,7 +240,7 @@ export default function Reports() {
   const exportProductReport = () => {
     generateReportPDF("Product Profitability Report",
       ['Code', 'Name', 'Category', 'Cost (ETB)', 'Price (ETB)', 'Margin %', 'Stock'],
-      products.map(p => [p.code, p.name, p.category, p.totalCost.toLocaleString(), p.sellingPrice.toLocaleString(), `${((p.sellingPrice - p.totalCost) / p.sellingPrice * 100).toFixed(1)}%`, String(p.currentStock)])
+      products.map(p => [p.code, p.name, p.category, p.materialCost.toLocaleString(), p.sellingPrice.toLocaleString(), `${((p.sellingPrice - p.materialCost) / p.sellingPrice * 100).toFixed(1)}%`, String(p.currentStock)])
     );
   };
 
