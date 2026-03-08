@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { FileText, PackagePlus, ClipboardList, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
@@ -12,18 +10,19 @@ import { enhancedSampleProducts, calculateProductStats, type EnhancedProduct } f
 import { enhancedSampleInventory, sampleStockMovements, calculateInventoryStats, type EnhancedInventoryItem, type StockMovement } from "@/data/enhancedInventoryData";
 import { enhancedSampleWorkOrders, enhancedSampleCuttingJobs, calculateProductionStats, calculateCuttingStats, type EnhancedWorkOrder, type EnhancedCuttingJob } from "@/data/enhancedProductionData";
 import { enhancedSampleProjects, calculateProjectStats, type EnhancedProject } from "@/data/enhancedProjectData";
-import { enhancedCustomers, type EnhancedCustomer } from "@/data/enhancedCustomerData";
+import { enhancedCustomers } from "@/data/enhancedCustomerData";
+import type { EnhancedCustomer } from "@/data/customerTypes";
 import { enhancedSampleOrders, calculateOrderStats, type EnhancedOrder } from "@/data/enhancedOrderData";
 import { enhancedSampleQuotes, calculateQuoteStats, type EnhancedQuote } from "@/data/enhancedQuoteData";
 import { sampleEnhancedInstallations, calculateInstallationStats, type EnhancedInstallation } from "@/data/enhancedInstallationData";
-import { sampleEnhancedTasks, sampleEquipment, calculateMaintenanceStats, type EnhancedMaintenanceTask, type Equipment } from "@/data/enhancedMaintenanceData";
-import { sampleEnhancedInspections, sampleNCRs, sampleCustomerComplaints, calculateQualityStats, type EnhancedInspection, type NCR, type CustomerComplaint } from "@/data/enhancedQualityData";
+import { sampleEnhancedMaintenanceTasks, sampleEquipment, calculateMaintenanceStats, type EnhancedMaintenanceTask, type Equipment } from "@/data/enhancedMaintenanceData";
+import { sampleEnhancedInspections, sampleNCRs, sampleComplaints, calculateQualityStats, type EnhancedInspection, type NCR, type CustomerComplaint } from "@/data/enhancedQualityData";
 import { sampleEnhancedSuppliers, sampleEnhancedPOs, sampleReorderSuggestions, calculateProcurementStats, type EnhancedSupplier, type EnhancedPurchaseOrder, type ReorderSuggestion } from "@/data/enhancedProcurementData";
 import { sampleEnhancedInvoices, sampleEnhancedPayments, sampleExpenses, calculateFinanceStats, type EnhancedInvoice, type EnhancedPayment, type Expense } from "@/data/enhancedFinanceData";
 import { sampleEnhancedEmployees, sampleLeaveRequests, samplePayrolls, calculateHRStats, type EnhancedEmployee, type LeaveRequest, type Payroll } from "@/data/enhancedHRData";
 
 // Dashboard components
-import DashboardKPIGrid, { DollarSign, TrendingUp, Package, Users, ShoppingCart, Wrench, Shield, Truck as TruckIcon, Warehouse, Factory, Scissors, HardHat, UserCheck, AlertTriangle } from "@/components/dashboard/DashboardKPIGrid";
+import DashboardKPIGrid, { DollarSign, TrendingUp, Package, Users, ShoppingCart, Wrench, Shield, Truck as TruckIcon, Warehouse, Factory, Scissors, HardHat, UserCheck } from "@/components/dashboard/DashboardKPIGrid";
 import ModuleSummaryCard from "@/components/dashboard/ModuleSummaryCard";
 import DashboardAlerts from "@/components/dashboard/DashboardAlerts";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
@@ -34,7 +33,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t, language } = useI18n();
 
-  // Load all module data from localStorage
+  // Load all module data
   const [products] = useLocalStorage<EnhancedProduct[]>(STORAGE_KEYS.PRODUCTS, enhancedSampleProducts);
   const [inventory] = useLocalStorage<EnhancedInventoryItem[]>(STORAGE_KEYS.INVENTORY, enhancedSampleInventory);
   const [stockMovements] = useLocalStorage<StockMovement[]>(STORAGE_KEYS.STOCK_ADJUSTMENTS, sampleStockMovements);
@@ -45,17 +44,17 @@ export default function Dashboard() {
   const [orders] = useLocalStorage<EnhancedOrder[]>(STORAGE_KEYS.ORDERS, enhancedSampleOrders);
   const [quotes] = useLocalStorage<EnhancedQuote[]>(STORAGE_KEYS.QUOTES, enhancedSampleQuotes);
   const [installations] = useLocalStorage<EnhancedInstallation[]>(STORAGE_KEYS.INSTALLATIONS, sampleEnhancedInstallations);
-  const [maintenanceTasks] = useLocalStorage<EnhancedMaintenanceTask[]>(STORAGE_KEYS.MAINTENANCE_TASKS, sampleEnhancedTasks);
+  const [maintenanceTasks] = useLocalStorage<EnhancedMaintenanceTask[]>(STORAGE_KEYS.MAINTENANCE_TASKS, sampleEnhancedMaintenanceTasks);
   const [equipment] = useLocalStorage<Equipment[]>('equipment', sampleEquipment);
   const [inspections] = useLocalStorage<EnhancedInspection[]>(STORAGE_KEYS.INSPECTIONS, sampleEnhancedInspections);
   const [ncrs] = useLocalStorage<NCR[]>(STORAGE_KEYS.NCRS, sampleNCRs);
-  const [complaints] = useLocalStorage<CustomerComplaint[]>(STORAGE_KEYS.CUSTOMER_COMPLAINTS, sampleCustomerComplaints);
+  const [complaints] = useLocalStorage<CustomerComplaint[]>(STORAGE_KEYS.CUSTOMER_COMPLAINTS, sampleComplaints);
   const [suppliers] = useLocalStorage<EnhancedSupplier[]>(STORAGE_KEYS.SUPPLIERS, sampleEnhancedSuppliers);
   const [purchaseOrders] = useLocalStorage<EnhancedPurchaseOrder[]>(STORAGE_KEYS.PURCHASE_ORDERS, sampleEnhancedPOs);
   const [reorders] = useLocalStorage<ReorderSuggestion[]>('reorders', sampleReorderSuggestions);
   const [invoices] = useLocalStorage<EnhancedInvoice[]>(STORAGE_KEYS.INVOICES, sampleEnhancedInvoices);
-  const [payments] = useLocalStorage<EnhancedPayment[]>(STORAGE_KEYS.PAYMENTS, sampleEnhancedPayments);
-  const [expenses] = useLocalStorage<Expense[]>('expenses', sampleExpenses);
+  const [paymentsData] = useLocalStorage<EnhancedPayment[]>(STORAGE_KEYS.PAYMENTS, sampleEnhancedPayments);
+  const [expensesData] = useLocalStorage<Expense[]>('expenses', sampleExpenses);
   const [employees] = useLocalStorage<EnhancedEmployee[]>(STORAGE_KEYS.ENHANCED_EMPLOYEES, sampleEnhancedEmployees);
   const [leaveRequests] = useLocalStorage<LeaveRequest[]>(STORAGE_KEYS.LEAVE_REQUESTS, sampleLeaveRequests);
   const [payrolls] = useLocalStorage<Payroll[]>(STORAGE_KEYS.PAYROLLS, samplePayrolls);
@@ -72,25 +71,24 @@ export default function Dashboard() {
   const maintenanceStats = useMemo(() => calculateMaintenanceStats(maintenanceTasks, equipment), [maintenanceTasks, equipment]);
   const qualityStats = useMemo(() => calculateQualityStats(inspections, ncrs, complaints), [inspections, ncrs, complaints]);
   const procurementStats = useMemo(() => calculateProcurementStats(suppliers, purchaseOrders, reorders), [suppliers, purchaseOrders, reorders]);
-  const financeStats = useMemo(() => calculateFinanceStats(invoices, payments, expenses), [invoices, payments, expenses]);
+  const financeStats = useMemo(() => calculateFinanceStats(invoices, paymentsData, expensesData), [invoices, paymentsData, expensesData]);
   const hrStats = useMemo(() => calculateHRStats(employees, leaveRequests, payrolls), [employees, leaveRequests, payrolls]);
 
-  // Top-level KPI cards
+  // Top-level KPI cards (8)
   const topKPIs = [
-    { icon: DollarSign, label: 'Revenue MTD', value: fmtETB(financeStats.totalRevenue), sub: `${invoices.length} invoices`, trend: 'up' as const, trendValue: `Profit: ${fmtETB(financeStats.totalRevenue - financeStats.totalExpenses)}`, color: 'bg-primary' },
-    { icon: ShoppingCart, label: 'Active Orders', value: String(orderStats.activeOrders), sub: `${fmtETB(orderStats.totalRevenue)} total`, trend: 'up' as const, trendValue: `${orderStats.processingOrders} processing`, color: 'bg-chart-2' },
-    { icon: Factory, label: 'Production', value: `${productionStats.activeWorkOrders} active`, sub: `${productionStats.completedWorkOrders} completed`, trend: 'up' as const, trendValue: `${productionStats.onTimeRate?.toFixed(0) || 85}% on-time`, color: 'bg-chart-3' },
+    { icon: DollarSign, label: 'Revenue MTD', value: fmtETB(financeStats.totalRevenueMTD), sub: `${invoices.length} invoices`, trend: 'up' as const, trendValue: `Profit: ${fmtETB(financeStats.grossProfitMTD)}`, color: 'bg-primary' },
+    { icon: ShoppingCart, label: 'Orders', value: `${orderStats.totalOrders} total`, sub: `${fmtETB(orderStats.totalValue)}`, trend: 'up' as const, trendValue: `${orderStats.processingCount} processing`, color: 'bg-chart-2' },
+    { icon: Factory, label: 'Production', value: `${productionStats.activeWorkOrders} active`, sub: `${productionStats.completedWorkOrders} completed`, trend: 'up' as const, trendValue: `${productionStats.onTimeRate.toFixed(0)}% on-time`, color: 'bg-chart-3' },
     { icon: Shield, label: 'Quality Rate', value: `${qualityStats.passRate.toFixed(0)}%`, sub: `${qualityStats.openNCRs} open NCRs`, trend: qualityStats.passRate >= 90 ? 'up' as const : 'down' as const, trendValue: `${qualityStats.totalInspections} inspections`, color: qualityStats.passRate >= 90 ? 'bg-success' : 'bg-warning' },
     { icon: Warehouse, label: 'Inventory', value: fmtETB(inventoryStats.totalValue), sub: `${inventory.length} items`, trend: inventoryStats.lowStockItems > 0 ? 'down' as const : 'up' as const, trendValue: `${inventoryStats.lowStockItems} low stock`, color: 'bg-chart-4' },
-    { icon: Users, label: 'Customers', value: String(customers.filter(c => c.status === 'Active').length), sub: `${customers.length} total`, trend: 'up' as const, trendValue: `${fmtETB(orderStats.totalRevenue)} revenue`, color: 'bg-info' },
+    { icon: Users, label: 'Customers', value: String(customers.filter(c => c.status === 'Active').length), sub: `${customers.length} total`, trend: 'up' as const, trendValue: `${fmtETB(orderStats.totalValue)} revenue`, color: 'bg-info' },
     { icon: UserCheck, label: 'Employees', value: String(hrStats.activeEmployees), sub: `${hrStats.pendingLeaveRequests} leave pending`, trend: 'neutral' as const, trendValue: `${hrStats.presentToday} present today`, color: 'bg-chart-5' },
-    { icon: TruckIcon, label: 'Procurement', value: `${procurementStats.activePOs} active POs`, sub: fmtETB(procurementStats.totalPOValue), trend: procurementStats.overduePOs > 0 ? 'down' as const : 'up' as const, trendValue: `${procurementStats.overduePOs} overdue`, color: 'bg-accent' },
+    { icon: TruckIcon, label: 'Procurement', value: `${procurementStats.openPOs} open POs`, sub: fmtETB(procurementStats.totalSpentMTD), trend: procurementStats.overduePOs > 0 ? 'down' as const : 'up' as const, trendValue: `${procurementStats.overduePOs} overdue`, color: 'bg-accent' },
   ];
 
   // Alerts from all modules
   const alerts = useMemo(() => {
     const a: { id: string; type: 'critical' | 'warning' | 'info'; module: string; message: string; route?: string }[] = [];
-
     if (inventoryStats.lowStockItems > 0)
       a.push({ id: 'inv-low', type: 'critical', module: 'Inventory', message: `${inventoryStats.lowStockItems} items below minimum stock`, route: '/inventory' });
     if (qualityStats.openNCRs > 0)
@@ -105,9 +103,8 @@ export default function Dashboard() {
       a.push({ id: 'qt-exp', type: 'warning', module: 'Quotes', message: `${quoteStats.expiringThisWeek} quotes expiring this week`, route: '/quotes' });
     if (productStats.criticalStockCount > 0)
       a.push({ id: 'prd-crit', type: 'critical', module: 'Products', message: `${productStats.criticalStockCount} products at critical stock`, route: '/products' });
-    if (installationStats.scheduledThisWeek > 0)
-      a.push({ id: 'inst-wk', type: 'info', module: 'Installation', message: `${installationStats.scheduledThisWeek} installations scheduled this week`, route: '/installation' });
-
+    if (installationStats.thisWeekInstallations > 0)
+      a.push({ id: 'inst-wk', type: 'info', module: 'Installation', message: `${installationStats.thisWeekInstallations} installations scheduled this week`, route: '/installation' });
     return a.sort((x, y) => (x.type === 'critical' ? 0 : x.type === 'warning' ? 1 : 2) - (y.type === 'critical' ? 0 : y.type === 'warning' ? 1 : 2));
   }, [inventoryStats, qualityStats, maintenanceStats, hrStats, procurementStats, quoteStats, productStats, installationStats]);
 
@@ -123,8 +120,8 @@ export default function Dashboard() {
 
   const moduleLoadData = [
     { name: 'Production', value: productionStats.activeWorkOrders, color: 'hsl(212, 72%, 42%)' },
-    { name: 'Cutting', value: cuttingStats.activeJobs, color: 'hsl(38, 92%, 50%)' },
-    { name: 'Installation', value: installationStats.inProgress, color: 'hsl(142, 72%, 40%)' },
+    { name: 'Cutting', value: cuttingStats.inProgressJobs, color: 'hsl(38, 92%, 50%)' },
+    { name: 'Installation', value: installationStats.inProgressInstallations, color: 'hsl(142, 72%, 40%)' },
     { name: 'Maintenance', value: maintenanceStats.inProgressTasks, color: 'hsl(280, 60%, 50%)' },
     { name: 'Quality', value: qualityStats.totalInspections, color: 'hsl(0, 72%, 51%)' },
   ].filter(m => m.value > 0);
@@ -134,10 +131,13 @@ export default function Dashboard() {
     { month: 'Jan', rate: 93 }, { month: 'Feb', rate: 92 }, { month: 'Mar', rate: qualityStats.passRate },
   ];
 
-  const stages = ['Cutting', 'Machining', 'Assembly', 'Welding', 'Glazing', 'Quality Check', 'Packaging'];
+  const stages = ['Cutting', 'Machining', 'Assembly', 'Welding', 'Glazing', 'QC', 'Packaging'];
   const productionData = stages.map(stage => ({
-    stage: stage.length > 8 ? stage.slice(0, 7) + '.' : stage,
-    count: workOrders.filter(w => w.currentStage === stage && w.status !== 'Completed' && w.status !== 'Cancelled').length,
+    stage,
+    count: workOrders.filter(w => {
+      const s = stage === 'QC' ? 'Quality Check' : stage;
+      return w.currentStage === s && w.status !== 'Completed' && w.status !== 'Cancelled';
+    }).length,
   }));
 
   return (
@@ -147,7 +147,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t('nav.dashboard')}</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {language === 'am' ? 'ሁሉም ሞጁሎች ማጠቃለያ' : 'All modules at a glance'} · {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {language === 'am' ? 'ሁሉም ሞጁሎች ማጠቃለያ' : 'All modules at a glance'} · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
         <div className="hidden md:flex items-center gap-2">
@@ -158,21 +158,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Top KPIs */}
+      {/* Top 8 KPIs */}
       <DashboardKPIGrid cards={topKPIs} />
 
       {/* Alerts */}
       <DashboardAlerts alerts={alerts} />
 
       {/* Charts */}
-      <DashboardCharts
-        revenueData={revenueData}
-        moduleLoadData={moduleLoadData}
-        qualityTrend={qualityTrend}
-        productionData={productionData}
-      />
+      <DashboardCharts revenueData={revenueData} moduleLoadData={moduleLoadData} qualityTrend={qualityTrend} productionData={productionData} />
 
-      {/* Module Summary Grid */}
+      {/* Module Summary Grid - 14 modules */}
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">Module Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -191,20 +186,20 @@ export default function Dashboard() {
           <ModuleSummaryCard title="Production" icon={Factory} route="/production" accentColor="bg-chart-3" items={[
             { label: 'Active WOs', value: productionStats.activeWorkOrders },
             { label: 'Completed', value: productionStats.completedWorkOrders, color: 'text-success' },
-            { label: 'Efficiency', value: `${productionStats.efficiency?.toFixed(0) || 87}%` },
-            { label: 'Overdue', value: productionStats.overdueWorkOrders || 0, color: (productionStats.overdueWorkOrders || 0) > 0 ? 'text-destructive' : 'text-foreground' },
+            { label: 'Efficiency', value: `${productionStats.averageEfficiency.toFixed(0)}%` },
+            { label: 'Overdue', value: productionStats.overdueCount, color: productionStats.overdueCount > 0 ? 'text-destructive' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="Cutting" icon={Scissors} route="/cutting" accentColor="bg-chart-2" items={[
-            { label: 'Active Jobs', value: cuttingStats.activeJobs },
+            { label: 'In Progress', value: cuttingStats.inProgressJobs },
             { label: 'Completed', value: cuttingStats.completedJobs, color: 'text-success' },
-            { label: 'Avg Waste', value: `${cuttingStats.avgWastePercent?.toFixed(1) || 0}%` },
-            { label: 'Total Cuts', value: cuttingStats.totalCuts || 0 },
+            { label: 'Avg Waste', value: `${cuttingStats.averageWastePercent.toFixed(1)}%` },
+            { label: 'Total Cuts', value: cuttingStats.totalCuts },
           ]} />
           <ModuleSummaryCard title="Projects" icon={HardHat} route="/projects" accentColor="bg-info" items={[
             { label: 'Active', value: projectStats.activeProjects },
             { label: 'Total Value', value: fmtETB(projectStats.totalValue) },
-            { label: 'On Track', value: projectStats.onTrackProjects || 0, color: 'text-success' },
-            { label: 'At Risk', value: projectStats.atRiskProjects || 0, color: (projectStats.atRiskProjects || 0) > 0 ? 'text-warning' : 'text-foreground' },
+            { label: 'Completed', value: projectStats.completedProjects, color: 'text-success' },
+            { label: 'At Risk', value: projectStats.behindSchedule || 0, color: (projectStats.behindSchedule || 0) > 0 ? 'text-warning' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="Customers" icon={Users} route="/customers" accentColor="bg-chart-5" items={[
             { label: 'Active', value: customers.filter(c => c.status === 'Active').length },
@@ -213,51 +208,51 @@ export default function Dashboard() {
             { label: 'Contractors', value: customers.filter(c => c.type === 'Contractor').length },
           ]} />
           <ModuleSummaryCard title="Orders" icon={ShoppingCart} route="/orders" accentColor="bg-success" items={[
-            { label: 'Active', value: orderStats.activeOrders },
-            { label: 'Revenue', value: fmtETB(orderStats.totalRevenue) },
-            { label: 'Processing', value: orderStats.processingOrders },
-            { label: 'Delivered', value: orderStats.deliveredOrders || 0, color: 'text-success' },
+            { label: 'Total', value: orderStats.totalOrders },
+            { label: 'Value', value: fmtETB(orderStats.totalValue) },
+            { label: 'Processing', value: orderStats.processingCount },
+            { label: 'Completed', value: orderStats.completedOrders, color: 'text-success' },
           ]} />
           <ModuleSummaryCard title="Quotes" icon={FileText} route="/quotes" accentColor="bg-warning" items={[
             { label: 'Pending', value: quoteStats.pendingQuotes },
             { label: 'Total Value', value: fmtETB(quoteStats.totalValue) },
-            { label: 'Win Rate', value: `${quoteStats.conversionRate?.toFixed(0) || 0}%`, color: 'text-success' },
+            { label: 'Accepted', value: quoteStats.acceptedQuotes, color: 'text-success' },
             { label: 'Expiring', value: quoteStats.expiringThisWeek, color: quoteStats.expiringThisWeek > 0 ? 'text-warning' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="Installation" icon={Wrench} route="/installation" accentColor="bg-chart-1" items={[
-            { label: 'In Progress', value: installationStats.inProgress },
-            { label: 'This Week', value: installationStats.scheduledThisWeek },
-            { label: 'Completed', value: installationStats.completedInstallations || 0, color: 'text-success' },
-            { label: 'Overdue', value: installationStats.overdueInstallations || 0, color: (installationStats.overdueInstallations || 0) > 0 ? 'text-destructive' : 'text-foreground' },
+            { label: 'In Progress', value: installationStats.inProgressInstallations },
+            { label: 'This Week', value: installationStats.thisWeekInstallations },
+            { label: 'Completed', value: installationStats.completedInstallations, color: 'text-success' },
+            { label: 'Delayed', value: installationStats.delayedInstallations, color: installationStats.delayedInstallations > 0 ? 'text-destructive' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="Maintenance" icon={Wrench} route="/maintenance" accentColor="bg-chart-4" items={[
             { label: 'In Progress', value: maintenanceStats.inProgressTasks },
-            { label: 'Scheduled', value: maintenanceStats.scheduledTasks },
+            { label: 'Open', value: maintenanceStats.openTasks },
             { label: 'Overdue', value: maintenanceStats.overdueTasks, color: maintenanceStats.overdueTasks > 0 ? 'text-destructive' : 'text-foreground' },
-            { label: 'MTD Cost', value: fmtETB(maintenanceStats.mtdCost || 0) },
+            { label: 'Cost MTD', value: fmtETB(maintenanceStats.totalCostMTD) },
           ]} />
           <ModuleSummaryCard title="Quality" icon={Shield} route="/quality" accentColor="bg-success" items={[
             { label: 'Pass Rate', value: `${qualityStats.passRate.toFixed(0)}%`, color: qualityStats.passRate >= 90 ? 'text-success' : 'text-warning' },
             { label: 'Open NCRs', value: qualityStats.openNCRs, color: qualityStats.openNCRs > 0 ? 'text-warning' : 'text-foreground' },
             { label: 'Inspections', value: qualityStats.totalInspections },
-            { label: 'Complaints', value: qualityStats.openComplaints || 0 },
+            { label: 'Complaints', value: complaints.length },
           ]} />
           <ModuleSummaryCard title="Procurement" icon={TruckIcon} route="/procurement" accentColor="bg-accent" items={[
-            { label: 'Active POs', value: procurementStats.activePOs },
-            { label: 'PO Value', value: fmtETB(procurementStats.totalPOValue) },
+            { label: 'Open POs', value: procurementStats.openPOs },
+            { label: 'Spent MTD', value: fmtETB(procurementStats.totalSpentMTD) },
             { label: 'Suppliers', value: suppliers.length },
             { label: 'Overdue', value: procurementStats.overduePOs, color: procurementStats.overduePOs > 0 ? 'text-destructive' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="Finance" icon={DollarSign} route="/finance" accentColor="bg-primary" items={[
-            { label: 'Revenue', value: fmtETB(financeStats.totalRevenue) },
-            { label: 'Expenses', value: fmtETB(financeStats.totalExpenses) },
-            { label: 'Receivable', value: fmtETB(financeStats.totalReceivable || 0), color: 'text-warning' },
-            { label: 'Overdue', value: fmtETB(financeStats.overdueAmount || 0), color: (financeStats.overdueAmount || 0) > 0 ? 'text-destructive' : 'text-foreground' },
+            { label: 'Revenue MTD', value: fmtETB(financeStats.totalRevenueMTD) },
+            { label: 'Expenses', value: fmtETB(financeStats.totalExpensesMTD) },
+            { label: 'Receivables', value: fmtETB(financeStats.totalReceivables), color: 'text-warning' },
+            { label: 'Overdue', value: fmtETB(financeStats.overdueReceivables), color: financeStats.overdueReceivables > 0 ? 'text-destructive' : 'text-foreground' },
           ]} />
           <ModuleSummaryCard title="HR" icon={UserCheck} route="/hr" accentColor="bg-chart-5" items={[
             { label: 'Active Staff', value: hrStats.activeEmployees },
             { label: 'Present', value: hrStats.presentToday },
-            { label: 'On Leave', value: hrStats.onLeaveToday || 0 },
+            { label: 'On Leave', value: hrStats.onLeaveEmployees },
             { label: 'Payroll MTD', value: fmtETB(hrStats.totalPayrollThisMonth) },
           ]} />
         </div>
