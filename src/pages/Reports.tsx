@@ -210,7 +210,7 @@ export default function Reports() {
   const exportOrderReport = () => {
     generateReportPDF("Order Analysis Report",
       ['Order#', 'Customer', 'Status', 'Total (ETB)', 'Paid (ETB)', 'Balance', 'Payment'],
-      orders.map(o => [o.orderNumber, o.customerName, o.status, o.total.toLocaleString(), o.paid.toLocaleString(), o.balance.toLocaleString(), o.paymentStatus])
+      orders.map(o => [o.orderNumber, o.customerName, o.status, o.total.toLocaleString(), o.totalPaid.toLocaleString(), o.balance.toLocaleString(), o.paymentStatus])
     );
   };
   const exportHRReport = () => {
