@@ -83,14 +83,14 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
       setForm(prev => ({ ...prev, supplierId: '', supplierName: '', leadTimeDays: '', moq: '' }));
       return;
     }
-    const supplier = sampleSuppliers.find(s => s.id === supplierId);
+    const supplier = dbSuppliers.find(s => s.id === supplierId);
     if (supplier) {
       setForm(prev => ({
         ...prev,
         supplierId: supplier.id,
-        supplierName: supplier.company,
-        leadTimeDays: String(supplier.leadTime || ''),
-        moq: String(supplier.minOrderQty || ''),
+        supplierName: supplier.company_name,
+        leadTimeDays: String(supplier.average_lead_time || ''),
+        moq: String(supplier.min_order_qty || ''),
       }));
     }
   };
