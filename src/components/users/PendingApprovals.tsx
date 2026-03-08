@@ -43,9 +43,21 @@ export function PendingApprovals({ pendingUsers, onRefresh, currentUserId }: Pro
   };
 
   const handleReject = async (userId: string) => {
-    // Just mark them as rejected by keeping approved=false
-    // In a real system you might delete the account
-    toast({ title: "User rejected", description: "User remains unapproved.", variant: "destructive" });
+    // Delete the user's roles and profile
+    await supabase.from("user_roles").delete().eq("user_id", userId);
+    const { error } = await supabase.from("profiles").delete().eq("id", userId);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      await supabase.from("activity_log").insert({
+        actor_id: currentUserId,
+        action: "user_removed",
+        target_user_id: userId,
+        details: { reason: "rejected" },
+      });
+      toast({ title: "User rejected", description: "User has been removed." });
+      onRefresh();
+    }
   };
 
   const getInitials = (name: string | null) => {
