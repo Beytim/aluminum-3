@@ -1,15 +1,15 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Grid3X3, List, Download } from "lucide-react";
+import { Plus, Grid3X3, List, Download, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/lib/settingsContext";
 import { generateReportPDF } from "@/lib/pdfExport";
 import {
-  enhancedSampleProducts, calculateProductStats, calcTotalCost, calcMargin,
-  type EnhancedProduct,
-} from "@/data/enhancedProductData";
+  useProducts, useUpdateProduct, useDeleteProduct, useDeleteProducts, useAddProduct,
+  calculateProductStats, calcTotalCost, calcMargin,
+  type Product,
+} from "@/hooks/useProducts";
 import ProductStats from "@/components/products/ProductStats";
 import ProductFilters from "@/components/products/ProductFilters";
 import ProductTable from "@/components/products/ProductTable";
@@ -21,7 +21,12 @@ import EditEnhancedProductDialog from "@/components/products/EditEnhancedProduct
 import ProductDetailsDialog from "@/components/products/ProductDetailsDialog";
 
 export default function Products() {
-  const [products, setProducts] = useLocalStorage<EnhancedProduct[]>(STORAGE_KEYS.PRODUCTS, enhancedSampleProducts);
+  const { data: products = [], isLoading } = useProducts();
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
+  const deleteProducts = useDeleteProducts();
+  const addProduct = useAddProduct();
+
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -29,8 +34,8 @@ export default function Products() {
   const [marginFilter, setMarginFilter] = useState("all");
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editProduct, setEditProduct] = useState<EnhancedProduct | null>(null);
-  const [viewProduct, setViewProduct] = useState<EnhancedProduct | null>(null);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [viewProduct, setViewProduct] = useState<Product | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { t, language } = useI18n();
   const { toast } = useToast();
@@ -41,13 +46,13 @@ export default function Products() {
   const filtered = useMemo(() => {
     return products.filter(p => {
       const q = search.toLowerCase();
-      const matchSearch = !search || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.nameAm.includes(search);
+      const matchSearch = !search || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.name_am.includes(search);
       const matchCat = catFilter === "all" || p.category === catFilter;
-      const matchType = typeFilter === "all" || p.productType === typeFilter;
+      const matchType = typeFilter === "all" || p.product_type === typeFilter;
       let matchStock = true;
-      if (stockFilter === "low") matchStock = p.currentStock <= p.minStock && p.currentStock > 0;
-      else if (stockFilter === "critical") matchStock = p.currentStock <= p.minStock * 0.5;
-      else if (stockFilter === "over") matchStock = p.currentStock > p.maxStock;
+      if (stockFilter === "low") matchStock = p.current_stock <= p.min_stock && p.current_stock > 0;
+      else if (stockFilter === "critical") matchStock = p.current_stock <= p.min_stock * 0.5;
+      else if (stockFilter === "over") matchStock = p.current_stock > p.max_stock;
       let matchMargin = true;
       const mg = calcMargin(p);
       if (marginFilter === "high") matchMargin = mg > 40;
@@ -70,42 +75,43 @@ export default function Products() {
   };
 
   const handleDelete = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+    deleteProduct.mutate(id);
     setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
-    toast({ title: "Deleted", description: "Product removed." });
   };
 
   const handleBulkDelete = () => {
-    setProducts(prev => prev.filter(p => !selectedIds.has(p.id)));
-    toast({ title: "Deleted", description: `${selectedIds.size} products removed.` });
+    deleteProducts.mutate([...selectedIds]);
     setSelectedIds(new Set());
   };
 
-  const handleClone = (p: EnhancedProduct) => {
-    const now = new Date().toISOString().split('T')[0];
-    const id = `PRD-${String(products.length + 1).padStart(3, '0')}`;
-    const cloned: EnhancedProduct = { ...p, id, code: `${p.code}-COPY`, name: `${p.name} (Copy)`, nameAm: `${p.nameAm} (ቅጂ)`, createdAt: now, updatedAt: now };
-    setProducts(prev => [...prev, cloned]);
-    toast({ title: "Cloned", description: `${cloned.name} created.` });
+  const handleClone = async (p: Product) => {
+    const code = `${p.code}-COPY`;
+    await addProduct.mutateAsync({
+      ...p,
+      code,
+      name: `${p.name} (Copy)`,
+      name_am: `${p.name_am} (ቅጂ)`,
+      created_by: null,
+      updated_by: null,
+    } as any);
   };
 
-  const handleToggleStatus = (p: EnhancedProduct) => {
+  const handleToggleStatus = (p: Product) => {
     const newStatus = p.status === 'Active' ? 'Inactive' : 'Active';
-    setProducts(prev => prev.map(x => x.id === p.id ? { ...x, status: newStatus as any, updatedAt: new Date().toISOString().split('T')[0] } : x));
-    toast({ title: "Updated", description: `${p.name} ${newStatus === 'Active' ? 'activated' : 'deactivated'}.` });
+    updateProduct.mutate({ id: p.id, status: newStatus as any });
   };
 
   const handleExportPDF = () => {
     generateReportPDF("Product Catalog",
       ['Code', 'Name', 'Category', 'Type', 'Cost', 'Price', 'Margin', 'Stock'],
-      filtered.map(p => [p.code, p.name, p.category, p.productType, formatCurrency(calcTotalCost(p)), formatCurrency(p.sellingPrice), `${calcMargin(p).toFixed(1)}%`, String(p.currentStock)])
+      filtered.map(p => [p.code, p.name, p.category, p.product_type, formatCurrency(calcTotalCost(p)), formatCurrency(p.selling_price), `${calcMargin(p).toFixed(1)}%`, String(p.current_stock)])
     );
   };
 
   const handleBulkExport = () => {
     const sel = products.filter(p => selectedIds.has(p.id));
     generateReportPDF("Selected Products", ['Code', 'Name', 'Type', 'Cost', 'Price', 'Margin'],
-      sel.map(p => [p.code, p.name, p.productType, formatCurrency(calcTotalCost(p)), formatCurrency(p.sellingPrice), `${calcMargin(p).toFixed(1)}%`])
+      sel.map(p => [p.code, p.name, p.product_type, formatCurrency(calcTotalCost(p)), formatCurrency(p.selling_price), `${calcMargin(p).toFixed(1)}%`])
     );
   };
 
@@ -115,11 +121,19 @@ export default function Products() {
     setSelectedIds(new Set());
   };
 
-  const handleExportOne = (p: EnhancedProduct) => {
+  const handleExportOne = (p: Product) => {
     generateReportPDF(p.name, ['Field', 'Value'], [
-      ['Code', p.code], ['Name', p.name], ['Category', p.category], ['Type', p.productType], ['Price', formatCurrency(p.sellingPrice)]
+      ['Code', p.code], ['Name', p.name], ['Category', p.category], ['Type', p.product_type], ['Price', formatCurrency(p.selling_price)]
     ]);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -188,8 +202,8 @@ export default function Products() {
       />
 
       {/* Dialogs */}
-      <AddEnhancedProductDialog open={dialogOpen} onOpenChange={setDialogOpen} onAdd={p => setProducts(prev => [...prev, p])} existingCount={products.length} />
-      <EditEnhancedProductDialog open={!!editProduct} onOpenChange={open => { if (!open) setEditProduct(null); }} product={editProduct} onSave={updated => setProducts(prev => prev.map(p => p.id === updated.id ? updated : p))} />
+      <AddEnhancedProductDialog open={dialogOpen} onOpenChange={setDialogOpen} existingCount={products.length} />
+      <EditEnhancedProductDialog open={!!editProduct} onOpenChange={open => { if (!open) setEditProduct(null); }} product={editProduct} />
       <ProductDetailsDialog open={!!viewProduct} onOpenChange={open => { if (!open) setViewProduct(null); }} product={viewProduct} onEdit={p => { setViewProduct(null); setEditProduct(p); }} onClone={p => { setViewProduct(null); handleClone(p); }} language={language} />
     </div>
   );

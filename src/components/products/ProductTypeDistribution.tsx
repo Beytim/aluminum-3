@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import type { ProductStats } from "@/data/enhancedProductData";
+import type { ProductStats } from "@/hooks/useProducts";
 
 interface Props {
   stats: ProductStats;

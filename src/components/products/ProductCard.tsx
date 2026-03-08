@@ -1,24 +1,24 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle } from "lucide-react";
-import type { EnhancedProduct } from "@/data/enhancedProductData";
-import { calcTotalCost, calcMargin } from "@/data/enhancedProductData";
+import type { Product } from "@/hooks/useProducts";
+import { calcTotalCost, calcMargin } from "@/hooks/useProducts";
 
 interface Props {
-  product: EnhancedProduct;
+  product: Product;
   language: string;
   onClick: () => void;
 }
 
 export default function ProductCard({ product: p, language, onClick }: Props) {
   const mg = calcMargin(p);
-  const isLow = p.currentStock <= p.minStock;
+  const isLow = p.current_stock <= p.min_stock;
 
   return (
     <Card className="shadow-card hover:shadow-card-hover transition-shadow cursor-pointer" onClick={onClick}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
-          <Badge variant="secondary" className="text-[10px]">{p.productType}</Badge>
+          <Badge variant="secondary" className="text-[10px]">{p.product_type}</Badge>
           <div className="flex items-center gap-1">
             {isLow && <AlertTriangle className="h-3 w-3 text-destructive" />}
             <Badge variant={p.status === 'Active' ? 'outline' : 'secondary'}
@@ -27,7 +27,7 @@ export default function ProductCard({ product: p, language, onClick }: Props) {
             </Badge>
           </div>
         </div>
-        <h3 className="text-sm font-semibold mt-2">{language === 'am' ? p.nameAm : p.name}</h3>
+        <h3 className="text-sm font-semibold mt-2">{language === 'am' ? p.name_am : p.name}</h3>
         <p className="text-[10px] text-muted-foreground mt-1">{p.profile} · {p.glass || p.form}</p>
         {p.tags && p.tags.length > 0 && (
           <div className="flex gap-1 mt-2 flex-wrap">
@@ -37,14 +37,14 @@ export default function ProductCard({ product: p, language, onClick }: Props) {
           </div>
         )}
         <div className="flex items-center justify-between mt-3 pt-2 border-t">
-          <span className="text-xs text-muted-foreground">Stock: {p.currentStock}{p.reservedStock > 0 && ` (${p.reservedStock} rsv)`}</span>
+          <span className="text-xs text-muted-foreground">Stock: {p.current_stock}{p.reserved_stock > 0 && ` (${p.reserved_stock} rsv)`}</span>
           <span className={`text-xs font-semibold ${mg >= 25 ? 'text-success' : mg >= 0 ? 'text-warning' : 'text-destructive'}`}>
             {mg.toFixed(0)}% margin
           </span>
         </div>
         <div className="flex items-center justify-between mt-1">
           <span className="text-xs text-muted-foreground">Cost: ETB {calcTotalCost(p).toLocaleString()}</span>
-          <span className="text-sm font-bold text-primary">ETB {p.sellingPrice.toLocaleString()}</span>
+          <span className="text-sm font-bold text-primary">ETB {p.selling_price.toLocaleString()}</span>
         </div>
       </CardContent>
     </Card>

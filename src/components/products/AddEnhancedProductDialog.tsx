@@ -6,24 +6,25 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2 } from "lucide-react";
-import type { EnhancedProduct, BOMComponent, ProductCategory, ProductType } from "@/data/enhancedProductData";
+import { useAddProduct, useSaveBOM } from "@/hooks/useProducts";
 
-const categories: ProductCategory[] = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
-const productTypes: ProductType[] = ['Raw Material', 'Fabricated', 'System', 'Custom'];
-const units = ['pcs', 'm', 'm²', 'kg', 'set', 'roll', 'box', 'sqm', 'lm'] as const;
-const bomTypes = ['Profile', 'Hardware', 'Glass', 'Accessory', 'Other'] as const;
+const categories = ['Windows', 'Doors', 'Curtain Walls', 'Handrails', 'Louvers', 'Partitions', 'Sheet', 'Plate', 'Bar/Rod', 'Tube/Pipe', 'Angle', 'Channel', 'Beam', 'Profile', 'Coil', 'Custom'];
+const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
+const units = ['pcs', 'm', 'm²', 'kg', 'set', 'roll', 'box', 'sqm', 'lm'];
+const bomTypes = ['Profile', 'Hardware', 'Glass', 'Accessory', 'Other'];
+
+interface BOMRow { id: string; type: string; name: string; quantity: number; unit: string; unitCost: number; total: number; }
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (product: EnhancedProduct) => void;
   existingCount: number;
 }
 
-export default function AddEnhancedProductDialog({ open, onOpenChange, onAdd, existingCount }: Props) {
-  const { toast } = useToast();
+export default function AddEnhancedProductDialog({ open, onOpenChange, existingCount }: Props) {
+  const addProduct = useAddProduct();
+  const saveBOM = useSaveBOM();
   const [tab, setTab] = useState("basic");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -38,7 +39,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, onAdd, ex
     supplierName: '', leadTimeDays: '', moq: '', tags: '',
   });
 
-  const [bom, setBom] = useState<BOMComponent[]>([]);
+  const [bom, setBom] = useState<BOMRow[]>([]);
 
   const totalCost = () => {
     const sub = [form.profileCost, form.glassCost, form.hardwareCost, form.accessoriesCost, form.fabLaborCost, form.installLaborCost].reduce((s, v) => s + (Number(v) || 0), 0);
@@ -61,42 +62,86 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, onAdd, ex
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) { setTab("basic"); return; }
-    const id = `PRD-${String(existingCount + 1).padStart(3, '0')}`;
-    const code = `${form.category.substring(0, 2).toUpperCase()}-${id}`;
-    const now = new Date().toISOString().split('T')[0];
+    const code = `${form.category.substring(0, 2).toUpperCase()}-${String(existingCount + 1).padStart(3, '0')}`;
     const tc = totalCost();
-    const product: EnhancedProduct = {
-      id, code, name: form.name.trim(), nameAm: form.nameAm.trim(),
-      category: form.category as ProductCategory, subcategory: form.subcategory.trim(),
-      productType: form.productType as ProductType, status: 'Active',
-      profile: form.profile.trim(), glass: form.glass.trim(),
+
+    const result = await addProduct.mutateAsync({
+      code,
+      name: form.name.trim(),
+      name_am: form.nameAm.trim(),
+      category: form.category as any,
+      subcategory: form.subcategory.trim(),
+      product_type: form.productType as any,
+      status: 'Active' as any,
+      profile: form.profile.trim(),
+      glass: form.glass.trim(),
       colors: form.colors.split(',').map(c => c.trim()).filter(Boolean),
-      laborHrs: Number(form.laborHrs) || 0, unit: form.unit,
-      profileCost: Number(form.profileCost) || 0, glassCost: Number(form.glassCost) || 0,
-      hardwareCost: Number(form.hardwareCost) || 0, accessoriesCost: Number(form.accessoriesCost) || 0,
-      fabLaborCost: Number(form.fabLaborCost) || 0, installLaborCost: Number(form.installLaborCost) || 0,
-      overheadPercent: Number(form.overheadPercent) || 0,
-      materialCost: tc > 0 ? tc : Number(form.sellingPrice) * 0.6,
-      sellingPrice: Number(form.sellingPrice),
-      currentStock: Number(form.currentStock) || 0, minStock: Number(form.minStock) || 0,
-      maxStock: Number(form.maxStock) || 0, reservedStock: 0,
-      warehouseLocation: form.warehouseLocation || undefined,
-      supplierId: form.supplierId || undefined, supplierName: form.supplierName || undefined,
-      leadTimeDays: Number(form.leadTimeDays) || undefined, moq: Number(form.moq) || undefined,
-      width: Number(form.width) || undefined, length: Number(form.height || form.length) || undefined,
-      thickness: Number(form.thickness) || undefined, diameter: Number(form.diameter) || undefined,
-      wallThickness: Number(form.wallThickness) || undefined,
-      weightPerMeter: Number(form.weightPerMeter) || undefined, weightPerPiece: Number(form.weightPerPiece) || undefined,
-      inspectionRequired: form.productType !== 'Raw Material',
-      bom: bom.length > 0 ? bom : undefined,
-      version: form.version || '1.0', effectiveDate: form.effectiveDate || undefined,
-      tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
-      createdAt: now, createdBy: 'Admin', updatedAt: now, updatedBy: 'Admin',
-    };
-    onAdd(product);
-    toast({ title: "Product Added", description: product.name });
+      alloy_type: null,
+      temper: null,
+      form: null,
+      width: Number(form.width) || null,
+      length: Number(form.length) || null,
+      height: Number(form.height) || null,
+      thickness: Number(form.thickness) || null,
+      diameter: Number(form.diameter) || null,
+      wall_thickness: Number(form.wallThickness) || null,
+      weight_per_meter: Number(form.weightPerMeter) || null,
+      weight_per_piece: Number(form.weightPerPiece) || null,
+      labor_hrs: Number(form.laborHrs) || 0,
+      unit: form.unit,
+      profile_cost: Number(form.profileCost) || 0,
+      glass_cost: Number(form.glassCost) || 0,
+      hardware_cost: Number(form.hardwareCost) || 0,
+      accessories_cost: Number(form.accessoriesCost) || 0,
+      fab_labor_cost: Number(form.fabLaborCost) || 0,
+      install_labor_cost: Number(form.installLaborCost) || 0,
+      overhead_percent: Number(form.overheadPercent) || 0,
+      material_cost: tc > 0 ? tc : Number(form.sellingPrice) * 0.6,
+      selling_price: Number(form.sellingPrice),
+      purchase_price: null,
+      markup_percent: null,
+      current_stock: Number(form.currentStock) || 0,
+      min_stock: Number(form.minStock) || 0,
+      max_stock: Number(form.maxStock) || 0,
+      reserved_stock: 0,
+      warehouse_location: form.warehouseLocation || null,
+      supplier_id: form.supplierId || null,
+      supplier_name: form.supplierName || null,
+      lead_time_days: Number(form.leadTimeDays) || null,
+      moq: Number(form.moq) || null,
+      inspection_required: form.productType !== 'Raw Material',
+      defect_rate: null,
+      version: form.version || '1.0',
+      effective_date: form.effectiveDate || null,
+      batch_number: null,
+      mill_certificate: false,
+      date_received: null,
+      tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      notes: null,
+      created_by: null,
+      updated_by: null,
+    });
+
+    // Save BOM if any
+    if (bom.length > 0 && result) {
+      await saveBOM.mutateAsync({
+        productId: result.id,
+        bom: bom.map(b => ({
+          component_type: b.type,
+          name: b.name,
+          quantity: b.quantity,
+          unit: b.unit,
+          unit_cost: b.unitCost,
+          total: b.total,
+          inventory_item_id: null,
+          sort_order: 0,
+          created_at: new Date().toISOString(),
+        })),
+      });
+    }
+
     resetForm();
     onOpenChange(false);
   };
@@ -199,7 +244,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, onAdd, ex
                     {bom.map((row, idx) => (
                       <TableRow key={row.id}>
                         <TableCell className="p-1">
-                          <Select value={row.type} onValueChange={v => setBom(prev => prev.map((r, i) => i === idx ? { ...r, type: v as any } : r))}>
+                          <Select value={row.type} onValueChange={v => setBom(prev => prev.map((r, i) => i === idx ? { ...r, type: v } : r))}>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
                             <SelectContent>{bomTypes.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent>
                           </Select>
@@ -251,7 +296,9 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, onAdd, ex
         </Tabs>
         <DialogFooter className="mt-2">
           <Button variant="outline" size="sm" onClick={() => { resetForm(); onOpenChange(false); }}>Cancel</Button>
-          <Button size="sm" onClick={handleSubmit}>Add Product</Button>
+          <Button size="sm" onClick={handleSubmit} disabled={addProduct.isPending}>
+            {addProduct.isPending ? "Adding..." : "Add Product"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

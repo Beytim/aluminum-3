@@ -5,21 +5,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Eye, Pencil, Copy, Trash2, Power, PowerOff, Download, AlertTriangle, Package } from "lucide-react";
-import type { EnhancedProduct } from "@/data/enhancedProductData";
-import { calcTotalCost, calcMargin } from "@/data/enhancedProductData";
+import type { Product } from "@/hooks/useProducts";
+import { calcTotalCost, calcMargin } from "@/hooks/useProducts";
 
 interface Props {
-  products: EnhancedProduct[];
+  products: Product[];
   selectedIds: Set<string>;
   allSelected: boolean;
   onToggleAll: () => void;
   onToggleSelect: (id: string) => void;
-  onView: (p: EnhancedProduct) => void;
-  onEdit: (p: EnhancedProduct) => void;
-  onClone: (p: EnhancedProduct) => void;
+  onView: (p: Product) => void;
+  onEdit: (p: Product) => void;
+  onClone: (p: Product) => void;
   onDelete: (id: string) => void;
-  onToggleStatus: (p: EnhancedProduct) => void;
-  onExportOne: (p: EnhancedProduct) => void;
+  onToggleStatus: (p: Product) => void;
+  onExportOne: (p: Product) => void;
   language: string;
 }
 
@@ -50,24 +50,24 @@ export default function ProductTable({
           <TableBody>
             {products.map(p => {
               const mg = calcMargin(p);
-              const isLow = p.currentStock <= p.minStock;
+              const isLow = p.current_stock <= p.min_stock;
               return (
                 <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onView(p)}>
                   <TableCell className="px-2" onClick={e => e.stopPropagation()}>
                     <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => onToggleSelect(p.id)} />
                   </TableCell>
                   <TableCell className="text-xs font-mono">{p.code}</TableCell>
-                  <TableCell className="text-xs font-medium max-w-[140px] truncate">{language === 'am' ? p.nameAm : p.name}</TableCell>
+                  <TableCell className="text-xs font-medium max-w-[140px] truncate">{language === 'am' ? p.name_am : p.name}</TableCell>
                   <TableCell className="hidden sm:table-cell"><Badge variant="secondary" className="text-[10px]">{p.category}</Badge></TableCell>
                   <TableCell className="text-xs hidden md:table-cell">{p.profile}</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <Badge variant="outline" className="text-[10px]">
-                      {p.productType === 'Raw Material' ? 'Raw' : p.productType === 'Fabricated' ? 'Fab' : p.productType}
+                      {p.product_type === 'Raw Material' ? 'Raw' : p.product_type === 'Fabricated' ? 'Fab' : p.product_type}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-right hidden md:table-cell">
                     <span className="flex items-center justify-end gap-1">
-                      {p.currentStock}
+                      {p.current_stock}
                       {isLow && <AlertTriangle className="h-3 w-3 text-destructive" />}
                     </span>
                   </TableCell>
@@ -77,7 +77,7 @@ export default function ProductTable({
                     </span>
                   </TableCell>
                   <TableCell className="text-xs text-right">ETB {calcTotalCost(p).toLocaleString()}</TableCell>
-                  <TableCell className="text-xs text-right font-semibold">ETB {p.sellingPrice.toLocaleString()}</TableCell>
+                  <TableCell className="text-xs text-right font-semibold">ETB {p.selling_price.toLocaleString()}</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <Badge variant={p.status === 'Active' ? 'outline' : 'secondary'}
                       className={`text-[10px] ${p.status === 'Active' ? 'text-success border-success/30' : ''}`}>
