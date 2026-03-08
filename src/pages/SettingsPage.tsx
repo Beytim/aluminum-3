@@ -162,21 +162,21 @@ const defaultPricing: PricingDefaults = {
 };
 
 const defaultModules: ModuleConfig[] = [
-  { id: "products", name: "Products", icon: Package, enabled: true, description: "Product catalog, BOM, pricing" },
-  { id: "inventory", name: "Inventory", icon: Warehouse, enabled: true, description: "Stock tracking, movements, alerts" },
-  { id: "production", name: "Production", icon: Factory, enabled: true, description: "Work orders, stage tracking" },
-  { id: "cutting", name: "Cutting", icon: Scissors, enabled: true, description: "Cut lists, optimization, waste" },
-  { id: "projects", name: "Projects", icon: HardHat, enabled: true, description: "Project management, milestones" },
-  { id: "customers", name: "Customers", icon: Users, enabled: true, description: "CRM, contacts, history" },
-  { id: "orders", name: "Orders", icon: ShoppingCart, enabled: true, description: "Order processing, fulfillment" },
-  { id: "quotes", name: "Quotes", icon: FileText, enabled: true, description: "Quotations, approvals, PDF export" },
-  { id: "installation", name: "Installation", icon: Wrench, enabled: true, description: "Scheduling, teams, site tracking" },
-  { id: "maintenance", name: "Maintenance", icon: Wrench, enabled: true, description: "Equipment, preventive tasks" },
-  { id: "quality", name: "Quality", icon: ClipboardCheck, enabled: true, description: "Inspections, NCRs, defects" },
-  { id: "procurement", name: "Procurement", icon: Truck, enabled: true, description: "Suppliers, POs, receiving" },
-  { id: "finance", name: "Finance", icon: DollarSign, enabled: true, description: "Invoices, payments, expenses" },
-  { id: "hr", name: "HR", icon: Users, enabled: true, description: "Employees, leave, payroll" },
-  { id: "reports", name: "Reports", icon: BarChart3, enabled: true, description: "Analytics, cross-module reports" },
+  { id: "products", name: "Products", enabled: true, description: "Product catalog, BOM, pricing" },
+  { id: "inventory", name: "Inventory", enabled: true, description: "Stock tracking, movements, alerts" },
+  { id: "production", name: "Production", enabled: true, description: "Work orders, stage tracking" },
+  { id: "cutting", name: "Cutting", enabled: true, description: "Cut lists, optimization, waste" },
+  { id: "projects", name: "Projects", enabled: true, description: "Project management, milestones" },
+  { id: "customers", name: "Customers", enabled: true, description: "CRM, contacts, history" },
+  { id: "orders", name: "Orders", enabled: true, description: "Order processing, fulfillment" },
+  { id: "quotes", name: "Quotes", enabled: true, description: "Quotations, approvals, PDF export" },
+  { id: "installation", name: "Installation", enabled: true, description: "Scheduling, teams, site tracking" },
+  { id: "maintenance", name: "Maintenance", enabled: true, description: "Equipment, preventive tasks" },
+  { id: "quality", name: "Quality", enabled: true, description: "Inspections, NCRs, defects" },
+  { id: "procurement", name: "Procurement", enabled: true, description: "Suppliers, POs, receiving" },
+  { id: "finance", name: "Finance", enabled: true, description: "Invoices, payments, expenses" },
+  { id: "hr", name: "HR", enabled: true, description: "Employees, leave, payroll" },
+  { id: "reports", name: "Reports", enabled: true, description: "Analytics, cross-module reports" },
 ];
 
 export default function SettingsPage() {
