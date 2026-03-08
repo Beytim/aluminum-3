@@ -192,7 +192,7 @@ export default function Reports() {
   const exportQualityReport = () => {
     generateReportPDF("Quality Analysis Report",
       ['Inspection', 'Product', 'Type', 'Result', 'Score', 'Date'],
-      inspections.map(i => [i.inspectionNumber, i.productName, i.inspectionType, i.result, `${i.overallScore}%`, i.inspectionDate])
+      inspections.map(i => [i.inspectionNumber, i.productName || 'N/A', i.type, i.result, `${i.score ?? 'N/A'}%`, i.inspectionDate])
     );
   };
   const exportInventoryReport = () => {
