@@ -150,6 +150,8 @@ export default function Suppliers() {
               onView={setViewSupplier}
               onEdit={setEditSupplier}
               onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
+              onExportOne={handleExportOne}
             />
           </CardContent>
         </Card>
