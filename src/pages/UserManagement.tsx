@@ -168,66 +168,79 @@ export default function UserManagement() {
         />
       )}
 
-      {/* View Toggle + Count */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{filtered.length} results</p>
-        <div className="flex gap-1 border rounded-md p-0.5">
-          <Button variant={viewMode === "table" ? "default" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewMode("table")}>
-            <List className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant={viewMode === "grid" ? "default" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewMode("grid")}>
-            <LayoutGrid className="h-3.5 w-3.5" />
-          </Button>
+      {/* Main content grid with activity log */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
+          {/* View Toggle + Count */}
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">{filtered.length} results</p>
+            <div className="flex gap-1 border rounded-md p-0.5">
+              <Button variant={viewMode === "table" ? "default" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewMode("table")}>
+                <List className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant={viewMode === "grid" ? "default" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewMode("grid")}>
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Content */}
+          {loading ? (
+            <Card className="shadow-card">
+              <CardContent className="flex items-center justify-center p-12">
+                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+              </CardContent>
+            </Card>
+          ) : viewMode === "table" ? (
+            <Card className="shadow-card">
+              <CardContent className="p-0 overflow-x-auto">
+                <UserTable
+                  users={filtered}
+                  selectedIds={selectedIds}
+                  onSelectIds={setSelectedIds}
+                  onView={(u) => setViewUser(u)}
+                  onChangeRole={handleRoleChange}
+                  onDelete={handleDelete}
+                  isAdmin={isAdmin}
+                  currentUserId={currentUser?.id}
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {filtered.map((u) => (
+                <UserCard
+                  key={u.id}
+                  user={u}
+                  onView={(u) => setViewUser(u)}
+                  onChangeRole={handleRoleChange}
+                  isAdmin={isAdmin}
+                  currentUserId={currentUser?.id}
+                />
+              ))}
+            </div>
+          )}
+
+          {!loading && filtered.length === 0 && (
+            <Card className="shadow-card">
+              <CardContent className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">No users found matching your filters.</p>
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => setFilters(defaultUserFilters)}>
+                  Clear Filters
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Activity Log Sidebar */}
+        <div>
+          <ActivityLog
+            refreshTrigger={logRefresh}
+            userMap={new Map(users.map(u => [u.id, u.full_name || "Unnamed User"]))}
+          />
         </div>
       </div>
-
-      {/* Content */}
-      {loading ? (
-        <Card className="shadow-card">
-          <CardContent className="flex items-center justify-center p-12">
-            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-          </CardContent>
-        </Card>
-      ) : viewMode === "table" ? (
-        <Card className="shadow-card">
-          <CardContent className="p-0 overflow-x-auto">
-            <UserTable
-              users={filtered}
-              selectedIds={selectedIds}
-              onSelectIds={setSelectedIds}
-              onView={(u) => setViewUser(u)}
-              onChangeRole={handleRoleChange}
-              onDelete={handleDelete}
-              isAdmin={isAdmin}
-              currentUserId={currentUser?.id}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map((u) => (
-            <UserCard
-              key={u.id}
-              user={u}
-              onView={(u) => setViewUser(u)}
-              onChangeRole={handleRoleChange}
-              isAdmin={isAdmin}
-              currentUserId={currentUser?.id}
-            />
-          ))}
-        </div>
-      )}
-
-      {!loading && filtered.length === 0 && (
-        <Card className="shadow-card">
-          <CardContent className="p-8 text-center">
-            <p className="text-sm text-muted-foreground">No users found matching your filters.</p>
-            <Button size="sm" variant="outline" className="mt-2" onClick={() => setFilters(defaultUserFilters)}>
-              Clear Filters
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Details Dialog */}
       <UserDetailsDialog
