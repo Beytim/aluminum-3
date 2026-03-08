@@ -313,7 +313,7 @@ export function useSaveBOM() {
       // Insert new
       if (bom.length > 0) {
         const { error } = await supabase.from("product_bom").insert(
-          bom.map((b, i) => ({ ...b, product_id: productId, sort_order: i }))
+          bom.map((b, i) => ({ ...b, product_id: productId, sort_order: i })) as any
         );
         if (error) throw error;
       }
