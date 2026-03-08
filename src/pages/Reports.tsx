@@ -27,6 +27,8 @@ import { sampleEnhancedSuppliers, sampleEnhancedPOs, sampleReorderSuggestions, c
 import { sampleEnhancedInvoices, sampleEnhancedPayments, sampleExpenses, calculateFinanceStats, type EnhancedInvoice, type EnhancedPayment, type Expense } from "@/data/enhancedFinanceData";
 import { sampleEnhancedEmployees, sampleLeaveRequests, samplePayrolls, calculateHRStats, type EnhancedEmployee, type LeaveRequest, type Payroll } from "@/data/enhancedHRData";
 
+import { useSettings } from "@/lib/settingsContext";
+
 // Report components
 import ReportKPIs, { type ReportKPI } from "@/components/reports/ReportKPIs";
 import ReportCardGrid, { type ReportCard } from "@/components/reports/ReportCardGrid";
