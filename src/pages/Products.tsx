@@ -105,7 +105,7 @@ export default function Products() {
   const handleBulkExport = () => {
     const sel = products.filter(p => selectedIds.has(p.id));
     generateReportPDF("Selected Products", ['Code', 'Name', 'Type', 'Cost', 'Price', 'Margin'],
-      sel.map(p => [p.code, p.name, p.productType, `ETB ${calcTotalCost(p).toLocaleString()}`, `ETB ${p.sellingPrice.toLocaleString()}`, `${calcMargin(p).toFixed(1)}%`])
+      sel.map(p => [p.code, p.name, p.productType, formatCurrency(calcTotalCost(p)), formatCurrency(p.sellingPrice), `${calcMargin(p).toFixed(1)}%`])
     );
   };
 
