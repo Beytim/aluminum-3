@@ -15,6 +15,7 @@ import { CuttingBulkActions } from "@/components/cutting/CuttingBulkActions";
 import { CuttingDetailsDialog } from "@/components/cutting/CuttingDetailsDialog";
 import { AddCuttingJobDialog } from "@/components/cutting/AddCuttingJobDialog";
 import { OptimizerDialog } from "@/components/cutting/OptimizerDialog";
+import { EditCuttingJobDialog } from "@/components/cutting/EditCuttingJobDialog";
 
 type ViewMode = 'grid' | 'table';
 
@@ -25,6 +26,7 @@ export default function Cutting() {
   const [detailsJob, setDetailsJob] = useState<EnhancedCuttingJob | null>(null);
   const [optimizerOpen, setOptimizerOpen] = useState(false);
   const [optimizerJob, setOptimizerJob] = useState<EnhancedCuttingJob | null>(null);
+  const [editJob, setEditJob] = useState<EnhancedCuttingJob | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [quickFilter, setQuickFilter] = useState('all');
   const [filters, setFilters] = useState({
@@ -202,6 +204,7 @@ export default function Cutting() {
               key={job.id}
               job={job}
               onView={setDetailsJob}
+              onEdit={setEditJob}
               onOptimize={handleOptimize}
               onStatusChange={updateStatus}
               onDelete={handleDelete}
@@ -215,6 +218,7 @@ export default function Cutting() {
           onSelect={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
           onSelectAll={() => setSelectedIds(prev => prev.length === filteredJobs.length ? [] : filteredJobs.map(j => j.id))}
           onView={setDetailsJob}
+          onEdit={setEditJob}
           onOptimize={handleOptimize}
           onStatusChange={updateStatus}
           onDelete={handleDelete}
@@ -253,6 +257,16 @@ export default function Cutting() {
         onOpenChange={setOptimizerOpen}
         job={optimizerJob}
         onApplyOptimization={handleApplyOptimization}
+      />
+
+      <EditCuttingJobDialog
+        open={!!editJob}
+        onOpenChange={o => { if (!o) setEditJob(null); }}
+        job={editJob}
+        onSave={updated => {
+          setJobs(prev => prev.map(j => j.id === updated.id ? updated : j));
+          toast({ title: "Job Updated", description: `${updated.jobNumber} saved` });
+        }}
       />
     </div>
   );

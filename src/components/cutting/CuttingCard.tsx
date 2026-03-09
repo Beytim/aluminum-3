@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Scissors, Trash2, Play, CheckCircle, Calculator } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreVertical, Eye, Trash2, Play, CheckCircle, Calculator, Pencil, Pause, XCircle, FileDown } from "lucide-react";
 import type { EnhancedCuttingJob } from "@/data/enhancedProductionData";
 import { formatETBShort, priorityColors } from "@/data/enhancedProductionData";
 
@@ -15,12 +16,13 @@ const statusColor: Record<string, string> = {
 interface Props {
   job: EnhancedCuttingJob;
   onView: (job: EnhancedCuttingJob) => void;
+  onEdit: (job: EnhancedCuttingJob) => void;
   onOptimize: (id: string) => void;
   onStatusChange: (id: string, status: EnhancedCuttingJob['status']) => void;
   onDelete: (id: string) => void;
 }
 
-export function CuttingCard({ job, onView, onOptimize, onStatusChange, onDelete }: Props) {
+export function CuttingCard({ job, onView, onEdit, onOptimize, onStatusChange, onDelete }: Props) {
   return (
     <Card className="shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer group" onClick={() => onView(job)}>
       <CardContent className="p-4 space-y-3">
@@ -34,9 +36,58 @@ export function CuttingCard({ job, onView, onOptimize, onStatusChange, onDelete 
             <p className="text-sm font-semibold truncate mt-0.5">{job.materialName}</p>
             {job.projectName && <p className="text-[10px] text-muted-foreground truncate">{job.projectName}</p>}
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <Badge className={`text-[9px] ${statusColor[job.status]}`}>{job.status}</Badge>
-            <Badge className={`text-[9px] ${priorityColors[job.priority]}`}>{job.priority}</Badge>
+          <div className="flex items-start gap-1">
+            <div className="flex flex-col items-end gap-1">
+              <Badge className={`text-[9px] ${statusColor[job.status]}`}>{job.status}</Badge>
+              <Badge className={`text-[9px] ${priorityColors[job.priority]}`}>{job.priority}</Badge>
+            </div>
+            <div onClick={e => e.stopPropagation()}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreVertical className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem onClick={() => onEdit(job)}>
+                    <Pencil className="h-3.5 w-3.5 mr-2" />Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onView(job)}>
+                    <Eye className="h-3.5 w-3.5 mr-2" />View Details
+                  </DropdownMenuItem>
+                  {job.status === 'Pending' && !job.optimized && (
+                    <DropdownMenuItem onClick={() => onOptimize(job.id)}>
+                      <Calculator className="h-3.5 w-3.5 mr-2" />Optimize
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  {job.status === 'Pending' && (
+                    <DropdownMenuItem onClick={() => onStatusChange(job.id, 'In Progress')}>
+                      <Play className="h-3.5 w-3.5 mr-2" />Start Job
+                    </DropdownMenuItem>
+                  )}
+                  {job.status === 'In Progress' && (
+                    <>
+                      <DropdownMenuItem onClick={() => onStatusChange(job.id, 'Completed')}>
+                        <CheckCircle className="h-3.5 w-3.5 mr-2" />Complete
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onStatusChange(job.id, 'Pending')}>
+                        <Pause className="h-3.5 w-3.5 mr-2" />Pause
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {job.status !== 'Cancelled' && job.status !== 'Completed' && (
+                    <DropdownMenuItem onClick={() => onStatusChange(job.id, 'Cancelled')}>
+                      <XCircle className="h-3.5 w-3.5 mr-2" />Cancel
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive" onClick={() => onDelete(job.id)}>
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
@@ -98,7 +149,7 @@ export function CuttingCard({ job, onView, onOptimize, onStatusChange, onDelete 
           <span>{job.assignee}</span>
         </div>
 
-        {/* Actions */}
+        {/* Quick Actions */}
         <div className="flex gap-1 pt-1" onClick={e => e.stopPropagation()}>
           {job.status === 'Pending' && (
             <>
@@ -115,12 +166,6 @@ export function CuttingCard({ job, onView, onOptimize, onStatusChange, onDelete 
               <CheckCircle className="h-3 w-3" />Complete
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onView(job)}>
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDelete(job.id)}>
-            <Trash2 className="h-3 w-3 text-destructive" />
-          </Button>
         </div>
       </CardContent>
     </Card>
