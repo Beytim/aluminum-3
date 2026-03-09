@@ -259,6 +259,10 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
               {F('glass', 'Glass', { placeholder: 'e.g. 6mm Clear Tempered' })}
               {F('colors', 'Colors (comma-separated)', { placeholder: 'White, Black, Bronze', span: true })}
               {F('tags', 'Tags (comma-separated)', { placeholder: 'bestseller, residential', span: true })}
+              {F('certifications', 'Certifications (comma-separated)', { placeholder: 'CE, ISO 9001', span: true })}
+              {F('installationInstructions', 'Installation Instructions URL', { placeholder: 'https://...', span: true })}
+              {F('images', 'Image URLs (comma-separated)', { placeholder: 'https://...', span: true })}
+              {F('alternativeProducts', 'Alternative Product IDs (comma-separated)', { span: true })}
               {F('version', 'Version')}
               {F('effectiveDate', 'Effective Date', { type: 'date' })}
             </div>
