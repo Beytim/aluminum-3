@@ -15,7 +15,7 @@ const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
 const units = ['pcs', 'm', 'm²', 'kg', 'set', 'roll', 'box', 'sqm', 'lm'];
 const bomTypes = ['Profile', 'Hardware', 'Glass', 'Accessory', 'Other'];
 
-interface BOMRow { id: string; type: string; name: string; quantity: number; unit: string; unitCost: number; total: number; }
+interface BOMRow { id: string; type: string; name: string; quantity: number; unit: string; unitCost: number; total: number; wastagePercent?: string; }
 
 interface Props {
   open: boolean;
@@ -35,6 +35,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
     profile: '', glass: '', colors: '', unit: 'pcs', version: '1.0', effectiveDate: '',
     width: '', height: '', thickness: '', length: '', diameter: '', wallThickness: '',
     weightPerMeter: '', weightPerPiece: '', laborHrs: '',
+    surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '',
     profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '',
     fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '',
     currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '',
@@ -121,6 +122,13 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
       profile: form.profile.trim(),
       glass: form.glass.trim(),
       colors: form.colors.split(',').map(c => c.trim()).filter(Boolean),
+      surface_finish: form.surfaceFinish || null,
+      has_thermal_break: form.hasThermalBreak,
+      u_value: Number(form.uValue) || null,
+      wind_load_rating: form.windLoadRating || null,
+      stc_rating: form.stcRating || null,
+      fire_rating: form.fireRating || null,
+      warranty_months: Number(form.warrantyMonths) || null,
       alloy_type: null,
       temper: null,
       form: null,
@@ -177,6 +185,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
           unit: b.unit,
           unit_cost: b.unitCost,
           total: b.total,
+          wastage_percent: Number(b.wastagePercent) || null,
           inventory_item_id: null,
           sort_order: 0,
           created_at: new Date().toISOString(),
@@ -189,7 +198,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
   };
 
   const resetForm = () => {
-    setForm({ name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated', profile: '', glass: '', colors: '', unit: 'pcs', version: '1.0', effectiveDate: '', width: '', height: '', thickness: '', length: '', diameter: '', wallThickness: '', weightPerMeter: '', weightPerPiece: '', laborHrs: '', profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '', fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '', currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '', supplierName: '', leadTimeDays: '', moq: '', tags: '' });
+    setForm({ name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated', profile: '', glass: '', colors: '', unit: 'pcs', version: '1.0', effectiveDate: '', width: '', height: '', thickness: '', length: '', diameter: '', wallThickness: '', weightPerMeter: '', weightPerPiece: '', laborHrs: '', surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '', profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '', fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '', currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '', supplierName: '', leadTimeDays: '', moq: '', tags: '' });
     setBom([]);
     setErrors({});
     setTab("basic");
@@ -210,7 +219,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-4 h-8">
             <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
-            <TabsTrigger value="dimensions" className="text-xs">Dimensions</TabsTrigger>
+            <TabsTrigger value="specs" className="text-xs">Specs & Dims</TabsTrigger>
             <TabsTrigger value="bom" className="text-xs">BOM</TabsTrigger>
             <TabsTrigger value="pricing" className="text-xs">Pricing & Stock</TabsTrigger>
           </TabsList>
@@ -250,8 +259,20 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
             </div>
           </TabsContent>
 
-          <TabsContent value="dimensions" className="space-y-3 mt-3">
+          <TabsContent value="specs" className="space-y-3 mt-3">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {F('surfaceFinish', 'Surface Finish')}
+              <div className="flex items-end pb-1.5">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={form.hasThermalBreak} onChange={e => setForm(p => ({ ...p, hasThermalBreak: e.target.checked }))} className="h-4 w-4 rounded border-border" />
+                  Thermal Break
+                </label>
+              </div>
+              {F('uValue', 'U-Value', { type: 'number' })}
+              {F('windLoadRating', 'Wind Load Rating')}
+              {F('stcRating', 'STC Rating')}
+              {F('fireRating', 'Fire Rating')}
+              {F('warrantyMonths', 'Warranty (Months)', { type: 'number' })}
               {F('width', 'Width (mm)', { type: 'number' })}
               {F('height', 'Height (mm)', { type: 'number' })}
               {F('thickness', 'Thickness (mm)', { type: 'number' })}
@@ -266,7 +287,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
 
           <TabsContent value="bom" className="space-y-3 mt-3">
             <div className="flex items-center justify-between">
-              <Button size="sm" variant="outline" onClick={() => setBom(prev => [...prev, { id: `BOM-${Date.now()}`, type: 'Profile', name: '', quantity: 0, unit: 'm', unitCost: 0, total: 0 }])} className="h-7 text-xs">
+              <Button size="sm" variant="outline" onClick={() => setBom(prev => [...prev, { id: `BOM-${Date.now()}`, type: 'Profile', name: '', quantity: 0, unit: 'm', unitCost: 0, total: 0, wastagePercent: '' }])} className="h-7 text-xs">
                 <Plus className="h-3 w-3 mr-1" />Add Component
               </Button>
               {bom.length > 0 && (
@@ -281,6 +302,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
                       <TableHead className="text-xs w-24">Type</TableHead>
                       <TableHead className="text-xs">Component</TableHead>
                       <TableHead className="text-xs w-16">Qty</TableHead>
+                      <TableHead className="text-xs w-16">Waste%</TableHead>
                       <TableHead className="text-xs w-16">Unit</TableHead>
                       <TableHead className="text-xs w-20">Cost</TableHead>
                       <TableHead className="text-xs w-20">Total</TableHead>
@@ -298,6 +320,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
                         </TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" value={row.name} onChange={e => setBom(prev => prev.map((r, i) => i === idx ? { ...r, name: e.target.value } : r))} /></TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" type="number" value={row.quantity || ''} onChange={e => { const q = Number(e.target.value); setBom(prev => prev.map((r, i) => i === idx ? { ...r, quantity: q, total: q * r.unitCost } : r)); }} /></TableCell>
+                        <TableCell className="p-1"><Input className="h-7 text-xs" type="number" value={row.wastagePercent || ''} onChange={e => setBom(prev => prev.map((r, i) => i === idx ? { ...r, wastagePercent: e.target.value } : r))} placeholder="%" /></TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" value={row.unit} onChange={e => setBom(prev => prev.map((r, i) => i === idx ? { ...r, unit: e.target.value } : r))} /></TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" type="number" value={row.unitCost || ''} onChange={e => { const c = Number(e.target.value); setBom(prev => prev.map((r, i) => i === idx ? { ...r, unitCost: c, total: r.quantity * c } : r)); }} /></TableCell>
                         <TableCell className="p-1 text-xs font-medium">{row.total.toLocaleString()}</TableCell>

@@ -30,6 +30,7 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
     leadTimeDays: '', moq: '',
     profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '',
     fabLaborCost: '', installLaborCost: '', overheadPercent: '',
+    surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '',
   });
 
   useEffect(() => {
@@ -50,6 +51,9 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
         hardwareCost: String(product.hardware_cost || ''), accessoriesCost: String(product.accessories_cost || ''),
         fabLaborCost: String(product.fab_labor_cost || ''), installLaborCost: String(product.install_labor_cost || ''),
         overheadPercent: String(product.overhead_percent || ''),
+        surfaceFinish: product.surface_finish || '', hasThermalBreak: product.has_thermal_break || false,
+        uValue: String(product.u_value || ''), windLoadRating: product.wind_load_rating || '',
+        stcRating: product.stc_rating || '', fireRating: product.fire_rating || '', warrantyMonths: String(product.warranty_months || ''),
       });
       setErrors({});
     }
@@ -120,6 +124,13 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
       selling_price: Number(form.sellingPrice),
       alloy_type: form.alloyType || null,
       temper: form.temper || null,
+      surface_finish: form.surfaceFinish || null,
+      has_thermal_break: form.hasThermalBreak,
+      u_value: Number(form.uValue) || null,
+      wind_load_rating: form.windLoadRating || null,
+      stc_rating: form.stcRating || null,
+      fire_rating: form.fireRating || null,
+      warranty_months: Number(form.warrantyMonths) || null,
       current_stock: Number(form.currentStock) || 0,
       min_stock: Number(form.minStock) || 0,
       max_stock: Number(form.maxStock) || 0,
@@ -150,8 +161,9 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Edit Product</DialogTitle></DialogHeader>
         <Tabs defaultValue="basic">
-          <TabsList className="grid w-full grid-cols-4 h-8">
+          <TabsList className="grid w-full grid-cols-5 h-8">
             <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
+            <TabsTrigger value="specs" className="text-xs">Specs</TabsTrigger>
             <TabsTrigger value="pricing" className="text-xs">Pricing</TabsTrigger>
             <TabsTrigger value="stock" className="text-xs">Stock</TabsTrigger>
             <TabsTrigger value="supplier" className="text-xs">Supplier</TabsTrigger>
@@ -180,6 +192,23 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
               {F('colors', 'Colors (comma-separated)', { span: true })}
               {F('tags', 'Tags (comma-separated)', { span: true })}
               {F('notes', 'Notes', { span: true })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="specs" className="mt-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {F('surfaceFinish', 'Surface Finish')}
+              <div className="flex items-end pb-1.5">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={form.hasThermalBreak} onChange={e => setForm(p => ({ ...p, hasThermalBreak: e.target.checked }))} className="h-4 w-4 rounded border-border" />
+                  Thermal Break
+                </label>
+              </div>
+              {F('uValue', 'U-Value', { type: 'number' })}
+              {F('windLoadRating', 'Wind Load Rating')}
+              {F('stcRating', 'STC Rating')}
+              {F('fireRating', 'Fire Rating')}
+              {F('warrantyMonths', 'Warranty (Months)', { type: 'number' })}
             </div>
           </TabsContent>
 
