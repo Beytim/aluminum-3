@@ -18,6 +18,7 @@ import InventoryBulkActions from "@/components/inventory/InventoryBulkActions";
 import AddInventoryDialog from "@/components/inventory/AddInventoryDialog";
 import InventoryDetailsDialog from "@/components/inventory/InventoryDetailsDialog";
 import StockMovementDialog from "@/components/inventory/StockMovementDialog";
+import { generateReportPDF } from "@/lib/pdfExport";
 
 import { useInventory } from "@/hooks/useInventory";
 
