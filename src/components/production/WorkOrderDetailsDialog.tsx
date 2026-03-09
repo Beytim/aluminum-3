@@ -167,6 +167,7 @@ export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAd
                 </CardContent>
               </Card>
             )}
+            {wo.stageHistory.length > 0 && (
               <Table>
                 <TableHeader><TableRow>
                   <TableHead className="text-xs">Stage</TableHead>
