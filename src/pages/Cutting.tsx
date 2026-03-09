@@ -203,6 +203,7 @@ export default function Cutting() {
               key={job.id}
               job={job}
               onView={setDetailsJob}
+              onEdit={setEditJob}
               onOptimize={handleOptimize}
               onStatusChange={updateStatus}
               onDelete={handleDelete}
@@ -216,6 +217,7 @@ export default function Cutting() {
           onSelect={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
           onSelectAll={() => setSelectedIds(prev => prev.length === filteredJobs.length ? [] : filteredJobs.map(j => j.id))}
           onView={setDetailsJob}
+          onEdit={setEditJob}
           onOptimize={handleOptimize}
           onStatusChange={updateStatus}
           onDelete={handleDelete}
