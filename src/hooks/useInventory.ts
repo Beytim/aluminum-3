@@ -75,10 +75,7 @@ export function useInventory() {
         return [];
       }
       
-      // Filter out inventory items that are linked to Finished Goods
-      const filteredData = data.filter(item => !item.products || item.products.product_type === 'Raw Material');
-      
-      return filteredData.map(item => mapDbToItem(item, item.products));
+      return data.map(item => mapDbToItem(item, item.products));
     }
   });
 
