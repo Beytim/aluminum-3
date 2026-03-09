@@ -143,7 +143,7 @@ export default function Production() {
       {view === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredWOs.map(wo => (
-            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={advanceStage} onDelete={handleDelete} />
+            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={advanceStage} onDelete={handleDelete} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
           ))}
         </div>
       )}
