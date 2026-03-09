@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -6,19 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { enhancedSampleWorkOrders } from "@/data/enhancedProductionData";
+import { useProduction } from "@/hooks/useProduction";
+import { useInventory } from "@/hooks/useInventory";
 import type { EnhancedCuttingJob, WorkOrderPriority } from "@/data/enhancedProductionData";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (job: EnhancedCuttingJob) => void;
+  onAdd: (job: Partial<EnhancedCuttingJob> & { jobNumber: string }) => void;
   existingCount: number;
 }
 
 export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }: Props) {
+  const { workOrders } = useProduction();
+  const { inventoryItems } = useInventory();
+  
   const [form, setForm] = useState({
     workOrderId: '',
+    inventoryItemId: '',
     materialName: '',
     materialCategory: 'Profile',
     alloyType: '6063',
@@ -33,8 +38,26 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
     notes: '',
   });
 
-  const selectedWO = enhancedSampleWorkOrders.find(w => w.id === form.workOrderId);
-  const activeWOs = enhancedSampleWorkOrders.filter(w => w.status !== 'Completed' && w.status !== 'Cancelled');
+  const selectedWO = workOrders.find(w => w.id === form.workOrderId);
+  const activeWOs = workOrders.filter(w => w.status !== 'Completed' && w.status !== 'Cancelled');
+  const profileInventory = inventoryItems.filter(i => 
+    i.productCategory?.includes('Profile') || 
+    i.productCategory?.includes('Bar') || 
+    i.productCategory?.includes('Tube')
+  );
+
+  useEffect(() => {
+    if (form.inventoryItemId) {
+      const inv = inventoryItems.find(i => i.id === form.inventoryItemId);
+      if (inv) {
+        setForm(p => ({
+          ...p,
+          materialName: inv.productName || inv.itemCode,
+          materialCategory: inv.productCategory || 'Profile',
+        }));
+      }
+    }
+  }, [form.inventoryItemId, inventoryItems]);
 
   const handleSubmit = () => {
     if (!form.materialName.trim() || !form.stockLength || !form.cuts) return;
@@ -44,18 +67,14 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
     const totalCutLength = cuts.reduce((s, c) => s + c, 0);
     const totalStock = stockLength * stocksUsed;
     const waste = Math.max(0, totalStock - totalCutLength);
+    
+    const year = new Date().getFullYear();
     const num = String(existingCount + 1).padStart(3, '0');
 
-    const job: EnhancedCuttingJob = {
-      id: `CJ-${num}`,
-      jobNumber: `CJ-2025-${num}`,
+    const job: Partial<EnhancedCuttingJob> & { jobNumber: string } = {
+      jobNumber: `CJ-${year}-${num}`,
       workOrderId: form.workOrderId || undefined,
-      workOrderNumber: selectedWO?.workOrderNumber,
-      projectId: selectedWO?.projectId,
-      projectName: selectedWO?.projectName,
-      customerId: selectedWO?.customerId,
-      customerName: selectedWO?.customerName,
-      materialCode: '',
+      inventoryItemId: form.inventoryItemId || undefined,
       materialName: form.materialName.trim(),
       materialCategory: form.materialCategory,
       alloyType: form.alloyType || undefined,
@@ -67,28 +86,25 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
       totalCutLength,
       waste,
       wastePercent: Number(((waste / totalStock) * 100).toFixed(1)),
-      optimized: false,
       efficiency: Number(((totalCutLength / totalStock) * 100).toFixed(1)),
       remnants: waste > 200 ? [{ length: waste, reusable: true }] : waste > 0 ? [{ length: waste, reusable: false }] : [],
-      assignee: form.assignee || 'Unassigned',
       machine: form.machine,
       scheduledDate: form.scheduledDate,
       materialCost: totalStock * 0.085,
       wasteCost: waste * 0.085,
       laborCost: 345,
-      totalCost: totalStock * 0.085 + 345,
-      status: 'Pending',
       priority: form.priority,
-      qualityChecked: false,
       notes: form.notes || undefined,
-      createdAt: new Date().toISOString().split('T')[0],
-      createdBy: 'EMP-001',
-      updatedAt: new Date().toISOString().split('T')[0],
     };
 
     onAdd(job);
     onOpenChange(false);
-    setForm({ workOrderId: '', materialName: '', materialCategory: 'Profile', alloyType: '6063', temper: 'T5', stockLength: '6000', stocksUsed: '1', cuts: '', assignee: '', machine: 'Double Head Cutting Saw', priority: 'Medium', scheduledDate: new Date().toISOString().split('T')[0], notes: '' });
+    setForm({
+      workOrderId: '', inventoryItemId: '', materialName: '', materialCategory: 'Profile', 
+      alloyType: '6063', temper: 'T5', stockLength: '6000', stocksUsed: '1', cuts: '', 
+      assignee: '', machine: 'Double Head Cutting Saw', priority: 'Medium', 
+      scheduledDate: new Date().toISOString().split('T')[0], notes: ''
+    });
   };
 
   return (
@@ -108,7 +124,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
             <div>
               <Label className="text-xs">Link to Work Order</Label>
               <Select value={form.workOrderId} onValueChange={v => {
-                const wo = enhancedSampleWorkOrders.find(w => w.id === v);
+                const wo = workOrders.find(w => w.id === v);
                 setForm(p => ({
                   ...p,
                   workOrderId: v,
@@ -119,14 +135,14 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
                 <SelectContent>
                   {activeWOs.map(w => (
                     <SelectItem key={w.id} value={w.id}>
-                      <span className="font-mono text-xs">{w.workOrderNumber}</span> — {w.productName} ({w.projectName})
+                      <span className="font-mono text-xs">{w.workOrderNumber}</span> — {w.productName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedWO && (
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  Project: {selectedWO.projectName} · Customer: {selectedWO.customerName} · Qty: {selectedWO.quantity}
+                  Customer: {selectedWO.customerName || '—'} · Qty: {selectedWO.quantity}
                 </p>
               )}
             </div>
@@ -148,6 +164,19 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
           </TabsContent>
 
           <TabsContent value="material" className="space-y-3 mt-3">
+            <div>
+              <Label className="text-xs">Select from Inventory</Label>
+              <Select value={form.inventoryItemId} onValueChange={v => setForm(p => ({ ...p, inventoryItemId: v }))}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="Select inventory item (optional)" /></SelectTrigger>
+                <SelectContent>
+                  {profileInventory.map(i => (
+                    <SelectItem key={i.id} value={i.id}>
+                      <span className="font-mono text-xs">{i.itemCode}</span> — {i.productName} ({i.stock} {i.unit})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label className="text-xs">Material Name *</Label>
               <Input value={form.materialName} onChange={e => setForm(p => ({ ...p, materialName: e.target.value }))} placeholder="e.g. Window Frame Profile 6063" className="h-9" />
