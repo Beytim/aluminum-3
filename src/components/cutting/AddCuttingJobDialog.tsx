@@ -19,7 +19,7 @@ interface Props {
 
 export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }: Props) {
   const { workOrders } = useProduction();
-  const { inventoryItems } = useInventory();
+  const { inventory } = useInventory();
   
   const [form, setForm] = useState({
     workOrderId: '',
@@ -40,7 +40,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
 
   const selectedWO = workOrders.find(w => w.id === form.workOrderId);
   const activeWOs = workOrders.filter(w => w.status !== 'Completed' && w.status !== 'Cancelled');
-  const profileInventory = inventoryItems.filter(i => 
+  const profileInventory = inventory.filter(i => 
     i.productCategory?.includes('Profile') || 
     i.productCategory?.includes('Bar') || 
     i.productCategory?.includes('Tube')
