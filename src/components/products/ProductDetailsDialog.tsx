@@ -92,6 +92,13 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
             <Row label="Alloy Type" value={p.alloy_type || '—'} />
             <Row label="Temper" value={p.temper || '—'} />
             <Row label="Form" value={p.form || '—'} />
+            <Row label="Surface Finish" value={p.surface_finish || '—'} />
+            <Row label="Thermal Break" value={p.has_thermal_break ? 'Yes' : 'No'} />
+            <Row label="U-Value" value={p.u_value || '—'} />
+            <Row label="Wind Load Rating" value={p.wind_load_rating || '—'} />
+            <Row label="STC Rating" value={p.stc_rating || '—'} />
+            <Row label="Fire Rating" value={p.fire_rating || '—'} />
+            <Row label="Warranty (Months)" value={p.warranty_months || '—'} />
             <Row label="Width (mm)" value={p.width?.toLocaleString() || '—'} />
             <Row label="Height/Length (mm)" value={p.length?.toLocaleString() || '—'} />
             <Row label="Thickness (mm)" value={p.thickness || '—'} />
