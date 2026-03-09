@@ -30,6 +30,7 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
     leadTimeDays: '', moq: '',
     profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '',
     fabLaborCost: '', installLaborCost: '', overheadPercent: '',
+    surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '',
   });
 
   useEffect(() => {
