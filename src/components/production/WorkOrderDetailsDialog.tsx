@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertTriangle, ArrowRight, Clock, Package, Users, Scissors, CheckCircle, DollarSign } from "lucide-react";
+import { AlertTriangle, ArrowRight, Clock, Package, Users, Scissors, CheckCircle, DollarSign, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { EnhancedWorkOrder } from "@/data/enhancedProductionData";
 import { stageColors, priorityColors, statusColors, getDaysUntilDue, getEfficiencyColor, formatETBFull, formatETBShort } from "@/data/enhancedProductionData";
 
