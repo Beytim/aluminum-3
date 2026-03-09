@@ -257,6 +257,16 @@ export default function Cutting() {
         job={optimizerJob}
         onApplyOptimization={handleApplyOptimization}
       />
+
+      <EditCuttingJobDialog
+        open={!!editJob}
+        onOpenChange={o => { if (!o) setEditJob(null); }}
+        job={editJob}
+        onSave={updated => {
+          setJobs(prev => prev.map(j => j.id === updated.id ? updated : j));
+          toast({ title: "Job Updated", description: `${updated.jobNumber} saved` });
+        }}
+      />
     </div>
   );
 }
