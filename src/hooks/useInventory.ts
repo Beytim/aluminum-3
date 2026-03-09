@@ -87,7 +87,7 @@ export function useInventory() {
       const { data, error } = await supabase
         .from('inventory_items')
         .insert({
-          product_id: item.productId,
+          product_id: item.productId || null,
           item_code: item.itemCode || `INV-${Date.now()}`,
           stock: item.stock || 0,
           warehouse: item.warehouse || 'Main',
