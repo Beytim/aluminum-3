@@ -290,6 +290,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
                       <TableHead className="text-xs w-24">Type</TableHead>
                       <TableHead className="text-xs">Component</TableHead>
                       <TableHead className="text-xs w-16">Qty</TableHead>
+                      <TableHead className="text-xs w-16">Waste%</TableHead>
                       <TableHead className="text-xs w-16">Unit</TableHead>
                       <TableHead className="text-xs w-20">Cost</TableHead>
                       <TableHead className="text-xs w-20">Total</TableHead>
