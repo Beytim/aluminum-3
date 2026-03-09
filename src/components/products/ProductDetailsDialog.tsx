@@ -120,6 +120,7 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                       <TableHead className="text-xs">Type</TableHead>
                       <TableHead className="text-xs">Component</TableHead>
                       <TableHead className="text-xs text-right">Qty</TableHead>
+                      <TableHead className="text-xs text-right">Waste</TableHead>
                       <TableHead className="text-xs">Unit</TableHead>
                       <TableHead className="text-xs text-right">Cost</TableHead>
                       <TableHead className="text-xs text-right">Total</TableHead>
@@ -131,6 +132,7 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                         <TableCell className="text-xs"><Badge variant="secondary" className="text-[10px]">{b.component_type}</Badge></TableCell>
                         <TableCell className="text-xs">{b.name}</TableCell>
                         <TableCell className="text-xs text-right">{b.quantity}</TableCell>
+                        <TableCell className="text-xs text-right">{b.wastage_percent ? `${b.wastage_percent}%` : '—'}</TableCell>
                         <TableCell className="text-xs">{b.unit}</TableCell>
                         <TableCell className="text-xs text-right">{b.unit_cost.toLocaleString()}</TableCell>
                         <TableCell className="text-xs text-right font-medium">{b.total.toLocaleString()}</TableCell>

@@ -59,6 +59,13 @@ export interface Product {
   date_received: string | null;
   tags: string[];
   notes: string | null;
+  surface_finish?: string | null;
+  has_thermal_break?: boolean | null;
+  u_value?: number | null;
+  wind_load_rating?: string | null;
+  stc_rating?: string | null;
+  fire_rating?: string | null;
+  warranty_months?: number | null;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
@@ -74,6 +81,7 @@ export interface ProductBOM {
   unit: string;
   unit_cost: number;
   total: number;
+  wastage_percent?: number | null;
   inventory_item_id: string | null;
   sort_order: number;
 }
