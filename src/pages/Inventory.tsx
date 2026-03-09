@@ -23,9 +23,7 @@ import { generateReportPDF } from "@/lib/pdfExport";
 import { useInventory } from "@/hooks/useInventory";
 
 export default function Inventory() {
-  const { inventory, isLoading, addItem, deleteItem, addMovement } = useInventory();
-  // We still use local storage for movements and reservations if not fully migrated yet
-  const [movements, setMovements] = useLocalStorage<StockMovement[]>('stock_movements', sampleStockMovements);
+  const { inventory, movements, isLoading, addItem, deleteItem, addMovement } = useInventory();
   const [reservations] = useLocalStorage<StockReservation[]>('stock_reservations', sampleReservations);
 
   const [view, setView] = useState<'grid' | 'table'>('table');
@@ -105,9 +103,6 @@ export default function Inventory() {
   };
 
   const handleMovementConfirm = (movement: StockMovement, updatedItem: EnhancedInventoryItem) => {
-    setMovements(prev => [...prev, movement]);
-    // With DB, the trigger handles stock updates, so we just add the movement
-    // But since the frontend expects movement to trigger a refetch or optimistic update, we can just call our hook
     addMovement(movement);
     toast({
       title: movement.type === 'receipt' ? 'Stock Received' : 'Stock Issued',
