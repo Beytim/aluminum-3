@@ -185,6 +185,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
           unit: b.unit,
           unit_cost: b.unitCost,
           total: b.total,
+          wastage_percent: Number(b.wastagePercent) || null,
           inventory_item_id: null,
           sort_order: 0,
           created_at: new Date().toISOString(),
