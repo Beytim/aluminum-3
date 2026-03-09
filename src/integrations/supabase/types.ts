@@ -1351,6 +1351,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_work_order: {
+        Args: { p_work_order_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1358,6 +1362,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      start_work_order: { Args: { p_work_order_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "manager" | "user"
