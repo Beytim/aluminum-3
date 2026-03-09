@@ -2,7 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Trash2, ArrowRight, AlertTriangle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Eye, Trash2, ArrowRight, AlertTriangle, MoreVertical, FileText, Play, Pause, Ban } from "lucide-react";
 import type { EnhancedWorkOrder } from "@/data/enhancedProductionData";
 import { stageColors, priorityColors, getDaysUntilDue, getDueDateColor, getEfficiencyColor, formatETBShort } from "@/data/enhancedProductionData";
 
@@ -11,9 +12,11 @@ interface Props {
   onView: (wo: EnhancedWorkOrder) => void;
   onAdvance: (id: string) => void;
   onDelete: (id: string) => void;
+  onExportPDF?: (wo: EnhancedWorkOrder) => void;
+  onUpdateStatus?: (id: string, status: string) => void;
 }
 
-export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete }: Props) {
+export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete, onExportPDF, onUpdateStatus }: Props) {
   const daysLeft = getDaysUntilDue(wo.scheduledEnd);
   const dueDateColor = getDueDateColor(wo.scheduledEnd);
   const effColor = wo.variances.efficiency > 0 ? getEfficiencyColor(wo.variances.efficiency) : 'text-muted-foreground';
@@ -30,17 +33,56 @@ export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete }: Pr
               {wo.isBlocked && <span className="text-[9px] px-1 py-0.5 rounded bg-destructive/10 text-destructive">BLOCKED</span>}
             </div>
             <p className="text-sm font-semibold mt-0.5 truncate">{wo.productName}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{wo.projectName}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{wo.customerName || 'No customer'}</p>
           </div>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${priorityColors[wo.priority]}`}>
-            {wo.priority}
-          </span>
+          <div className="flex items-center gap-1">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${priorityColors[wo.priority]}`}>
+              {wo.priority}
+            </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem onClick={() => onView(wo)}>
+                  <Eye className="h-3.5 w-3.5 mr-2" />View Details
+                </DropdownMenuItem>
+                {wo.progress < 100 && wo.status !== 'On Hold' && wo.status !== 'Cancelled' && (
+                  <DropdownMenuItem onClick={() => onAdvance(wo.id)}>
+                    <ArrowRight className="h-3.5 w-3.5 mr-2" />Advance Stage
+                  </DropdownMenuItem>
+                )}
+                {onExportPDF && (
+                  <DropdownMenuItem onClick={() => onExportPDF(wo)}>
+                    <FileText className="h-3.5 w-3.5 mr-2" />Export PDF
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                {onUpdateStatus && wo.status !== 'On Hold' && wo.status !== 'Completed' && wo.status !== 'Cancelled' && (
+                  <DropdownMenuItem onClick={() => onUpdateStatus(wo.id, 'On Hold')}>
+                    <Pause className="h-3.5 w-3.5 mr-2" />Put On Hold
+                  </DropdownMenuItem>
+                )}
+                {onUpdateStatus && wo.status === 'On Hold' && (
+                  <DropdownMenuItem onClick={() => onUpdateStatus(wo.id, 'In Progress')}>
+                    <Play className="h-3.5 w-3.5 mr-2" />Resume
+                  </DropdownMenuItem>
+                )}
+                {onUpdateStatus && wo.status !== 'Cancelled' && wo.status !== 'Completed' && (
+                  <DropdownMenuItem onClick={() => onUpdateStatus(wo.id, 'Cancelled')} className="text-destructive">
+                    <Ban className="h-3.5 w-3.5 mr-2" />Cancel
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onDelete(wo.id)} className="text-destructive">
+                  <Trash2 className="h-3.5 w-3.5 mr-2" />Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-
-        {/* Customer */}
-        {wo.customerName && (
-          <p className="text-[10px] text-muted-foreground">Customer: <strong className="text-foreground">{wo.customerName}</strong></p>
-        )}
 
         {/* Stage & Progress */}
         <div>
@@ -68,27 +110,10 @@ export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete }: Pr
 
         {/* Costs & Efficiency */}
         <div className="grid grid-cols-2 gap-2 text-[10px]">
-          <span className="text-muted-foreground">Cost: <strong className="text-foreground">{formatETBShort(wo.actual.totalCost)}</strong></span>
+          <span className="text-muted-foreground">Est: <strong className="text-foreground">{formatETBShort(wo.estimated.totalCost)}</strong></span>
           {wo.variances.efficiency > 0 && (
             <span className={effColor}>Eff: <strong>{wo.variances.efficiency}%</strong></span>
           )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-between items-center pt-1 border-t border-border">
-          <Button size="sm" variant="ghost" className="text-[10px] h-6 px-2" onClick={(e) => { e.stopPropagation(); onView(wo); }}>
-            <Eye className="h-3 w-3 mr-1" />View
-          </Button>
-          <div className="flex gap-1">
-            {wo.progress < 100 && wo.status !== 'On Hold' && wo.status !== 'Cancelled' && (
-              <Button size="sm" variant="outline" className="text-[10px] h-6 px-2" onClick={(e) => { e.stopPropagation(); onAdvance(wo.id); }}>
-                <ArrowRight className="h-3 w-3 mr-1" />Advance
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); onDelete(wo.id); }}>
-              <Trash2 className="h-3 w-3 text-destructive" />
-            </Button>
-          </div>
         </div>
       </CardContent>
     </Card>

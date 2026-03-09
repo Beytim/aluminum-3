@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutGrid, List, Kanban } from "lucide-react";
+import { Plus, LayoutGrid, List, Kanban, FileText } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 import { calculateProductionStats, getProductionStages } from "@/data/enhancedProductionData";
@@ -14,6 +14,7 @@ import { StageBoard } from "@/components/production/StageBoard";
 import { ProductionBulkActions } from "@/components/production/ProductionBulkActions";
 import { WorkOrderDetailsDialog } from "@/components/production/WorkOrderDetailsDialog";
 import { AddWorkOrderDialog } from "@/components/production/AddWorkOrderDialog";
+import { generateWorkOrderPDF, generateProductionReportPDF } from "@/lib/productionPdfExport";
 
 type ViewMode = 'grid' | 'table' | 'kanban';
 
@@ -88,6 +89,20 @@ export default function Production() {
     toast({ title: "Exported" });
   };
 
+  const handleExportPDF = (wo: EnhancedWorkOrder) => {
+    generateWorkOrderPDF(wo);
+  };
+
+  const handleExportAllPDF = () => {
+    const data = selectedIds.length > 0 ? workOrders.filter(w => selectedIds.includes(w.id)) : filteredWOs;
+    generateProductionReportPDF(data);
+  };
+
+  const handleUpdateStatus = (id: string, status: string) => {
+    updateWorkOrder({ id, updates: { status } });
+    toast({ title: `Status updated to ${status}` });
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -102,6 +117,7 @@ export default function Production() {
             <Button variant={view === 'table' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-none border-x" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
             <Button variant={view === 'kanban' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-l-none" onClick={() => setView('kanban')}><Kanban className="h-3.5 w-3.5" /></Button>
           </div>
+          <Button size="sm" variant="outline" onClick={handleExportAllPDF}><FileText className="h-3.5 w-3.5 mr-1.5" />PDF Report</Button>
           <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Work Order</Button>
         </div>
       </div>
@@ -127,7 +143,7 @@ export default function Production() {
       {view === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredWOs.map(wo => (
-            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={advanceStage} onDelete={handleDelete} />
+            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={advanceStage} onDelete={handleDelete} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
           ))}
         </div>
       )}
