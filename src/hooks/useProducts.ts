@@ -177,8 +177,14 @@ export function useProducts() {
       if (error) throw error;
       
       return (data || []).map((p: any) => {
-        const calculatedStock = p.inventory_items?.reduce((sum: number, item: any) => sum + (Number(item.stock) || 0), 0) ?? p.current_stock;
-        const calculatedReserved = p.inventory_items?.reduce((sum: number, item: any) => sum + (Number(item.reserved) || 0), 0) ?? p.reserved_stock;
+        const hasInventoryItems = p.inventory_items && p.inventory_items.length > 0;
+        const calculatedStock = hasInventoryItems 
+          ? p.inventory_items.reduce((sum: number, item: any) => sum + (Number(item.stock) || 0), 0) 
+          : p.current_stock;
+          
+        const calculatedReserved = hasInventoryItems 
+          ? p.inventory_items.reduce((sum: number, item: any) => sum + (Number(item.reserved) || 0), 0) 
+          : p.reserved_stock;
         
         const { inventory_items, ...rest } = p;
         return {
