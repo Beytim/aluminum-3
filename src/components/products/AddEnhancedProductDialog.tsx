@@ -275,7 +275,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
 
           <TabsContent value="bom" className="space-y-3 mt-3">
             <div className="flex items-center justify-between">
-              <Button size="sm" variant="outline" onClick={() => setBom(prev => [...prev, { id: `BOM-${Date.now()}`, type: 'Profile', name: '', quantity: 0, unit: 'm', unitCost: 0, total: 0 }])} className="h-7 text-xs">
+              <Button size="sm" variant="outline" onClick={() => setBom(prev => [...prev, { id: `BOM-${Date.now()}`, type: 'Profile', name: '', quantity: 0, unit: 'm', unitCost: 0, total: 0, wastagePercent: '' }])} className="h-7 text-xs">
                 <Plus className="h-3 w-3 mr-1" />Add Component
               </Button>
               {bom.length > 0 && (
