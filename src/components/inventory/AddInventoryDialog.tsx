@@ -63,7 +63,7 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
     const item: EnhancedInventoryItem = {
       id: uniqueId, itemCode: uniqueId,
-      productId: selectedProductId || '', productCode: product?.code || id,
+      productId: selectedProductId || '', productCode: product?.code || uniqueId,
       productName: form.name.trim(), productNameAm: form.nameAm.trim() || form.name.trim(),
       category: form.category as any, productType: form.productType as any,
       alloyType: form.alloyType || undefined, temper: form.temper || undefined, color: form.color || undefined,
