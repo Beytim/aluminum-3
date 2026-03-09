@@ -191,7 +191,7 @@ export default function Inventory() {
       />
 
       {/* Bulk Actions */}
-      <InventoryBulkActions count={selectedIds.length} onDelete={handleBulkDelete} onExport={handleExport} onClear={() => setSelectedIds([])} />
+      <InventoryBulkActions count={selectedIds.length} onDelete={handleBulkDelete} onExport={handleExportPDF} onClear={() => setSelectedIds([])} />
 
       {/* Results */}
       <p className="text-xs text-muted-foreground">{filtered.length} of {inventory.length} items</p>
