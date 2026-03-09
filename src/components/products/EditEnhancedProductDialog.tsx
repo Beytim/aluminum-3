@@ -146,6 +146,10 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
       moq: Number(form.moq) || null,
       notes: form.notes || null,
       tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      installation_instructions: form.installationInstructions || null,
+      images: form.images ? form.images.split(',').map(i => i.trim()).filter(Boolean) : [],
+      alternative_products: form.alternativeProducts ? form.alternativeProducts.split(',').map(a => a.trim()).filter(Boolean) : [],
+      certifications: form.certifications ? form.certifications.split(',').map(c => c.trim()).filter(Boolean) : [],
     });
     onOpenChange(false);
   };
