@@ -48,7 +48,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
 
   useEffect(() => {
     if (form.inventoryItemId) {
-      const inv = inventoryItems.find(i => i.id === form.inventoryItemId);
+      const inv = inventory.find(i => i.id === form.inventoryItemId);
       if (inv) {
         setForm(p => ({
           ...p,
@@ -57,7 +57,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
         }));
       }
     }
-  }, [form.inventoryItemId, inventoryItems]);
+  }, [form.inventoryItemId, inventory]);
 
   const handleSubmit = () => {
     if (!form.materialName.trim() || !form.stockLength || !form.cuts) return;

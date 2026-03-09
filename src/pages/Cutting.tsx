@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutGrid, List, Calculator } from "lucide-react";
+import { Plus, LayoutGrid, List, Calculator, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/lib/settingsContext";
-import { enhancedSampleCuttingJobs, calculateCuttingStats } from "@/data/enhancedProductionData";
+import { useCutting } from "@/hooks/useCutting";
 import type { EnhancedCuttingJob } from "@/data/enhancedProductionData";
 import { CuttingStats } from "@/components/cutting/CuttingStats";
 import { CuttingCard } from "@/components/cutting/CuttingCard";
@@ -14,19 +13,24 @@ import { CuttingFilters } from "@/components/cutting/CuttingFilters";
 import { CuttingBulkActions } from "@/components/cutting/CuttingBulkActions";
 import { CuttingDetailsDialog } from "@/components/cutting/CuttingDetailsDialog";
 import { AddCuttingJobDialog } from "@/components/cutting/AddCuttingJobDialog";
-import { OptimizerDialog } from "@/components/cutting/OptimizerDialog";
 import { EditCuttingJobDialog } from "@/components/cutting/EditCuttingJobDialog";
+import { OptimizerDialog } from "@/components/cutting/OptimizerDialog";
 
 type ViewMode = 'grid' | 'table';
 
 export default function Cutting() {
-  const [jobs, setJobs] = useLocalStorage<EnhancedCuttingJob[]>(STORAGE_KEYS.CUTTING_JOBS, enhancedSampleCuttingJobs);
+  const { 
+    cuttingJobs, isLoading, stats,
+    addCuttingJob, updateCuttingJob, deleteCuttingJob, 
+    updateStatus, applyOptimization 
+  } = useCutting();
+  
   const [view, setView] = useState<ViewMode>('table');
   const [addOpen, setAddOpen] = useState(false);
   const [detailsJob, setDetailsJob] = useState<EnhancedCuttingJob | null>(null);
+  const [editJob, setEditJob] = useState<EnhancedCuttingJob | null>(null);
   const [optimizerOpen, setOptimizerOpen] = useState(false);
   const [optimizerJob, setOptimizerJob] = useState<EnhancedCuttingJob | null>(null);
-  const [editJob, setEditJob] = useState<EnhancedCuttingJob | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [quickFilter, setQuickFilter] = useState('all');
   const [filters, setFilters] = useState({
@@ -36,20 +40,18 @@ export default function Cutting() {
   const { toast } = useToast();
   const { formatCurrency } = useSettings();
 
-  const stats = useMemo(() => calculateCuttingStats(jobs), [jobs]);
-
   // Job counts for quick filter badges
   const jobCounts = useMemo(() => ({
-    'all': jobs.length,
-    'Pending': jobs.filter(j => j.status === 'Pending').length,
-    'In Progress': jobs.filter(j => j.status === 'In Progress').length,
-    'Completed': jobs.filter(j => j.status === 'Completed').length,
-    'high-waste': jobs.filter(j => j.wastePercent > 15).length,
-    'optimized': jobs.filter(j => j.optimized).length,
-  }), [jobs]);
+    'all': cuttingJobs.length,
+    'Pending': cuttingJobs.filter(j => j.status === 'Pending').length,
+    'In Progress': cuttingJobs.filter(j => j.status === 'In Progress').length,
+    'Completed': cuttingJobs.filter(j => j.status === 'Completed').length,
+    'high-waste': cuttingJobs.filter(j => j.wastePercent > 15).length,
+    'optimized': cuttingJobs.filter(j => j.optimized).length,
+  }), [cuttingJobs]);
 
   const filteredJobs = useMemo(() => {
-    let result = [...jobs];
+    let result = [...cuttingJobs];
     if (quickFilter === 'Pending') result = result.filter(j => j.status === 'Pending');
     else if (quickFilter === 'In Progress') result = result.filter(j => j.status === 'In Progress');
     else if (quickFilter === 'Completed') result = result.filter(j => j.status === 'Completed');
@@ -72,64 +74,34 @@ export default function Cutting() {
     if (filters.project) result = result.filter(j => j.projectName === filters.project);
 
     return result;
-  }, [jobs, quickFilter, filters]);
+  }, [cuttingJobs, quickFilter, filters]);
 
-  const projectNames = useMemo(() => [...new Set(jobs.map(j => j.projectName).filter(Boolean) as string[])], [jobs]);
-  const machineNames = useMemo(() => [...new Set(jobs.map(j => j.machine).filter(Boolean))], [jobs]);
-
-  const updateStatus = (id: string, status: EnhancedCuttingJob['status']) => {
-    setJobs(prev => prev.map(j => j.id === id ? {
-      ...j, status,
-      startTime: status === 'In Progress' && !j.startTime ? new Date().toISOString() : j.startTime,
-      endTime: status === 'Completed' ? new Date().toISOString() : j.endTime,
-      updatedAt: new Date().toISOString().split('T')[0],
-    } : j));
-    toast({ title: "Status Updated", description: `Job updated to ${status}` });
-  };
+  const projectNames = useMemo(() => [...new Set(cuttingJobs.map(j => j.projectName).filter(Boolean) as string[])], [cuttingJobs]);
+  const machineNames = useMemo(() => [...new Set(cuttingJobs.map(j => j.machine).filter(Boolean))], [cuttingJobs]);
 
   const handleOptimize = (id: string) => {
-    const job = jobs.find(j => j.id === id);
+    const job = cuttingJobs.find(j => j.id === id);
     if (job) { setOptimizerJob(job); setOptimizerOpen(true); }
   };
 
-  const handleApplyOptimization = (jobId: string, layout: number[][], stockNeeded: number, totalWaste: number) => {
-    setJobs(prev => prev.map(j => j.id === jobId ? {
-      ...j,
-      optimized: true,
-      optimizationLayout: layout,
-      stocksUsed: stockNeeded,
-      waste: totalWaste,
-      wastePercent: Number(((totalWaste / (j.stockLength * stockNeeded)) * 100).toFixed(1)),
-      efficiency: Number((((j.totalCutLength) / (j.stockLength * stockNeeded)) * 100).toFixed(1)),
-      updatedAt: new Date().toISOString().split('T')[0],
-    } : j));
-    toast({ title: "Optimization Applied", description: `${stockNeeded} stocks, ${totalWaste}mm waste` });
-  };
-
   const handleDelete = (id: string) => {
-    setJobs(prev => prev.filter(j => j.id !== id));
-    toast({ title: "Cutting Job Deleted" });
+    deleteCuttingJob(id);
   };
 
   const handleBulkDelete = () => {
-    setJobs(prev => prev.filter(j => !selectedIds.includes(j.id)));
+    selectedIds.forEach(id => deleteCuttingJob(id));
     toast({ title: `${selectedIds.length} jobs deleted` });
     setSelectedIds([]);
   };
 
   const handleBulkStatus = (status: EnhancedCuttingJob['status']) => {
-    setJobs(prev => prev.map(j => selectedIds.includes(j.id) ? {
-      ...j, status,
-      startTime: status === 'In Progress' && !j.startTime ? new Date().toISOString() : j.startTime,
-      endTime: status === 'Completed' ? new Date().toISOString() : j.endTime,
-      updatedAt: new Date().toISOString().split('T')[0],
-    } : j));
+    selectedIds.forEach(id => updateStatus(id, status));
     toast({ title: `${selectedIds.length} jobs updated to ${status}` });
     setSelectedIds([]);
   };
 
   const handleExport = () => {
-    const data = selectedIds.length > 0 ? jobs.filter(j => selectedIds.includes(j.id)) : filteredJobs;
+    const data = selectedIds.length > 0 ? cuttingJobs.filter(j => selectedIds.includes(j.id)) : filteredJobs;
     const csv = [
       'Job #,Material,Work Order,Project,Customer,Status,Priority,Cuts,Stock,Waste,Waste%,Efficiency,Machine,Assignee,Cost',
       ...data.map(j =>
@@ -143,6 +115,14 @@ export default function Cutting() {
     toast({ title: "Exported", description: `${data.length} jobs exported to CSV` });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -150,7 +130,7 @@ export default function Cutting() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t('nav.cutting')} Optimization</h1>
           <p className="text-sm text-muted-foreground">
-            {filteredJobs.length} of {jobs.length} cutting jobs · Avg efficiency: {stats.averageEfficiency}% · Avg waste: {stats.averageWastePercent}%
+            {filteredJobs.length} of {cuttingJobs.length} cutting jobs · Avg efficiency: {stats.averageEfficiency}% · Avg waste: {stats.averageWastePercent}%
           </p>
         </div>
         <div className="flex gap-2">
@@ -237,11 +217,8 @@ export default function Cutting() {
       <AddCuttingJobDialog
         open={addOpen}
         onOpenChange={setAddOpen}
-        onAdd={job => {
-          setJobs(prev => [...prev, job]);
-          toast({ title: "Cutting Job Created", description: `${job.jobNumber} — ${job.totalCuts} cuts` });
-        }}
-        existingCount={jobs.length}
+        onAdd={addCuttingJob}
+        existingCount={cuttingJobs.length}
       />
 
       <CuttingDetailsDialog
@@ -256,16 +233,16 @@ export default function Cutting() {
         open={optimizerOpen}
         onOpenChange={setOptimizerOpen}
         job={optimizerJob}
-        onApplyOptimization={handleApplyOptimization}
+        onApplyOptimization={applyOptimization}
       />
 
       <EditCuttingJobDialog
         open={!!editJob}
         onOpenChange={o => { if (!o) setEditJob(null); }}
         job={editJob}
-        onSave={updated => {
-          setJobs(prev => prev.map(j => j.id === updated.id ? updated : j));
-          toast({ title: "Job Updated", description: `${updated.jobNumber} saved` });
+        onSave={(id, updates) => {
+          updateCuttingJob({ id, updates });
+          toast({ title: "Job Updated" });
         }}
       />
     </div>
