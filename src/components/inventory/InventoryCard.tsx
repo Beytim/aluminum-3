@@ -14,9 +14,10 @@ interface Props {
   onDelete: (id: string) => void;
   onReceive: (item: EnhancedInventoryItem) => void;
   onIssue: (item: EnhancedInventoryItem) => void;
+  onExportOne: (item: EnhancedInventoryItem) => void;
 }
 
-export default function InventoryCard({ item, language, onView, onEdit, onDelete, onReceive, onIssue }: Props) {
+export default function InventoryCard({ item, language, onView, onEdit, onDelete, onReceive, onIssue, onExportOne }: Props) {
   const stockPercent = item.maximum > 0 ? Math.min((item.stock / item.maximum) * 100, 100) : 0;
   const isLow = item.stock <= item.minimum && item.stock > 0;
   const isOut = item.stock === 0;
