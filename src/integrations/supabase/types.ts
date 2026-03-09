@@ -1372,6 +1372,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_cutting_job: {
+        Args: { p_cutting_job_id: string }
+        Returns: boolean
+      }
       complete_work_order: {
         Args: { p_work_order_id: string }
         Returns: boolean
