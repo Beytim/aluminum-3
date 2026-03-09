@@ -22,6 +22,7 @@ interface Props {
   onSelect: (id: string) => void;
   onSelectAll: () => void;
   onView: (job: EnhancedCuttingJob) => void;
+  onEdit: (job: EnhancedCuttingJob) => void;
   onOptimize: (id: string) => void;
   onStatusChange: (id: string, status: EnhancedCuttingJob['status']) => void;
   onDelete: (id: string) => void;
