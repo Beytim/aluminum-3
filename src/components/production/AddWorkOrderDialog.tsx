@@ -114,17 +114,17 @@ export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }:
               <Select value={form.productId} onValueChange={v => setForm(p => ({ ...p, productId: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
                 <SelectContent>
-                  {sampleProducts.filter(p => p.status === 'Active').map(p => (
+                  {products.filter(p => p.status === 'Active').map(p => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name} — {p.category}
-                      <span className="text-muted-foreground text-[10px] ml-1">(ETB {p.sellingPrice.toLocaleString()})</span>
+                      <span className="text-muted-foreground text-[10px] ml-1">(ETB {p.selling_price?.toLocaleString()})</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedProduct && (
                 <div className="mt-1 text-[10px] text-muted-foreground">
-                  {selectedProduct.code} · {selectedProduct.profile} · {selectedProduct.laborHrs}h labor · Stock: {selectedProduct.currentStock || 0}
+                  {selectedProduct.code} · {selectedProduct.profile} · {selectedProduct.labor_hrs}h labor · Stock: {selectedProduct.current_stock || 0}
                 </div>
               )}
             </div>
