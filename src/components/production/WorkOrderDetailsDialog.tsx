@@ -17,6 +17,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdvance: (id: string) => void;
+  onUpdateOutput?: (id: string, goodUnits: number, scrap: number, rework: number) => void;
 }
 
 export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAdvance }: Props) {
