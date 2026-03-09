@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Download, Grid3X3, List } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/lib/settingsContext";
 import { generateReportPDF } from "@/lib/pdfExport";
-import { sampleCustomers, sampleProducts } from "@/data/sampleData";
-import type { Customer, Product } from "@/data/sampleData";
+import { useProjects } from "@/hooks/useProjects";
+import { useProducts } from "@/hooks/useProducts";
 import type { EnhancedProject, ProjectStatus } from "@/data/enhancedProjectData";
-import { enhancedSampleProjects, calculateProjectStats, formatETBShort, projectStatusColors } from "@/data/enhancedProjectData";
+import { calculateProjectStats, formatETBShort, projectStatusColors } from "@/data/enhancedProjectData";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectCard } from "@/components/projects/ProjectCard";
@@ -22,9 +23,32 @@ import { AddEnhancedProjectDialog } from "@/components/projects/AddEnhancedProje
 import { EditEnhancedProjectDialog } from "@/components/projects/EditEnhancedProjectDialog";
 
 export default function Projects() {
-  const [projects, setProjects] = useLocalStorage<EnhancedProject[]>(STORAGE_KEYS.PROJECTS, enhancedSampleProjects as any);
-  const [customers] = useLocalStorage<Customer[]>(STORAGE_KEYS.CUSTOMERS, sampleCustomers);
-  const [products] = useLocalStorage<Product[]>(STORAGE_KEYS.PRODUCTS, sampleProducts);
+  const { projects, isLoading, addProject, updateProject, deleteProject, bulkDelete, bulkStatusChange, getNextProjectNumber } = useProjects();
+  const { products } = useProducts();
+
+  // Fetch customers from DB
+  const { data: customers = [] } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('customers').select('*').order('name');
+      if (error) throw error;
+      return (data || []).map(c => ({
+        id: c.id,
+        name: c.name,
+        nameAm: c.name_am,
+        contact: c.contact,
+        phone: c.phone,
+        email: c.email || '',
+        type: c.type,
+        status: c.status,
+        projects: c.projects_count || 0,
+        totalValue: Number(c.total_value) || 0,
+        outstanding: Number(c.outstanding) || 0,
+        lastOrder: c.last_activity_date || '',
+        joinDate: c.customer_since || '',
+      }));
+    },
+  });
 
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -66,20 +90,17 @@ export default function Projects() {
   const clearFilters = () => { setSearch(''); setStatusFilter('all'); setTypeFilter('all'); setRiskFilter('all'); setManagerFilter('all'); };
 
   const handleDelete = (id: string) => {
-    setProjects(prev => prev.filter(p => p.id !== id));
+    deleteProject.mutate(id);
     setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
-    toast({ title: "Deleted", description: "Project removed." });
   };
 
   const handleBulkDelete = () => {
-    setProjects(prev => prev.filter(p => !selectedIds.has(p.id)));
-    toast({ title: "Deleted", description: `${selectedIds.size} projects removed.` });
+    bulkDelete.mutate(Array.from(selectedIds));
     setSelectedIds(new Set());
   };
 
   const handleBulkStatusChange = (status: ProjectStatus) => {
-    setProjects(prev => prev.map(p => selectedIds.has(p.id) ? { ...p, status } : p));
-    toast({ title: "Updated", description: `${selectedIds.size} projects updated to ${status}.` });
+    bulkStatusChange.mutate({ ids: Array.from(selectedIds), status });
     setSelectedIds(new Set());
   };
 
@@ -104,6 +125,14 @@ export default function Projects() {
   const statusBar = Object.entries(stats.byStatus).map(([status, count]) => ({
     status, count, color: projectStatusColors[status]?.replace(/\/10\s.*$/, '').replace('bg-', 'bg-') || 'bg-muted',
   }));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-sm text-muted-foreground">Loading projects...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -182,9 +211,29 @@ export default function Projects() {
       )}
 
       {/* Dialogs */}
-      <AddEnhancedProjectDialog open={dialogOpen} onOpenChange={setDialogOpen} onAdd={p => setProjects(prev => [...prev, p])} customers={customers} products={products} existingCount={projects.length} />
-      <EditEnhancedProjectDialog open={!!editProject} onOpenChange={open => { if (!open) setEditProject(null); }} project={editProject} customers={customers} products={products} onSave={updated => setProjects(prev => prev.map(p => p.id === updated.id ? updated : p))} />
-      <ProjectDetailsDialog open={!!viewProject} onOpenChange={open => { if (!open) setViewProject(null); }} project={viewProject} onEdit={p => { setViewProject(null); setEditProject(p); }} language={language} />
+      <AddEnhancedProjectDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAdd={p => addProject.mutate(p)}
+        customers={customers as any}
+        products={products as any}
+        existingCount={projects.length}
+      />
+      <EditEnhancedProjectDialog
+        open={!!editProject}
+        onOpenChange={open => { if (!open) setEditProject(null); }}
+        project={editProject}
+        customers={customers as any}
+        products={products as any}
+        onSave={updated => updateProject.mutate(updated)}
+      />
+      <ProjectDetailsDialog
+        open={!!viewProject}
+        onOpenChange={open => { if (!open) setViewProject(null); }}
+        project={viewProject}
+        onEdit={p => { setViewProject(null); setEditProject(p); }}
+        language={language}
+      />
     </div>
   );
 }
