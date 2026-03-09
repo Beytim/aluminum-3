@@ -23,9 +23,7 @@ import { generateReportPDF } from "@/lib/pdfExport";
 import { useInventory } from "@/hooks/useInventory";
 
 export default function Inventory() {
-  const { inventory, isLoading, addItem, deleteItem, addMovement } = useInventory();
-  // We still use local storage for movements and reservations if not fully migrated yet
-  const [movements, setMovements] = useLocalStorage<StockMovement[]>('stock_movements', sampleStockMovements);
+  const { inventory, movements, isLoading, addItem, deleteItem, addMovement } = useInventory();
   const [reservations] = useLocalStorage<StockReservation[]>('stock_reservations', sampleReservations);
 
   const [view, setView] = useState<'grid' | 'table'>('table');
