@@ -163,7 +163,7 @@ export default function Production() {
       {view === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredWOs.map(wo => (
-            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={advanceStage} onDelete={handleDelete} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
+            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={handleAdvance} onDelete={handleDelete} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
           ))}
         </div>
       )}
@@ -173,12 +173,12 @@ export default function Production() {
           workOrders={filteredWOs} selectedIds={selectedIds}
           onToggleSelect={(id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
           onSelectAll={() => setSelectedIds(prev => prev.length === filteredWOs.length ? [] : filteredWOs.map(w => w.id))}
-          onView={setDetailsWO} onAdvance={advanceStage} onDelete={handleDelete}
+          onView={setDetailsWO} onAdvance={handleAdvance} onDelete={handleDelete}
         />
       )}
 
       {view === 'kanban' && (
-        <StageBoard workOrders={filteredWOs} onView={setDetailsWO} onAdvance={advanceStage} />
+        <StageBoard workOrders={filteredWOs} onView={setDetailsWO} onAdvance={handleAdvance} />
       )}
 
       {filteredWOs.length === 0 && (
@@ -190,9 +190,16 @@ export default function Production() {
 
       {/* Dialogs */}
       <AddWorkOrderDialog open={addOpen} onOpenChange={setAddOpen} onAdd={addWorkOrder} existingCount={workOrders.length} />
-      <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={advanceStage} onUpdateOutput={(id, good, scrap, rework) => {
+      <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={handleAdvance} onUpdateOutput={(id, good, scrap, rework) => {
         updateWorkOrder({ id, updates: { good_units: good, scrap, rework, remaining: (detailsWO?.quantity || 0) - good - scrap } });
       }} />
+      <RecordOutputDialog
+        open={!!outputWO}
+        onOpenChange={(o) => { if (!o) setOutputWO(null); }}
+        workOrderNumber={outputWO?.workOrderNumber || ''}
+        quantity={outputWO?.quantity || 0}
+        onSave={handleRecordOutputAndComplete}
+      />
     </div>
   );
 }
