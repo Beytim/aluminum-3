@@ -51,6 +51,9 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
         hardwareCost: String(product.hardware_cost || ''), accessoriesCost: String(product.accessories_cost || ''),
         fabLaborCost: String(product.fab_labor_cost || ''), installLaborCost: String(product.install_labor_cost || ''),
         overheadPercent: String(product.overhead_percent || ''),
+        surfaceFinish: product.surface_finish || '', hasThermalBreak: product.has_thermal_break || false,
+        uValue: String(product.u_value || ''), windLoadRating: product.wind_load_rating || '',
+        stcRating: product.stc_rating || '', fireRating: product.fire_rating || '', warrantyMonths: String(product.warranty_months || ''),
       });
       setErrors({});
     }
