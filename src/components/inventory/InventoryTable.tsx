@@ -19,6 +19,7 @@ interface Props {
   onDelete: (id: string) => void;
   onReceive: (item: EnhancedInventoryItem) => void;
   onIssue: (item: EnhancedInventoryItem) => void;
+  onExportOne: (item: EnhancedInventoryItem) => void;
 }
 
 type SortKey = 'itemCode' | 'productName' | 'category' | 'stock' | 'available' | 'unitCost' | 'totalValue';
