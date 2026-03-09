@@ -153,7 +153,7 @@ export default function Production() {
       )}
 
       {/* Dialogs */}
-      <AddWorkOrderDialog open={addOpen} onOpenChange={setAddOpen} onAdd={(wo) => { setWorkOrders(prev => [...prev, wo]); toast({ title: "Work Order Created", description: wo.workOrderNumber }); }} existingCount={workOrders.length} />
+      <AddWorkOrderDialog open={addOpen} onOpenChange={setAddOpen} onAdd={addWorkOrder} existingCount={workOrders.length} />
       <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={advanceStage} />
     </div>
   );
