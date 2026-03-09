@@ -135,7 +135,38 @@ export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAd
               <Card><CardContent className="p-3"><p className="text-[10px] text-muted-foreground">Remaining</p><p className="text-xl font-bold text-warning">{wo.remaining}</p></CardContent></Card>
               <Card><CardContent className="p-3"><p className="text-[10px] text-muted-foreground">Scrap</p><p className="text-xl font-bold text-destructive">{wo.scrap}</p></CardContent></Card>
             </div>
-            {wo.stageHistory.length > 0 && (
+
+            {/* Record Production Output */}
+            {wo.status === 'In Progress' && onUpdateOutput && (
+              <Card className="border-primary/30">
+                <CardContent className="p-3 space-y-3">
+                  <p className="text-xs font-semibold">Record Production Output</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-[10px]">Good Units</Label>
+                      <Input type="number" min={0} max={wo.quantity} value={goodInput} onChange={e => setGoodInput(Number(e.target.value))} className="h-8 text-sm" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Scrap</Label>
+                      <Input type="number" min={0} value={scrapInput} onChange={e => setScrapInput(Number(e.target.value))} className="h-8 text-sm" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Rework</Label>
+                      <Input type="number" min={0} value={reworkInput} onChange={e => setReworkInput(Number(e.target.value))} className="h-8 text-sm" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-muted-foreground">Total: {goodInput + scrapInput + reworkInput} / {wo.quantity}</p>
+                    <Button size="sm" disabled={goodInput <= 0} onClick={() => {
+                      onUpdateOutput(wo.id, goodInput, scrapInput, reworkInput);
+                      setGoodInput(0); setScrapInput(0); setReworkInput(0);
+                    }}>
+                      <Save className="h-3.5 w-3.5 mr-1" />Save Output
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
               <Table>
                 <TableHeader><TableRow>
                   <TableHead className="text-xs">Stage</TableHead>
