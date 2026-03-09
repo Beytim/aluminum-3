@@ -55,6 +55,10 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
         surfaceFinish: product.surface_finish || '', hasThermalBreak: product.has_thermal_break || false,
         uValue: String(product.u_value || ''), windLoadRating: product.wind_load_rating || '',
         stcRating: product.stc_rating || '', fireRating: product.fire_rating || '', warrantyMonths: String(product.warranty_months || ''),
+        installationInstructions: product.installation_instructions || '',
+        images: (product.images || []).join(', '),
+        alternativeProducts: (product.alternative_products || []).join(', '),
+        certifications: (product.certifications || []).join(', '),
       });
       setErrors({});
     }
