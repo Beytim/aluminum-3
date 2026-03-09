@@ -39,12 +39,9 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
   });
 
   const selectedWO = workOrders.find(w => w.id === form.workOrderId);
-  const activeWOs = workOrders.filter(w => w.status !== 'Completed' && w.status !== 'Cancelled');
-  const profileInventory = inventory.filter(i => 
-    i.category?.includes('Profile') || 
-    i.category?.includes('Bar') || 
-    i.category?.includes('Tube')
-  );
+  const activeWOs = workOrders.filter(w => w.status !== 'Cancelled');
+  // Show all inventory items that have stock available for cutting
+  const availableInventory = inventory.filter(i => i.stock > 0 && i.status === 'active');
 
   useEffect(() => {
     if (form.inventoryItemId) {
@@ -169,7 +166,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
               <Select value={form.inventoryItemId} onValueChange={v => setForm(p => ({ ...p, inventoryItemId: v }))}>
                 <SelectTrigger className="h-9"><SelectValue placeholder="Select inventory item (optional)" /></SelectTrigger>
                 <SelectContent>
-                  {profileInventory.map(i => (
+                  {availableInventory.map(i => (
                     <SelectItem key={i.id} value={i.id}>
                       <span className="font-mono text-xs">{i.itemCode}</span> — {i.productName} ({i.stock} {i.primaryUnit})
                     </SelectItem>
