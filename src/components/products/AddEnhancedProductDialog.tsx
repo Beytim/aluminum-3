@@ -308,6 +308,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
                         </TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" value={row.name} onChange={e => setBom(prev => prev.map((r, i) => i === idx ? { ...r, name: e.target.value } : r))} /></TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" type="number" value={row.quantity || ''} onChange={e => { const q = Number(e.target.value); setBom(prev => prev.map((r, i) => i === idx ? { ...r, quantity: q, total: q * r.unitCost } : r)); }} /></TableCell>
+                        <TableCell className="p-1"><Input className="h-7 text-xs" type="number" value={row.wastagePercent || ''} onChange={e => setBom(prev => prev.map((r, i) => i === idx ? { ...r, wastagePercent: e.target.value } : r))} placeholder="%" /></TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" value={row.unit} onChange={e => setBom(prev => prev.map((r, i) => i === idx ? { ...r, unit: e.target.value } : r))} /></TableCell>
                         <TableCell className="p-1"><Input className="h-7 text-xs" type="number" value={row.unitCost || ''} onChange={e => { const c = Number(e.target.value); setBom(prev => prev.map((r, i) => i === idx ? { ...r, unitCost: c, total: r.quantity * c } : r)); }} /></TableCell>
                         <TableCell className="p-1 text-xs font-medium">{row.total.toLocaleString()}</TableCell>
