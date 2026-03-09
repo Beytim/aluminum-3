@@ -172,10 +172,21 @@ export function useProducts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("*, inventory_items(stock, reserved)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as Product[];
+      
+      return (data || []).map((p: any) => {
+        const calculatedStock = p.inventory_items?.reduce((sum: number, item: any) => sum + (Number(item.stock) || 0), 0) ?? p.current_stock;
+        const calculatedReserved = p.inventory_items?.reduce((sum: number, item: any) => sum + (Number(item.reserved) || 0), 0) ?? p.reserved_stock;
+        
+        const { inventory_items, ...rest } = p;
+        return {
+          ...rest,
+          current_stock: calculatedStock,
+          reserved_stock: calculatedReserved
+        };
+      }) as Product[];
     },
   });
 }
