@@ -171,7 +171,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
                 <SelectContent>
                   {profileInventory.map(i => (
                     <SelectItem key={i.id} value={i.id}>
-                      <span className="font-mono text-xs">{i.itemCode}</span> — {i.productName} ({i.stock} {i.unit})
+                      <span className="font-mono text-xs">{i.itemCode}</span> — {i.productName} ({i.stock} {i.primaryUnit})
                     </SelectItem>
                   ))}
                 </SelectContent>
