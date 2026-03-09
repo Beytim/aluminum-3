@@ -29,7 +29,7 @@ export default function Products() {
 
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("finished");
   const [stockFilter, setStockFilter] = useState("all");
   const [marginFilter, setMarginFilter] = useState("all");
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
@@ -41,14 +41,12 @@ export default function Products() {
   const { toast } = useToast();
   const { formatCurrency } = useSettings();
 
-  const stats = useMemo(() => calculateProductStats(products), [products]);
-
   const filtered = useMemo(() => {
     return products.filter(p => {
       const q = search.toLowerCase();
       const matchSearch = !search || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.name_am.includes(search);
       const matchCat = catFilter === "all" || p.category === catFilter;
-      const matchType = typeFilter === "all" || p.product_type === typeFilter;
+      const matchType = typeFilter === "all" || p.product_type === typeFilter || (typeFilter === "finished" && p.product_type !== "Raw Material");
       let matchStock = true;
       if (stockFilter === "low") matchStock = p.current_stock <= p.min_stock && p.current_stock > 0;
       else if (stockFilter === "critical") matchStock = p.current_stock <= p.min_stock * 0.5;
@@ -62,6 +60,8 @@ export default function Products() {
       return matchSearch && matchCat && matchType && matchStock && matchMargin;
     });
   }, [search, catFilter, typeFilter, stockFilter, marginFilter, products]);
+
+  const stats = useMemo(() => calculateProductStats(filtered), [filtered]);
 
   const categories = [...new Set(products.map(p => p.category))];
   const allSelected = filtered.length > 0 && filtered.every(p => selectedIds.has(p.id));
