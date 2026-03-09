@@ -117,6 +117,7 @@ export default function Production() {
             <Button variant={view === 'table' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-none border-x" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
             <Button variant={view === 'kanban' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-l-none" onClick={() => setView('kanban')}><Kanban className="h-3.5 w-3.5" /></Button>
           </div>
+          <Button size="sm" variant="outline" onClick={handleExportAllPDF}><FileText className="h-3.5 w-3.5 mr-1.5" />PDF Report</Button>
           <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" />New Work Order</Button>
         </div>
       </div>
