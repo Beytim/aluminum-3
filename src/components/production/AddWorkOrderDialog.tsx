@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { sampleProducts } from "@/data/sampleData";
 import { enhancedSampleProjects } from "@/data/enhancedProjectData";
 import { enhancedCustomers } from "@/data/enhancedCustomerData";
 import type { EnhancedWorkOrder, WorkOrderPriority } from "@/data/enhancedProductionData";
+import { useProducts } from "@/hooks/useProducts";
 
 interface Props {
   open: boolean;
