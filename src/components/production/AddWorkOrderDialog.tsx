@@ -42,7 +42,7 @@ export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }:
       customerId: selectedProject?.customerId, customerName: selectedProject?.customerName,
       productId: form.productId, productCode: selectedProduct?.code || '',
       productName: selectedProduct?.name || '', productNameAm: selectedProduct?.name_am,
-      productCategory: selectedProduct?.category || '', productType: selectedProduct?.product_type || 'Fabricated',
+      productCategory: selectedProduct?.category || '', productType: (selectedProduct?.product_type as any) || 'Fabricated',
       specifications: {
         profile: selectedProduct?.profile || undefined, glass: selectedProduct?.glass || undefined,
         color: selectedProduct?.colors?.[0], alloyType: selectedProduct?.alloy_type || undefined, temper: selectedProduct?.temper || undefined,
