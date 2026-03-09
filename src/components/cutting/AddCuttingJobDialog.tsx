@@ -41,9 +41,9 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
   const selectedWO = workOrders.find(w => w.id === form.workOrderId);
   const activeWOs = workOrders.filter(w => w.status !== 'Completed' && w.status !== 'Cancelled');
   const profileInventory = inventory.filter(i => 
-    i.productCategory?.includes('Profile') || 
-    i.productCategory?.includes('Bar') || 
-    i.productCategory?.includes('Tube')
+    i.category?.includes('Profile') || 
+    i.category?.includes('Bar') || 
+    i.category?.includes('Tube')
   );
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
         setForm(p => ({
           ...p,
           materialName: inv.productName || inv.itemCode,
-          materialCategory: inv.productCategory || 'Profile',
+          materialCategory: inv.category || 'Profile',
         }));
       }
     }
