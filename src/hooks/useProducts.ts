@@ -66,6 +66,10 @@ export interface Product {
   stc_rating?: string | null;
   fire_rating?: string | null;
   warranty_months?: number | null;
+  installation_instructions?: string | null;
+  images?: string[] | null;
+  alternative_products?: string[] | null;
+  certifications?: string[] | null;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;

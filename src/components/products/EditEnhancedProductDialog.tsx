@@ -31,6 +31,7 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
     profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '',
     fabLaborCost: '', installLaborCost: '', overheadPercent: '',
     surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '',
+    installationInstructions: '', images: '', alternativeProducts: '', certifications: '',
   });
 
   useEffect(() => {
@@ -54,6 +55,10 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
         surfaceFinish: product.surface_finish || '', hasThermalBreak: product.has_thermal_break || false,
         uValue: String(product.u_value || ''), windLoadRating: product.wind_load_rating || '',
         stcRating: product.stc_rating || '', fireRating: product.fire_rating || '', warrantyMonths: String(product.warranty_months || ''),
+        installationInstructions: product.installation_instructions || '',
+        images: (product.images || []).join(', '),
+        alternativeProducts: (product.alternative_products || []).join(', '),
+        certifications: (product.certifications || []).join(', '),
       });
       setErrors({});
     }
@@ -141,6 +146,10 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
       moq: Number(form.moq) || null,
       notes: form.notes || null,
       tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      installation_instructions: form.installationInstructions || null,
+      images: form.images ? form.images.split(',').map(i => i.trim()).filter(Boolean) : [],
+      alternative_products: form.alternativeProducts ? form.alternativeProducts.split(',').map(a => a.trim()).filter(Boolean) : [],
+      certifications: form.certifications ? form.certifications.split(',').map(c => c.trim()).filter(Boolean) : [],
     });
     onOpenChange(false);
   };
@@ -191,6 +200,10 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
               {F('glass', 'Glass')}
               {F('colors', 'Colors (comma-separated)', { span: true })}
               {F('tags', 'Tags (comma-separated)', { span: true })}
+              {F('certifications', 'Certifications (comma-separated)', { span: true })}
+              {F('installationInstructions', 'Installation Instructions URL', { span: true })}
+              {F('images', 'Image URLs (comma-separated)', { span: true })}
+              {F('alternativeProducts', 'Alternative Product IDs (comma-separated)', { span: true })}
               {F('notes', 'Notes', { span: true })}
             </div>
           </TabsContent>

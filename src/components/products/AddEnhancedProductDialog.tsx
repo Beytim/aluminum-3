@@ -40,6 +40,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
     fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '',
     currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '',
     supplierName: '', leadTimeDays: '', moq: '', tags: '',
+    installationInstructions: '', images: '', alternativeProducts: '', certifications: '',
   });
 
   const [bom, setBom] = useState<BOMRow[]>([]);
@@ -129,6 +130,10 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
       stc_rating: form.stcRating || null,
       fire_rating: form.fireRating || null,
       warranty_months: Number(form.warrantyMonths) || null,
+      installation_instructions: form.installationInstructions || null,
+      images: form.images ? form.images.split(',').map(i => i.trim()).filter(Boolean) : [],
+      alternative_products: form.alternativeProducts ? form.alternativeProducts.split(',').map(a => a.trim()).filter(Boolean) : [],
+      certifications: form.certifications ? form.certifications.split(',').map(c => c.trim()).filter(Boolean) : [],
       alloy_type: null,
       temper: null,
       form: null,
@@ -198,7 +203,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
   };
 
   const resetForm = () => {
-    setForm({ name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated', profile: '', glass: '', colors: '', unit: 'pcs', version: '1.0', effectiveDate: '', width: '', height: '', thickness: '', length: '', diameter: '', wallThickness: '', weightPerMeter: '', weightPerPiece: '', laborHrs: '', surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '', profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '', fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '', currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '', supplierName: '', leadTimeDays: '', moq: '', tags: '' });
+    setForm({ name: '', nameAm: '', category: '', subcategory: '', productType: 'Fabricated', profile: '', glass: '', colors: '', unit: 'pcs', version: '1.0', effectiveDate: '', width: '', height: '', thickness: '', length: '', diameter: '', wallThickness: '', weightPerMeter: '', weightPerPiece: '', laborHrs: '', surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '', profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '', fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '', currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '', supplierName: '', leadTimeDays: '', moq: '', tags: '', installationInstructions: '', images: '', alternativeProducts: '', certifications: '' });
     setBom([]);
     setErrors({});
     setTab("basic");
@@ -254,6 +259,10 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
               {F('glass', 'Glass', { placeholder: 'e.g. 6mm Clear Tempered' })}
               {F('colors', 'Colors (comma-separated)', { placeholder: 'White, Black, Bronze', span: true })}
               {F('tags', 'Tags (comma-separated)', { placeholder: 'bestseller, residential', span: true })}
+              {F('certifications', 'Certifications (comma-separated)', { placeholder: 'CE, ISO 9001', span: true })}
+              {F('installationInstructions', 'Installation Instructions URL', { placeholder: 'https://...', span: true })}
+              {F('images', 'Image URLs (comma-separated)', { placeholder: 'https://...', span: true })}
+              {F('alternativeProducts', 'Alternative Product IDs (comma-separated)', { span: true })}
               {F('version', 'Version')}
               {F('effectiveDate', 'Effective Date', { type: 'date' })}
             </div>

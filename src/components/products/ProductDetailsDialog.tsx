@@ -86,6 +86,18 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                 </div>
               } />
             )}
+            {p.certifications && p.certifications.length > 0 && (
+              <Row label="Certifications" value={p.certifications.join(', ')} />
+            )}
+            {p.installation_instructions && (
+              <Row label="Installation" value={<a href={p.installation_instructions} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-center gap-1">View PDF <ExternalLink className="h-3 w-3" /></a>} />
+            )}
+            {p.images && p.images.length > 0 && (
+              <Row label="Images" value={<a href={p.images[0]} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-center gap-1">View ({p.images.length}) <ExternalLink className="h-3 w-3" /></a>} />
+            )}
+            {p.alternative_products && p.alternative_products.length > 0 && (
+              <Row label="Alternatives" value={p.alternative_products.join(', ')} />
+            )}
           </TabsContent>
 
           <TabsContent value="specs" className="mt-3 space-y-1">
