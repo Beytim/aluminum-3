@@ -222,7 +222,7 @@ export default function Inventory() {
               onToggleSelect={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
               onToggleAll={() => setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(i => i.id))}
               onView={handleView} onEdit={handleView} onDelete={handleDelete}
-              onReceive={handleReceive} onIssue={handleIssue}
+              onReceive={handleReceive} onIssue={handleIssue} onExportOne={handleExportOne}
             />
           </CardContent>
         </Card>
