@@ -18,6 +18,7 @@ import InventoryBulkActions from "@/components/inventory/InventoryBulkActions";
 import AddInventoryDialog from "@/components/inventory/AddInventoryDialog";
 import InventoryDetailsDialog from "@/components/inventory/InventoryDetailsDialog";
 import StockMovementDialog from "@/components/inventory/StockMovementDialog";
+import { generateReportPDF } from "@/lib/pdfExport";
 
 import { useInventory } from "@/hooks/useInventory";
 
@@ -114,17 +115,42 @@ export default function Inventory() {
     });
   };
 
-  const handleExport = () => {
+  const handleExportPDF = () => {
     const data = (selectedIds.length > 0 ? filtered.filter(i => selectedIds.includes(i.id)) : filtered);
-    const csv = [
-      ['Code', 'Product', 'Category', 'Stock', 'Reserved', 'Available', 'Unit', 'Unit Cost', 'Total Value', 'Location', 'Status'].join(','),
-      ...data.map(i => [i.itemCode, `"${i.productName}"`, i.category, i.stock, i.reserved, i.available, i.primaryUnit, i.unitCost, i.totalValue, `${i.warehouse}-${i.zone}-${i.rack}`, i.qualityStatus].join(',')),
-    ].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'inventory-export.csv'; a.click();
-    toast({ title: 'Exported', description: `${data.length} items exported to CSV` });
+    generateReportPDF(
+      "Inventory Report",
+      ['Code', 'Product', 'Category', 'Stock', 'Available', 'Unit Cost', 'Total Value'],
+      data.map(i => [
+        i.itemCode,
+        language === 'am' ? i.productNameAm : i.productName,
+        i.category,
+        `${i.stock} ${i.primaryUnit}`,
+        `${i.available} ${i.primaryUnit}`,
+        formatCurrency(i.unitCost),
+        formatCurrency(i.totalValue)
+      ])
+    );
+    toast({ title: 'Exported', description: `${data.length} items exported to PDF` });
+  };
+
+  const handleExportOne = (item: EnhancedInventoryItem) => {
+    generateReportPDF(
+      `Inventory Item: ${item.itemCode}`,
+      ['Property', 'Value'],
+      [
+        ['Code', item.itemCode],
+        ['Name', language === 'am' ? item.productNameAm : item.productName],
+        ['Category', item.category],
+        ['Stock', `${item.stock} ${item.primaryUnit}`],
+        ['Available', `${item.available} ${item.primaryUnit}`],
+        ['Location', `${item.warehouse}-${item.zone}-${item.rack}`],
+        ['Unit Cost', formatCurrency(item.unitCost)],
+        ['Total Value', formatCurrency(item.totalValue)],
+        ['Status', item.status],
+        ['Quality', item.qualityStatus],
+      ]
+    );
+    toast({ title: 'Exported', description: `${item.itemCode} details exported to PDF` });
   };
 
   return (
@@ -143,7 +169,7 @@ export default function Inventory() {
             <Button variant={view === 'grid' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-r-none" onClick={() => setView('grid')}><LayoutGrid className="h-3.5 w-3.5" /></Button>
             <Button variant={view === 'table' ? 'default' : 'ghost'} size="icon" className="h-8 w-8 rounded-l-none" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
           </div>
-          <Button variant="outline" size="sm" onClick={handleExport}><Download className="h-3.5 w-3.5 mr-1" />Export</Button>
+          <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="h-3.5 w-3.5 mr-1" />Export PDF</Button>
           <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5 mr-1" />Add Item</Button>
         </div>
       </div>
@@ -164,7 +190,7 @@ export default function Inventory() {
       />
 
       {/* Bulk Actions */}
-      <InventoryBulkActions count={selectedIds.length} onDelete={handleBulkDelete} onExport={handleExport} onClear={() => setSelectedIds([])} />
+      <InventoryBulkActions count={selectedIds.length} onDelete={handleBulkDelete} onExport={handleExportPDF} onClear={() => setSelectedIds([])} />
 
       {/* Results */}
       <p className="text-xs text-muted-foreground">{filtered.length} of {inventory.length} items</p>
@@ -183,7 +209,7 @@ export default function Inventory() {
       ) : view === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {filtered.map(item => (
-            <InventoryCard key={item.id} item={item} language={language} onView={handleView} onEdit={handleView} onDelete={handleDelete} onReceive={handleReceive} onIssue={handleIssue} />
+            <InventoryCard key={item.id} item={item} language={language} onView={handleView} onEdit={handleView} onDelete={handleDelete} onReceive={handleReceive} onIssue={handleIssue} onExportOne={handleExportOne} />
           ))}
         </div>
       ) : (
@@ -195,7 +221,7 @@ export default function Inventory() {
               onToggleSelect={id => setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
               onToggleAll={() => setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(i => i.id))}
               onView={handleView} onEdit={handleView} onDelete={handleDelete}
-              onReceive={handleReceive} onIssue={handleIssue}
+              onReceive={handleReceive} onIssue={handleIssue} onExportOne={handleExportOne}
             />
           </CardContent>
         </Card>

@@ -1,27 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { Trash2, Download, ArrowRightLeft, ShieldAlert } from "lucide-react";
+import { Download, Trash2, X } from "lucide-react";
 
 interface Props {
   count: number;
-  onDelete: () => void;
-  onExport: () => void;
   onClear: () => void;
+  onExport: () => void;
+  onDelete: () => void;
 }
 
-export default function InventoryBulkActions({ count, onDelete, onExport, onClear }: Props) {
+export default function InventoryBulkActions({ count, onClear, onExport, onDelete }: Props) {
   if (count === 0) return null;
-
   return (
-    <div className="flex items-center gap-2 p-2 bg-primary/5 border border-primary/20 rounded-lg">
-      <span className="text-xs font-medium text-primary">{count} selected</span>
-      <div className="flex-1" />
-      <Button variant="outline" size="sm" onClick={onExport}>
-        <Download className="h-3.5 w-3.5 mr-1" />Export
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-lg shadow-lg px-4 py-2 flex items-center gap-3 animate-in slide-in-from-bottom-4">
+      <span className="text-xs font-medium">{count} selected</span>
+      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onExport}>
+        <Download className="h-3 w-3 mr-1" />Export PDF
       </Button>
-      <Button variant="destructive" size="sm" onClick={onDelete}>
-        <Trash2 className="h-3.5 w-3.5 mr-1" />Delete
+      <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={onDelete}>
+        <Trash2 className="h-3 w-3 mr-1" />Delete
       </Button>
-      <Button variant="ghost" size="sm" onClick={onClear}>Clear</Button>
+      <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={onClear}>
+        <X className="h-3.5 w-3.5" />
+      </Button>
     </div>
   );
 }

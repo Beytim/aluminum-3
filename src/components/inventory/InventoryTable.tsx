@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Edit, Trash2, ArrowUpDown, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Eye, Edit, Trash2, ArrowUpDown, ArrowDownToLine, ArrowUpFromLine, MoreVertical, Download } from "lucide-react";
 import { formatETBShort, formatLocation, getStockStatusColor, getStockStatusLabel, getQualityStatusColor, type EnhancedInventoryItem } from "@/data/enhancedInventoryData";
 
 interface Props {
@@ -18,11 +19,12 @@ interface Props {
   onDelete: (id: string) => void;
   onReceive: (item: EnhancedInventoryItem) => void;
   onIssue: (item: EnhancedInventoryItem) => void;
+  onExportOne: (item: EnhancedInventoryItem) => void;
 }
 
 type SortKey = 'itemCode' | 'productName' | 'category' | 'stock' | 'available' | 'unitCost' | 'totalValue';
 
-export default function InventoryTable({ items, language, selectedIds, onToggleSelect, onToggleAll, onView, onEdit, onDelete, onReceive, onIssue }: Props) {
+export default function InventoryTable({ items, language, selectedIds, onToggleSelect, onToggleAll, onView, onEdit, onDelete, onReceive, onIssue, onExportOne }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('itemCode');
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -103,13 +105,33 @@ export default function InventoryTable({ items, language, selectedIds, onToggleS
               <TableCell><Badge className={`text-[9px] ${getQualityStatusColor(item.qualityStatus)}`}>{item.qualityStatus}</Badge></TableCell>
               <TableCell><Badge className={`text-[9px] ${getStockStatusColor(item)}`}>{getStockStatusLabel(item)}</Badge></TableCell>
               <TableCell onClick={e => e.stopPropagation()}>
-                <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReceive(item)}><ArrowDownToLine className="h-3 w-3 text-success" /></Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onIssue(item)}><ArrowUpFromLine className="h-3 w-3 text-warning" /></Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onView(item)}><Eye className="h-3 w-3" /></Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEdit(item)}><Edit className="h-3 w-3" /></Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDelete(item.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0"><MoreVertical className="h-4 w-4" /></Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onReceive(item)}>
+                      <ArrowDownToLine className="h-4 w-4 mr-2 text-success" /> Receive Stock
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onIssue(item)}>
+                      <ArrowUpFromLine className="h-4 w-4 mr-2 text-warning" /> Issue Stock
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onView(item)}>
+                      <Eye className="h-4 w-4 mr-2" /> View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEdit(item)}>
+                      <Edit className="h-4 w-4 mr-2" /> Edit Item
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onExportOne(item)}>
+                      <Download className="h-4 w-4 mr-2" /> Export to PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive" onClick={() => onDelete(item.id)}>
+                      <Trash2 className="h-4 w-4 mr-2" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           );
