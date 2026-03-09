@@ -1,11 +1,29 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, Copy, AlertTriangle, ExternalLink } from "lucide-react";
-import type { Product, ProductBOM, ProductPriceHistory } from "@/hooks/useProducts";
-import { calcTotalCost, calcMargin, useProductBOM, useProductPriceHistory } from "@/hooks/useProducts";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Pencil, Copy, AlertTriangle, ExternalLink, Plus, Trash2, Save, Loader2 } from "lucide-react";
+import type { Product, ProductBOM } from "@/hooks/useProducts";
+import { calcTotalCost, calcMargin, useProductBOM, useProductPriceHistory, useSaveBOM } from "@/hooks/useProducts";
+import { useInventory } from "@/hooks/useInventory";
+import { useToast } from "@/hooks/use-toast";
+
+const componentTypes = ['Profile', 'Hardware', 'Glass', 'Accessory', 'Other'] as const;
+
+interface BOMRow {
+  component_type: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  unit_cost: number;
+  total: number;
+  inventory_item_id: string | null;
+  sort_order: number;
+}
 
 interface Props {
   open: boolean;
@@ -19,6 +37,70 @@ interface Props {
 export default function ProductDetailsDialog({ open, onOpenChange, product: p, onEdit, onClone, language }: Props) {
   const { data: bom = [] } = useProductBOM(p?.id ?? null);
   const { data: priceHistory = [] } = useProductPriceHistory(p?.id ?? null);
+  const { inventory } = useInventory();
+  const saveBOM = useSaveBOM();
+  const { toast } = useToast();
+
+  const [editingBOM, setEditingBOM] = useState(false);
+  const [bomRows, setBomRows] = useState<BOMRow[]>([]);
+
+  const startEditBOM = () => {
+    setBomRows(bom.map(b => ({
+      component_type: b.component_type,
+      name: b.name,
+      quantity: b.quantity,
+      unit: b.unit,
+      unit_cost: b.unit_cost,
+      total: b.total,
+      inventory_item_id: b.inventory_item_id,
+      sort_order: b.sort_order,
+    })));
+    setEditingBOM(true);
+  };
+
+  const addBOMRow = () => {
+    setBomRows(prev => [...prev, {
+      component_type: 'Profile',
+      name: '',
+      quantity: 0,
+      unit: 'm',
+      unit_cost: 0,
+      total: 0,
+      inventory_item_id: null,
+      sort_order: prev.length,
+    }]);
+  };
+
+  const updateBOMRow = (idx: number, field: keyof BOMRow, value: any) => {
+    setBomRows(prev => prev.map((row, i) => {
+      if (i !== idx) return row;
+      const updated = { ...row, [field]: value };
+      if (field === 'quantity' || field === 'unit_cost') {
+        updated.total = Number(updated.quantity) * Number(updated.unit_cost);
+      }
+      if (field === 'inventory_item_id' && value) {
+        const inv = inventory.find(item => item.id === value);
+        if (inv) {
+          updated.name = inv.productName;
+          updated.unit_cost = inv.unitCost;
+          updated.total = Number(updated.quantity) * inv.unitCost;
+        }
+      }
+      return updated;
+    }));
+  };
+
+  const removeBOMRow = (idx: number) => {
+    setBomRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveBOM = async () => {
+    if (!p) return;
+    const valid = bomRows.filter(r => r.name.trim());
+    await saveBOM.mutateAsync({ productId: p.id, bom: valid });
+    setEditingBOM(false);
+    toast({ title: "BOM Saved", description: `${valid.length} components saved.` });
+  };
 
   if (!p) return null;
 
@@ -35,7 +117,7 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) setEditingBOM(false); onOpenChange(o); }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start justify-between gap-2">
@@ -58,7 +140,7 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
           <TabsList className="grid w-full grid-cols-4 h-8">
             <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
             <TabsTrigger value="specs" className="text-xs">Specs</TabsTrigger>
-            <TabsTrigger value="bom" className="text-xs">BOM</TabsTrigger>
+            <TabsTrigger value="bom" className="text-xs">BOM ({bom.length})</TabsTrigger>
             <TabsTrigger value="pricing" className="text-xs">Pricing</TabsTrigger>
           </TabsList>
 
@@ -104,13 +186,6 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
             <Row label="Alloy Type" value={p.alloy_type || '—'} />
             <Row label="Temper" value={p.temper || '—'} />
             <Row label="Form" value={p.form || '—'} />
-            <Row label="Surface Finish" value={p.surface_finish || '—'} />
-            <Row label="Thermal Break" value={p.has_thermal_break ? 'Yes' : 'No'} />
-            <Row label="U-Value" value={p.u_value || '—'} />
-            <Row label="Wind Load Rating" value={p.wind_load_rating || '—'} />
-            <Row label="STC Rating" value={p.stc_rating || '—'} />
-            <Row label="Fire Rating" value={p.fire_rating || '—'} />
-            <Row label="Warranty (Months)" value={p.warranty_months || '—'} />
             <Row label="Width (mm)" value={p.width?.toLocaleString() || '—'} />
             <Row label="Height/Length (mm)" value={p.length?.toLocaleString() || '—'} />
             <Row label="Thickness (mm)" value={p.thickness || '—'} />
@@ -124,7 +199,81 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
           </TabsContent>
 
           <TabsContent value="bom" className="mt-3">
-            {bom.length > 0 ? (
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold">Bill of Materials</p>
+              {!editingBOM ? (
+                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={startEditBOM}>
+                  <Pencil className="h-3 w-3 mr-1" />Edit BOM
+                </Button>
+              ) : (
+                <div className="flex gap-1.5">
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setEditingBOM(false)}>Cancel</Button>
+                  <Button size="sm" className="h-7 text-xs" onClick={handleSaveBOM} disabled={saveBOM.isPending}>
+                    {saveBOM.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+                    Save BOM
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {editingBOM ? (
+              <div className="space-y-2">
+                {bomRows.map((row, idx) => (
+                  <div key={idx} className="grid grid-cols-12 gap-1.5 items-end border rounded-md p-2 bg-muted/30">
+                    <div className="col-span-2">
+                      <label className="text-[10px] text-muted-foreground">Type</label>
+                      <Select value={row.component_type} onValueChange={v => updateBOMRow(idx, 'component_type', v)}>
+                        <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>{componentTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-3">
+                      <label className="text-[10px] text-muted-foreground">Inventory Item</label>
+                      <Select value={row.inventory_item_id || '__none__'} onValueChange={v => updateBOMRow(idx, 'inventory_item_id', v === '__none__' ? null : v)}>
+                        <SelectTrigger className="h-7 text-[11px]"><SelectValue placeholder="Manual" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">— Manual entry —</SelectItem>
+                          {inventory.filter(i => i.status === 'active').map(i => (
+                            <SelectItem key={i.id} value={i.id}>{i.itemCode} - {i.productName}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] text-muted-foreground">Name</label>
+                      <Input className="h-7 text-[11px]" value={row.name} onChange={e => updateBOMRow(idx, 'name', e.target.value)} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="text-[10px] text-muted-foreground">Qty</label>
+                      <Input type="number" className="h-7 text-[11px]" value={row.quantity} onChange={e => updateBOMRow(idx, 'quantity', Number(e.target.value))} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="text-[10px] text-muted-foreground">Unit</label>
+                      <Input className="h-7 text-[11px]" value={row.unit} onChange={e => updateBOMRow(idx, 'unit', e.target.value)} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="text-[10px] text-muted-foreground">Cost</label>
+                      <Input type="number" className="h-7 text-[11px]" value={row.unit_cost} onChange={e => updateBOMRow(idx, 'unit_cost', Number(e.target.value))} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="text-[10px] text-muted-foreground">Total</label>
+                      <p className="h-7 flex items-center text-[11px] font-medium">{row.total.toLocaleString()}</p>
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeBOMRow(idx)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <Button size="sm" variant="outline" className="w-full h-8 text-xs" onClick={addBOMRow}>
+                  <Plus className="h-3 w-3 mr-1" />Add Component
+                </Button>
+                <div className="text-right text-xs font-semibold pt-1">
+                  BOM Total: ETB {bomRows.reduce((s, r) => s + r.total, 0).toLocaleString()}
+                </div>
+              </div>
+            ) : bom.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -132,7 +281,6 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                       <TableHead className="text-xs">Type</TableHead>
                       <TableHead className="text-xs">Component</TableHead>
                       <TableHead className="text-xs text-right">Qty</TableHead>
-                      <TableHead className="text-xs text-right">Waste</TableHead>
                       <TableHead className="text-xs">Unit</TableHead>
                       <TableHead className="text-xs text-right">Cost</TableHead>
                       <TableHead className="text-xs text-right">Total</TableHead>
@@ -144,7 +292,6 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                         <TableCell className="text-xs"><Badge variant="secondary" className="text-[10px]">{b.component_type}</Badge></TableCell>
                         <TableCell className="text-xs">{b.name}</TableCell>
                         <TableCell className="text-xs text-right">{b.quantity}</TableCell>
-                        <TableCell className="text-xs text-right">{b.wastage_percent ? `${b.wastage_percent}%` : '—'}</TableCell>
                         <TableCell className="text-xs">{b.unit}</TableCell>
                         <TableCell className="text-xs text-right">{b.unit_cost.toLocaleString()}</TableCell>
                         <TableCell className="text-xs text-right font-medium">{b.total.toLocaleString()}</TableCell>
@@ -155,7 +302,12 @@ export default function ProductDetailsDialog({ open, onOpenChange, product: p, o
                 <div className="text-right text-xs font-semibold pt-2">BOM Total: ETB {bom.reduce((s, b) => s + b.total, 0).toLocaleString()}</div>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground text-center py-6">No BOM defined for this product.</p>
+              <div className="text-center py-6">
+                <p className="text-xs text-muted-foreground mb-2">No BOM defined for this product.</p>
+                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={startEditBOM}>
+                  <Plus className="h-3 w-3 mr-1" />Create BOM
+                </Button>
+              </div>
             )}
           </TabsContent>
 
