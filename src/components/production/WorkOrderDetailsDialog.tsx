@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertTriangle, ArrowRight, Clock, Package, Users, Scissors, CheckCircle, DollarSign } from "lucide-react";
+import { AlertTriangle, ArrowRight, Clock, Package, Users, Scissors, CheckCircle, DollarSign, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { EnhancedWorkOrder } from "@/data/enhancedProductionData";
 import { stageColors, priorityColors, statusColors, getDaysUntilDue, getEfficiencyColor, formatETBFull, formatETBShort } from "@/data/enhancedProductionData";
 
@@ -14,9 +17,14 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdvance: (id: string) => void;
+  onUpdateOutput?: (id: string, goodUnits: number, scrap: number, rework: number) => void;
 }
 
-export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAdvance }: Props) {
+export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAdvance, onUpdateOutput }: Props) {
+  const [goodInput, setGoodInput] = useState(0);
+  const [scrapInput, setScrapInput] = useState(0);
+  const [reworkInput, setReworkInput] = useState(0);
+
   if (!wo) return null;
 
   const daysLeft = getDaysUntilDue(wo.scheduledEnd);
@@ -127,6 +135,38 @@ export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAd
               <Card><CardContent className="p-3"><p className="text-[10px] text-muted-foreground">Remaining</p><p className="text-xl font-bold text-warning">{wo.remaining}</p></CardContent></Card>
               <Card><CardContent className="p-3"><p className="text-[10px] text-muted-foreground">Scrap</p><p className="text-xl font-bold text-destructive">{wo.scrap}</p></CardContent></Card>
             </div>
+
+            {/* Record Production Output */}
+            {wo.status === 'In Progress' && onUpdateOutput && (
+              <Card className="border-primary/30">
+                <CardContent className="p-3 space-y-3">
+                  <p className="text-xs font-semibold">Record Production Output</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-[10px]">Good Units</Label>
+                      <Input type="number" min={0} max={wo.quantity} value={goodInput} onChange={e => setGoodInput(Number(e.target.value))} className="h-8 text-sm" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Scrap</Label>
+                      <Input type="number" min={0} value={scrapInput} onChange={e => setScrapInput(Number(e.target.value))} className="h-8 text-sm" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Rework</Label>
+                      <Input type="number" min={0} value={reworkInput} onChange={e => setReworkInput(Number(e.target.value))} className="h-8 text-sm" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-muted-foreground">Total: {goodInput + scrapInput + reworkInput} / {wo.quantity}</p>
+                    <Button size="sm" disabled={goodInput <= 0} onClick={() => {
+                      onUpdateOutput(wo.id, goodInput, scrapInput, reworkInput);
+                      setGoodInput(0); setScrapInput(0); setReworkInput(0);
+                    }}>
+                      <Save className="h-3.5 w-3.5 mr-1" />Save Output
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {wo.stageHistory.length > 0 && (
               <Table>
                 <TableHeader><TableRow>
