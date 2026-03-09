@@ -170,7 +170,9 @@ export default function Production() {
 
       {/* Dialogs */}
       <AddWorkOrderDialog open={addOpen} onOpenChange={setAddOpen} onAdd={addWorkOrder} existingCount={workOrders.length} />
-      <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={advanceStage} />
+      <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={advanceStage} onUpdateOutput={(id, good, scrap, rework) => {
+        updateWorkOrder({ id, updates: { good_units: good, scrap, rework, remaining: (detailsWO?.quantity || 0) - good - scrap } });
+      }} />
     </div>
   );
 }
