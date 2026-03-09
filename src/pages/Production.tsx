@@ -15,6 +15,7 @@ import { ProductionBulkActions } from "@/components/production/ProductionBulkAct
 import { WorkOrderDetailsDialog } from "@/components/production/WorkOrderDetailsDialog";
 import { AddWorkOrderDialog } from "@/components/production/AddWorkOrderDialog";
 import { RecordOutputDialog } from "@/components/production/RecordOutputDialog";
+import { EditWorkOrderDialog } from "@/components/production/EditWorkOrderDialog";
 import { generateWorkOrderPDF, generateProductionReportPDF } from "@/lib/productionPdfExport";
 
 type ViewMode = 'grid' | 'table' | 'kanban';
@@ -24,6 +25,7 @@ export default function Production() {
   const [view, setView] = useState<ViewMode>('grid');
   const [addOpen, setAddOpen] = useState(false);
   const [detailsWO, setDetailsWO] = useState<EnhancedWorkOrder | null>(null);
+  const [editWO, setEditWO] = useState<EnhancedWorkOrder | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [outputWO, setOutputWO] = useState<EnhancedWorkOrder | null>(null);
   const [quickFilter, setQuickFilter] = useState('all');
