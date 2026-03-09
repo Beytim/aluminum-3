@@ -50,7 +50,6 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
   const handleSubmit = () => {
     const e: Record<string, string> = {};
-    if (!selectedProductId) e.productId = 'Required';
     if (!form.name.trim()) e.name = 'Required';
     if (!form.stock || Number(form.stock) < 0) e.stock = 'Invalid';
     if (!form.unitCost || Number(form.unitCost) <= 0) e.unitCost = 'Required';
