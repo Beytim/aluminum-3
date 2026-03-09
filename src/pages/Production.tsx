@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutGrid, List, Kanban } from "lucide-react";
+import { Plus, LayoutGrid, List, Kanban, FileText } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 import { calculateProductionStats, getProductionStages } from "@/data/enhancedProductionData";
@@ -14,6 +14,7 @@ import { StageBoard } from "@/components/production/StageBoard";
 import { ProductionBulkActions } from "@/components/production/ProductionBulkActions";
 import { WorkOrderDetailsDialog } from "@/components/production/WorkOrderDetailsDialog";
 import { AddWorkOrderDialog } from "@/components/production/AddWorkOrderDialog";
+import { generateWorkOrderPDF, generateProductionReportPDF } from "@/lib/productionPdfExport";
 
 type ViewMode = 'grid' | 'table' | 'kanban';
 
