@@ -752,8 +752,10 @@ export type Database = {
         Row: {
           accessories_cost: number
           alloy_type: string | null
+          alternative_products: string[] | null
           batch_number: string | null
           category: Database["public"]["Enums"]["product_category"]
+          certifications: string[] | null
           code: string
           colors: string[] | null
           created_at: string
@@ -770,8 +772,10 @@ export type Database = {
           hardware_cost: number
           height: number | null
           id: string
+          images: string[] | null
           inspection_required: boolean
           install_labor_cost: number
+          installation_instructions: string | null
           labor_hrs: number
           lead_time_days: number | null
           length: number | null
@@ -811,8 +815,10 @@ export type Database = {
         Insert: {
           accessories_cost?: number
           alloy_type?: string | null
+          alternative_products?: string[] | null
           batch_number?: string | null
           category: Database["public"]["Enums"]["product_category"]
+          certifications?: string[] | null
           code: string
           colors?: string[] | null
           created_at?: string
@@ -829,8 +835,10 @@ export type Database = {
           hardware_cost?: number
           height?: number | null
           id?: string
+          images?: string[] | null
           inspection_required?: boolean
           install_labor_cost?: number
+          installation_instructions?: string | null
           labor_hrs?: number
           lead_time_days?: number | null
           length?: number | null
@@ -870,8 +878,10 @@ export type Database = {
         Update: {
           accessories_cost?: number
           alloy_type?: string | null
+          alternative_products?: string[] | null
           batch_number?: string | null
           category?: Database["public"]["Enums"]["product_category"]
+          certifications?: string[] | null
           code?: string
           colors?: string[] | null
           created_at?: string
@@ -888,8 +898,10 @@ export type Database = {
           hardware_cost?: number
           height?: number | null
           id?: string
+          images?: string[] | null
           inspection_required?: boolean
           install_labor_cost?: number
+          installation_instructions?: string | null
           labor_hrs?: number
           lead_time_days?: number | null
           length?: number | null
