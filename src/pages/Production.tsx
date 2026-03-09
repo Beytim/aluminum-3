@@ -58,52 +58,22 @@ export default function Production() {
   const projectNames = useMemo(() => [...new Set(workOrders.map(w => w.projectName))], [workOrders]);
   const teamNames = useMemo(() => [...new Set(workOrders.map(w => w.assignedTeam).filter(Boolean) as string[])], [workOrders]);
 
-  const advanceStage = (id: string) => {
-    setWorkOrders(prev => prev.map(wo => {
-      if (wo.id !== id) return wo;
-      const idx = stages.indexOf(wo.currentStage);
-      if (idx >= 0 && idx < stages.length - 1) {
-        const nextStage = stages[idx + 1];
-        const now = new Date().toISOString().split('T')[0];
-        const newHistory = [...wo.stageHistory];
-        if (newHistory.length > 0 && !newHistory[newHistory.length - 1].exitedAt) {
-          newHistory[newHistory.length - 1].exitedAt = now;
-        }
-        newHistory.push({ stage: nextStage, enteredAt: now });
-        const newProgress = Math.min(100, wo.progress + Math.round(100 / stages.length));
-        return {
-          ...wo, currentStage: nextStage, stageHistory: newHistory,
-          progress: nextStage === 'Completed' ? 100 : newProgress,
-          status: nextStage === 'Completed' ? 'Completed' as const : 'In Progress' as const,
-          actualEnd: nextStage === 'Completed' ? now : undefined,
-          updatedAt: now,
-        };
-      }
-      return wo;
-    }));
-    toast({ title: "Stage Advanced" });
-  };
-
   const handleDelete = (id: string) => {
-    setWorkOrders(prev => prev.filter(w => w.id !== id));
-    toast({ title: "Work Order Deleted" });
+    deleteWorkOrder(id);
   };
 
   const handleBulkDelete = () => {
-    setWorkOrders(prev => prev.filter(w => !selectedIds.includes(w.id)));
-    toast({ title: `${selectedIds.length} work orders deleted` });
+    selectedIds.forEach(id => deleteWorkOrder(id));
     setSelectedIds([]);
   };
 
   const handleBulkStageChange = (stage: ProductionStage) => {
-    setWorkOrders(prev => prev.map(w => selectedIds.includes(w.id) ? { ...w, currentStage: stage, updatedAt: new Date().toISOString().split('T')[0] } : w));
-    toast({ title: `${selectedIds.length} work orders moved to ${stage}` });
+    selectedIds.forEach(id => updateWorkOrder({ id, updates: { current_stage: stage } }));
     setSelectedIds([]);
   };
 
   const handleBulkPriorityChange = (priority: WorkOrderPriority) => {
-    setWorkOrders(prev => prev.map(w => selectedIds.includes(w.id) ? { ...w, priority, updatedAt: new Date().toISOString().split('T')[0] } : w));
-    toast({ title: `Priority updated for ${selectedIds.length} work orders` });
+    selectedIds.forEach(id => updateWorkOrder({ id, updates: { priority } }));
     setSelectedIds([]);
   };
 
