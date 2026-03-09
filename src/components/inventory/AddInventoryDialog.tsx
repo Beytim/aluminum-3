@@ -109,9 +109,9 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
           <TabsContent value="basic" className="space-y-3 mt-3">
             <div>
-              <Label className={`text-xs ${errors.productId ? 'text-destructive' : ''}`}>Link to Product *</Label>
+              <Label className="text-xs">Link to Product</Label>
               <Select value={selectedProductId} onValueChange={handleProductSelect}>
-                <SelectTrigger className={errors.productId ? 'border-destructive' : ''}><SelectValue placeholder="Select product" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select product (optional)" /></SelectTrigger>
                 <SelectContent>
                   {products.filter(p => p.product_type === 'Raw Material').map(p => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}
                 </SelectContent>
