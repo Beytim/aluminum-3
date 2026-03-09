@@ -2,7 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Edit, Trash2, ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Eye, Edit, Trash2, ArrowDownToLine, ArrowUpFromLine, MoreVertical, Download } from "lucide-react";
 import { formatETBShort, formatLocation, getStockStatusColor, getStockStatusLabel, getQualityStatusColor, type EnhancedInventoryItem } from "@/data/enhancedInventoryData";
 
 interface Props {
