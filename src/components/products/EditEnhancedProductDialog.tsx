@@ -161,8 +161,9 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Edit Product</DialogTitle></DialogHeader>
         <Tabs defaultValue="basic">
-          <TabsList className="grid w-full grid-cols-4 h-8">
+          <TabsList className="grid w-full grid-cols-5 h-8">
             <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
+            <TabsTrigger value="specs" className="text-xs">Specs</TabsTrigger>
             <TabsTrigger value="pricing" className="text-xs">Pricing</TabsTrigger>
             <TabsTrigger value="stock" className="text-xs">Stock</TabsTrigger>
             <TabsTrigger value="supplier" className="text-xs">Supplier</TabsTrigger>
