@@ -59,11 +59,11 @@ export function ProductionStats({ stats }: Props) {
     },
     {
       label: 'Cost Variance',
-      value: formatETBShort(Math.abs(stats.costVariance)),
-      sub: stats.costVariance >= 0 ? '✅ Under budget' : '⚠️ Over budget',
+      value: stats.costVariance !== 0 ? formatETBShort(Math.abs(stats.costVariance)) : 'ETB 0',
+      sub: stats.costVariance === 0 ? 'On budget' : stats.costVariance > 0 ? '✅ Under budget' : '⚠️ Over budget',
       icon: TrendingUp,
-      color: stats.costVariance >= 0 ? 'text-success' : 'text-destructive',
-      bg: stats.costVariance >= 0 ? 'bg-success/10' : 'bg-destructive/10',
+      color: stats.costVariance === 0 ? 'text-muted-foreground' : stats.costVariance > 0 ? 'text-success' : 'text-destructive',
+      bg: stats.costVariance === 0 ? 'bg-muted' : stats.costVariance > 0 ? 'bg-success/10' : 'bg-destructive/10',
     },
     {
       label: 'At Risk / Blocked',
