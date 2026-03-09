@@ -55,7 +55,7 @@ export function AddEnhancedProjectDialog({ open, onOpenChange, onAdd, customers,
     if (projectProducts.some(pp => pp.productId === prod.id)) {
       setProjectProducts(prev => prev.map(pp => pp.productId === prod.id ? { ...pp, quantity: pp.quantity + qty, totalPrice: (pp.quantity + qty) * pp.unitPrice } : pp));
     } else {
-      setProjectProducts(prev => [...prev, { productId: prod.id, productName: prod.name, quantity: qty, unitPrice: prod.sellingPrice, totalPrice: qty * prod.sellingPrice, status: 'pending' }]);
+      setProjectProducts(prev => [...prev, { productId: prod.id, productName: prod.name, quantity: qty, unitPrice: (prod as any).sellingPrice ?? (prod as any).selling_price ?? 0, totalPrice: qty * ((prod as any).sellingPrice ?? (prod as any).selling_price ?? 0), status: 'pending' }]);
     }
     setAddProductId('');
     setAddProductQty('1');
