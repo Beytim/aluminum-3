@@ -74,23 +74,34 @@ export default function InventoryCard({ item, language, onView, onEdit, onDelete
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 pt-1 border-t border-border">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); onReceive(item); }}>
-            <ArrowDownToLine className="h-3 w-3 text-success" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); onIssue(item); }}>
-            <ArrowUpFromLine className="h-3 w-3 text-warning" />
-          </Button>
-          <div className="flex-1" />
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); onView(item); }}>
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); onEdit(item); }}>
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); onDelete(item.id); }}>
-            <Trash2 className="h-3 w-3 text-destructive" />
-          </Button>
+        <div className="flex items-center justify-end pt-1 border-t border-border">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0" onClick={e => e.stopPropagation()}><MoreVertical className="h-4 w-4" /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
+              <DropdownMenuItem onClick={() => onReceive(item)}>
+                <ArrowDownToLine className="h-4 w-4 mr-2 text-success" /> Receive Stock
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onIssue(item)}>
+                <ArrowUpFromLine className="h-4 w-4 mr-2 text-warning" /> Issue Stock
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onView(item)}>
+                <Eye className="h-4 w-4 mr-2" /> View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(item)}>
+                <Edit className="h-4 w-4 mr-2" /> Edit Item
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onExportOne(item)}>
+                <Download className="h-4 w-4 mr-2" /> Export to PDF
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={() => onDelete(item.id)}>
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardContent>
     </Card>
