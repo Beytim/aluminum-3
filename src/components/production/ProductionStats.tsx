@@ -27,11 +27,11 @@ export function ProductionStats({ stats }: Props) {
     },
     {
       label: 'Avg Efficiency',
-      value: `${stats.averageEfficiency}%`,
-      sub: stats.averageEfficiency >= 90 ? 'Excellent' : stats.averageEfficiency >= 70 ? 'Good' : 'Needs improvement',
+      value: stats.averageEfficiency > 0 ? `${stats.averageEfficiency}%` : 'N/A',
+      sub: stats.averageEfficiency === 0 ? 'No data yet' : stats.averageEfficiency >= 90 ? 'Excellent' : stats.averageEfficiency >= 70 ? 'Good' : 'Needs improvement',
       icon: Gauge,
-      color: stats.averageEfficiency >= 90 ? 'text-success' : stats.averageEfficiency >= 70 ? 'text-warning' : 'text-destructive',
-      bg: stats.averageEfficiency >= 90 ? 'bg-success/10' : stats.averageEfficiency >= 70 ? 'bg-warning/10' : 'bg-destructive/10',
+      color: stats.averageEfficiency === 0 ? 'text-muted-foreground' : stats.averageEfficiency >= 90 ? 'text-success' : stats.averageEfficiency >= 70 ? 'text-warning' : 'text-destructive',
+      bg: stats.averageEfficiency === 0 ? 'bg-muted' : stats.averageEfficiency >= 90 ? 'bg-success/10' : stats.averageEfficiency >= 70 ? 'bg-warning/10' : 'bg-destructive/10',
     },
     {
       label: 'On-Time Rate',
