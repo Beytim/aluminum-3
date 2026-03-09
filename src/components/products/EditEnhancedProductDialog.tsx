@@ -31,6 +31,7 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
     profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '',
     fabLaborCost: '', installLaborCost: '', overheadPercent: '',
     surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '',
+    installationInstructions: '', images: '', alternativeProducts: '', certifications: '',
   });
 
   useEffect(() => {
