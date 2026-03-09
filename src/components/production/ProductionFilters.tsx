@@ -121,7 +121,7 @@ export function ProductionFilters({ filters, onChange, quickFilter, onQuickFilte
             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Project" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Projects</SelectItem>
-              {projectNames.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              {projectNames.filter(p => p && p.trim() !== '').map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
