@@ -14,6 +14,7 @@ import { StageBoard } from "@/components/production/StageBoard";
 import { ProductionBulkActions } from "@/components/production/ProductionBulkActions";
 import { WorkOrderDetailsDialog } from "@/components/production/WorkOrderDetailsDialog";
 import { AddWorkOrderDialog } from "@/components/production/AddWorkOrderDialog";
+import { RecordOutputDialog } from "@/components/production/RecordOutputDialog";
 import { generateWorkOrderPDF, generateProductionReportPDF } from "@/lib/productionPdfExport";
 
 type ViewMode = 'grid' | 'table' | 'kanban';
@@ -24,6 +25,7 @@ export default function Production() {
   const [addOpen, setAddOpen] = useState(false);
   const [detailsWO, setDetailsWO] = useState<EnhancedWorkOrder | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [outputWO, setOutputWO] = useState<EnhancedWorkOrder | null>(null);
   const [quickFilter, setQuickFilter] = useState('all');
   const [filters, setFilters] = useState({ search: '', stage: '', priority: '', status: '', team: '', project: '', showOverdue: false, showBlocked: false });
   const { t } = useI18n();
