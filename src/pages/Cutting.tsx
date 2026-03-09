@@ -15,6 +15,7 @@ import { CuttingBulkActions } from "@/components/cutting/CuttingBulkActions";
 import { CuttingDetailsDialog } from "@/components/cutting/CuttingDetailsDialog";
 import { AddCuttingJobDialog } from "@/components/cutting/AddCuttingJobDialog";
 import { OptimizerDialog } from "@/components/cutting/OptimizerDialog";
+import { EditCuttingJobDialog } from "@/components/cutting/EditCuttingJobDialog";
 
 type ViewMode = 'grid' | 'table';
 
