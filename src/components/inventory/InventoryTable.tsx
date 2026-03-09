@@ -24,7 +24,7 @@ interface Props {
 
 type SortKey = 'itemCode' | 'productName' | 'category' | 'stock' | 'available' | 'unitCost' | 'totalValue';
 
-export default function InventoryTable({ items, language, selectedIds, onToggleSelect, onToggleAll, onView, onEdit, onDelete, onReceive, onIssue }: Props) {
+export default function InventoryTable({ items, language, selectedIds, onToggleSelect, onToggleAll, onView, onEdit, onDelete, onReceive, onIssue, onExportOne }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('itemCode');
   const [sortAsc, setSortAsc] = useState(true);
 
