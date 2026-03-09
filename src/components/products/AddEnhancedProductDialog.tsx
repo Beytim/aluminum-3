@@ -264,7 +264,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
               {F('surfaceFinish', 'Surface Finish')}
               <div className="flex items-end pb-1.5">
                 <label className="flex items-center gap-2 text-xs cursor-pointer">
-                  <input type="checkbox" checked={form.hasThermalBreak} onChange={e => setForm(p => ({ ...p, hasThermalBreak: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
+                  <input type="checkbox" checked={form.hasThermalBreak} onChange={e => setForm(p => ({ ...p, hasThermalBreak: e.target.checked }))} className="h-4 w-4 rounded border-border" />
                   Thermal Break
                 </label>
               </div>
