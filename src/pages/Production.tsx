@@ -165,7 +165,7 @@ export default function Production() {
       {view === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredWOs.map(wo => (
-            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={handleAdvance} onDelete={handleDelete} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
+            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={handleAdvance} onDelete={handleDelete} onEdit={setEditWO} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
           ))}
         </div>
       )}
@@ -195,6 +195,15 @@ export default function Production() {
       <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={handleAdvance} onUpdateOutput={(id, good, scrap, rework) => {
         updateWorkOrder({ id, updates: { good_units: good, scrap, rework, remaining: (detailsWO?.quantity || 0) - good - scrap } });
       }} />
+      <EditWorkOrderDialog
+        open={!!editWO}
+        onOpenChange={(o) => { if (!o) setEditWO(null); }}
+        workOrder={editWO}
+        onSave={(id, updates) => {
+          updateWorkOrder({ id, updates });
+          toast({ title: 'Work Order Updated' });
+        }}
+      />
       <RecordOutputDialog
         open={!!outputWO}
         onOpenChange={(o) => { if (!o) setOutputWO(null); }}
