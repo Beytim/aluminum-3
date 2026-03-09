@@ -189,7 +189,18 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
           <TabsContent value="supplier" className="space-y-3 mt-3">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-xs">Supplier Name</Label><Input value={form.supplierName} onChange={e => setForm(p => ({ ...p, supplierName: e.target.value }))} /></div>
+              <div>
+                <Label className="text-xs">Supplier Name</Label>
+                <Select value={form.supplierId} onValueChange={v => {
+                  const s = suppliers.find(sup => sup.id === v);
+                  setForm(p => ({ ...p, supplierId: v, supplierName: s?.company_name || '' }));
+                }}>
+                  <SelectTrigger><SelectValue placeholder="Select supplier (optional)" /></SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.company_name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label className="text-xs">Lead Time (days)</Label><Input type="number" value={form.leadTimeDays} onChange={e => setForm(p => ({ ...p, leadTimeDays: e.target.value }))} /></div>
               <div><Label className="text-xs">Batch Number</Label><Input value={form.batchNumber} onChange={e => setForm(p => ({ ...p, batchNumber: e.target.value }))} /></div>
             </div>
