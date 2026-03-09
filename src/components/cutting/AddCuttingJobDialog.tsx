@@ -39,12 +39,9 @@ export function AddCuttingJobDialog({ open, onOpenChange, onAdd, existingCount }
   });
 
   const selectedWO = workOrders.find(w => w.id === form.workOrderId);
-  const activeWOs = workOrders.filter(w => w.status !== 'Completed' && w.status !== 'Cancelled');
-  const profileInventory = inventory.filter(i => 
-    i.category?.includes('Profile') || 
-    i.category?.includes('Bar') || 
-    i.category?.includes('Tube')
-  );
+  const activeWOs = workOrders.filter(w => w.status !== 'Cancelled');
+  // Show all inventory items that have stock available for cutting
+  const availableInventory = inventory.filter(i => i.stock > 0 && i.status === 'active');
 
   useEffect(() => {
     if (form.inventoryItemId) {
