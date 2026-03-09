@@ -18,7 +18,7 @@ import { AddWorkOrderDialog } from "@/components/production/AddWorkOrderDialog";
 type ViewMode = 'grid' | 'table' | 'kanban';
 
 export default function Production() {
-  const [workOrders, setWorkOrders] = useLocalStorage<EnhancedWorkOrder[]>(STORAGE_KEYS.WORK_ORDERS, enhancedSampleWorkOrders);
+  const { workOrders, isLoading, addWorkOrder, updateWorkOrder, deleteWorkOrder, advanceStage } = useProduction();
   const [view, setView] = useState<ViewMode>('grid');
   const [addOpen, setAddOpen] = useState(false);
   const [detailsWO, setDetailsWO] = useState<EnhancedWorkOrder | null>(null);
