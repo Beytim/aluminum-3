@@ -73,7 +73,7 @@ const mapDbToWorkOrder = (db: any): EnhancedWorkOrder => {
     variances: {
       hoursVariance: Number(db.est_hours || 0) - Number(db.act_hours || 0),
       costVariance: estTotal - actTotal,
-      efficiency: Number(db.est_hours || 0) > 0 ? Math.round((Number(db.est_hours || 0) / Math.max(Number(db.act_hours || 0), 1)) * 100) : 0,
+      efficiency: Number(db.act_hours || 0) > 0 ? Math.round((Number(db.est_hours || 0) / Number(db.act_hours || 0)) * 100) : 0,
       scheduleVariance: 0,
     },
     status: db.status as WorkOrderStatus,
