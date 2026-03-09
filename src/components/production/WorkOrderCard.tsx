@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Eye, Trash2, ArrowRight, AlertTriangle, MoreVertical, FileText, Play, Pause, Ban } from "lucide-react";
+import { Eye, Trash2, ArrowRight, AlertTriangle, MoreVertical, FileText, Play, Pause, Ban, Pencil } from "lucide-react";
 import type { EnhancedWorkOrder } from "@/data/enhancedProductionData";
 import { stageColors, priorityColors, getDaysUntilDue, getDueDateColor, getEfficiencyColor, formatETBShort } from "@/data/enhancedProductionData";
 
@@ -12,11 +12,12 @@ interface Props {
   onView: (wo: EnhancedWorkOrder) => void;
   onAdvance: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit?: (wo: EnhancedWorkOrder) => void;
   onExportPDF?: (wo: EnhancedWorkOrder) => void;
   onUpdateStatus?: (id: string, status: string) => void;
 }
 
-export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete, onExportPDF, onUpdateStatus }: Props) {
+export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete, onEdit, onExportPDF, onUpdateStatus }: Props) {
   const daysLeft = getDaysUntilDue(wo.scheduledEnd);
   const dueDateColor = getDueDateColor(wo.scheduledEnd);
   const effColor = wo.variances.efficiency > 0 ? getEfficiencyColor(wo.variances.efficiency) : 'text-muted-foreground';
@@ -40,15 +41,20 @@ export function WorkOrderCard({ workOrder: wo, onView, onAdvance, onDelete, onEx
               {wo.priority}
             </span>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreVertical className="h-3.5 w-3.5" />
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => e.stopPropagation()}>
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuItem onClick={() => onView(wo)}>
                   <Eye className="h-3.5 w-3.5 mr-2" />View Details
                 </DropdownMenuItem>
+                {onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(wo)}>
+                    <Pencil className="h-3.5 w-3.5 mr-2" />Edit
+                  </DropdownMenuItem>
+                )}
                 {wo.progress < 100 && wo.status !== 'On Hold' && wo.status !== 'Cancelled' && (
                   <DropdownMenuItem onClick={() => onAdvance(wo.id)}>
                     <ArrowRight className="h-3.5 w-3.5 mr-2" />Advance Stage

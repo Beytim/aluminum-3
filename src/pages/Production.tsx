@@ -15,6 +15,7 @@ import { ProductionBulkActions } from "@/components/production/ProductionBulkAct
 import { WorkOrderDetailsDialog } from "@/components/production/WorkOrderDetailsDialog";
 import { AddWorkOrderDialog } from "@/components/production/AddWorkOrderDialog";
 import { RecordOutputDialog } from "@/components/production/RecordOutputDialog";
+import { EditWorkOrderDialog } from "@/components/production/EditWorkOrderDialog";
 import { generateWorkOrderPDF, generateProductionReportPDF } from "@/lib/productionPdfExport";
 
 type ViewMode = 'grid' | 'table' | 'kanban';
@@ -24,6 +25,7 @@ export default function Production() {
   const [view, setView] = useState<ViewMode>('grid');
   const [addOpen, setAddOpen] = useState(false);
   const [detailsWO, setDetailsWO] = useState<EnhancedWorkOrder | null>(null);
+  const [editWO, setEditWO] = useState<EnhancedWorkOrder | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [outputWO, setOutputWO] = useState<EnhancedWorkOrder | null>(null);
   const [quickFilter, setQuickFilter] = useState('all');
@@ -163,7 +165,7 @@ export default function Production() {
       {view === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredWOs.map(wo => (
-            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={handleAdvance} onDelete={handleDelete} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
+            <WorkOrderCard key={wo.id} workOrder={wo} onView={setDetailsWO} onAdvance={handleAdvance} onDelete={handleDelete} onEdit={setEditWO} onExportPDF={handleExportPDF} onUpdateStatus={handleUpdateStatus} />
           ))}
         </div>
       )}
@@ -193,6 +195,15 @@ export default function Production() {
       <WorkOrderDetailsDialog workOrder={detailsWO} open={!!detailsWO} onOpenChange={(o) => { if (!o) setDetailsWO(null); }} onAdvance={handleAdvance} onUpdateOutput={(id, good, scrap, rework) => {
         updateWorkOrder({ id, updates: { good_units: good, scrap, rework, remaining: (detailsWO?.quantity || 0) - good - scrap } });
       }} />
+      <EditWorkOrderDialog
+        open={!!editWO}
+        onOpenChange={(o) => { if (!o) setEditWO(null); }}
+        workOrder={editWO}
+        onSave={(id, updates) => {
+          updateWorkOrder({ id, updates });
+          toast({ title: 'Work Order Updated' });
+        }}
+      />
       <RecordOutputDialog
         open={!!outputWO}
         onOpenChange={(o) => { if (!o) setOutputWO(null); }}
