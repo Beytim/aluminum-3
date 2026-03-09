@@ -149,7 +149,7 @@ export function CuttingCard({ job, onView, onEdit, onOptimize, onStatusChange, o
           <span>{job.assignee}</span>
         </div>
 
-        {/* Actions */}
+        {/* Quick Actions */}
         <div className="flex gap-1 pt-1" onClick={e => e.stopPropagation()}>
           {job.status === 'Pending' && (
             <>
@@ -166,12 +166,6 @@ export function CuttingCard({ job, onView, onEdit, onOptimize, onStatusChange, o
               <CheckCircle className="h-3 w-3" />Complete
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onView(job)}>
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDelete(job.id)}>
-            <Trash2 className="h-3 w-3 text-destructive" />
-          </Button>
         </div>
       </CardContent>
     </Card>
