@@ -996,6 +996,209 @@ export type Database = {
         }
         Relationships: []
       }
+      project_products: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string | null
+          product_name: string
+          project_id: string
+          quantity: number
+          status: Database["public"]["Enums"]["project_product_status"]
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name: string
+          project_id: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["project_product_status"]
+          total_price?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name?: string
+          project_id?: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["project_product_status"]
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_products_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          balance: number
+          completed_date: string | null
+          created_at: string
+          created_by: string
+          customer_contact: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          deposit: number
+          deposit_percentage: number
+          due_date: string
+          id: string
+          installation_ids: string[] | null
+          internal_notes: string | null
+          invoice_ids: string[] | null
+          is_at_risk: boolean
+          is_overdue: boolean
+          labor_cost: number
+          material_cost: number
+          milestones: Json
+          name: string
+          name_am: string
+          notes: string | null
+          order_date: string
+          overhead_cost: number
+          payment_ids: string[] | null
+          profit: number
+          profit_margin: number
+          progress: number
+          project_manager: string
+          project_manager_id: string | null
+          project_number: string
+          purchase_order_ids: string[] | null
+          quote_id: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["project_status"]
+          team_members: string[] | null
+          timeline: Json | null
+          total_cost: number
+          type: Database["public"]["Enums"]["project_type"]
+          updated_at: string
+          updated_by: string
+          value: number
+          work_order_ids: string[] | null
+        }
+        Insert: {
+          balance?: number
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string
+          customer_contact?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          deposit?: number
+          deposit_percentage?: number
+          due_date?: string
+          id?: string
+          installation_ids?: string[] | null
+          internal_notes?: string | null
+          invoice_ids?: string[] | null
+          is_at_risk?: boolean
+          is_overdue?: boolean
+          labor_cost?: number
+          material_cost?: number
+          milestones?: Json
+          name: string
+          name_am?: string
+          notes?: string | null
+          order_date?: string
+          overhead_cost?: number
+          payment_ids?: string[] | null
+          profit?: number
+          profit_margin?: number
+          progress?: number
+          project_manager?: string
+          project_manager_id?: string | null
+          project_number: string
+          purchase_order_ids?: string[] | null
+          quote_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["project_status"]
+          team_members?: string[] | null
+          timeline?: Json | null
+          total_cost?: number
+          type?: Database["public"]["Enums"]["project_type"]
+          updated_at?: string
+          updated_by?: string
+          value?: number
+          work_order_ids?: string[] | null
+        }
+        Update: {
+          balance?: number
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string
+          customer_contact?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          deposit?: number
+          deposit_percentage?: number
+          due_date?: string
+          id?: string
+          installation_ids?: string[] | null
+          internal_notes?: string | null
+          invoice_ids?: string[] | null
+          is_at_risk?: boolean
+          is_overdue?: boolean
+          labor_cost?: number
+          material_cost?: number
+          milestones?: Json
+          name?: string
+          name_am?: string
+          notes?: string | null
+          order_date?: string
+          overhead_cost?: number
+          payment_ids?: string[] | null
+          profit?: number
+          profit_margin?: number
+          progress?: number
+          project_manager?: string
+          project_manager_id?: string | null
+          project_number?: string
+          purchase_order_ids?: string[] | null
+          quote_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["project_status"]
+          team_members?: string[] | null
+          timeline?: Json | null
+          total_cost?: number
+          type?: Database["public"]["Enums"]["project_type"]
+          updated_at?: string
+          updated_by?: string
+          value?: number
+          work_order_ids?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -1478,6 +1681,18 @@ export type Database = {
         | "Completed"
         | "On Hold"
         | "Cancelled"
+      project_product_status: "pending" | "ordered" | "received" | "installed"
+      project_status:
+        | "Quote"
+        | "Deposit"
+        | "Materials Ordered"
+        | "Production"
+        | "Ready"
+        | "Installation"
+        | "Completed"
+        | "On Hold"
+        | "Cancelled"
+      project_type: "Residential" | "Commercial" | "Industrial" | "Government"
       quality_check_result: "pass" | "fail" | "conditional"
       supplier_business_type:
         | "Manufacturer"
@@ -1723,6 +1938,19 @@ export const Constants = {
         "On Hold",
         "Cancelled",
       ],
+      project_product_status: ["pending", "ordered", "received", "installed"],
+      project_status: [
+        "Quote",
+        "Deposit",
+        "Materials Ordered",
+        "Production",
+        "Ready",
+        "Installation",
+        "Completed",
+        "On Hold",
+        "Cancelled",
+      ],
+      project_type: ["Residential", "Commercial", "Industrial", "Government"],
       quality_check_result: ["pass", "fail", "conditional"],
       supplier_business_type: [
         "Manufacturer",
