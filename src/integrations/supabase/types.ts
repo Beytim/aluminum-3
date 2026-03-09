@@ -177,9 +177,11 @@ export type Database = {
       }
       cutting_jobs: {
         Row: {
+          alloy_type: string | null
           assignee: string | null
           created_at: string
           created_by: string | null
+          cuts: number[] | null
           efficiency: number | null
           end_time: string | null
           id: string
@@ -187,8 +189,11 @@ export type Database = {
           job_number: string
           labor_cost: number | null
           machine: string | null
+          material_category: string | null
           material_cost: number | null
+          material_name: string | null
           notes: string | null
+          optimization_layout: Json | null
           optimized: boolean | null
           priority: Database["public"]["Enums"]["work_order_priority"]
           quality_checked: boolean | null
@@ -196,11 +201,13 @@ export type Database = {
           quality_result:
             | Database["public"]["Enums"]["quality_check_result"]
             | null
+          remnants: Json | null
           scheduled_date: string | null
           start_time: string | null
           status: Database["public"]["Enums"]["cutting_job_status"]
           stock_length: number | null
           stocks_used: number | null
+          temper: string | null
           total_cut_length: number | null
           total_cuts: number | null
           updated_at: string
@@ -210,9 +217,11 @@ export type Database = {
           work_order_id: string | null
         }
         Insert: {
+          alloy_type?: string | null
           assignee?: string | null
           created_at?: string
           created_by?: string | null
+          cuts?: number[] | null
           efficiency?: number | null
           end_time?: string | null
           id?: string
@@ -220,8 +229,11 @@ export type Database = {
           job_number: string
           labor_cost?: number | null
           machine?: string | null
+          material_category?: string | null
           material_cost?: number | null
+          material_name?: string | null
           notes?: string | null
+          optimization_layout?: Json | null
           optimized?: boolean | null
           priority?: Database["public"]["Enums"]["work_order_priority"]
           quality_checked?: boolean | null
@@ -229,11 +241,13 @@ export type Database = {
           quality_result?:
             | Database["public"]["Enums"]["quality_check_result"]
             | null
+          remnants?: Json | null
           scheduled_date?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["cutting_job_status"]
           stock_length?: number | null
           stocks_used?: number | null
+          temper?: string | null
           total_cut_length?: number | null
           total_cuts?: number | null
           updated_at?: string
@@ -243,9 +257,11 @@ export type Database = {
           work_order_id?: string | null
         }
         Update: {
+          alloy_type?: string | null
           assignee?: string | null
           created_at?: string
           created_by?: string | null
+          cuts?: number[] | null
           efficiency?: number | null
           end_time?: string | null
           id?: string
@@ -253,8 +269,11 @@ export type Database = {
           job_number?: string
           labor_cost?: number | null
           machine?: string | null
+          material_category?: string | null
           material_cost?: number | null
+          material_name?: string | null
           notes?: string | null
+          optimization_layout?: Json | null
           optimized?: boolean | null
           priority?: Database["public"]["Enums"]["work_order_priority"]
           quality_checked?: boolean | null
@@ -262,11 +281,13 @@ export type Database = {
           quality_result?:
             | Database["public"]["Enums"]["quality_check_result"]
             | null
+          remnants?: Json | null
           scheduled_date?: string | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["cutting_job_status"]
           stock_length?: number | null
           stocks_used?: number | null
+          temper?: string | null
           total_cut_length?: number | null
           total_cuts?: number | null
           updated_at?: string
