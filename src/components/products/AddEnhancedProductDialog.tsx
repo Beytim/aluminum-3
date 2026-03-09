@@ -259,8 +259,20 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
             </div>
           </TabsContent>
 
-          <TabsContent value="dimensions" className="space-y-3 mt-3">
+          <TabsContent value="specs" className="space-y-3 mt-3">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {F('surfaceFinish', 'Surface Finish')}
+              <div className="flex items-end pb-1.5">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={form.hasThermalBreak} onChange={e => setForm(p => ({ ...p, hasThermalBreak: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
+                  Thermal Break
+                </label>
+              </div>
+              {F('uValue', 'U-Value', { type: 'number' })}
+              {F('windLoadRating', 'Wind Load Rating')}
+              {F('stcRating', 'STC Rating')}
+              {F('fireRating', 'Fire Rating')}
+              {F('warrantyMonths', 'Warranty (Months)', { type: 'number' })}
               {F('width', 'Width (mm)', { type: 'number' })}
               {F('height', 'Height (mm)', { type: 'number' })}
               {F('thickness', 'Thickness (mm)', { type: 'number' })}
