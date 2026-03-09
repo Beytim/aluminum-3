@@ -61,6 +61,24 @@ export default function Production() {
   const projectNames = useMemo(() => [...new Set(workOrders.map(w => w.projectName))], [workOrders]);
   const teamNames = useMemo(() => [...new Set(workOrders.map(w => w.assignedTeam).filter(Boolean) as string[])], [workOrders]);
 
+  const handleAdvance = async (id: string) => {
+    const result = await advanceStage(id);
+    if (result === 'needs_output') {
+      const wo = workOrders.find(w => w.id === id);
+      if (wo) setOutputWO(wo);
+    }
+  };
+
+  const handleRecordOutputAndComplete = (good: number, scrap: number, rework: number) => {
+    if (!outputWO) return;
+    updateWorkOrder({ id: outputWO.id, updates: { good_units: good, scrap, rework, remaining: outputWO.quantity - good - scrap } });
+    // After saving output, complete the work order
+    setTimeout(() => {
+      advanceStage(outputWO.id);
+    }, 1000);
+    setOutputWO(null);
+  };
+
   const handleDelete = (id: string) => {
     deleteWorkOrder(id);
   };
