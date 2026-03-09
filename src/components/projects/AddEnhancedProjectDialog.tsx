@@ -55,7 +55,7 @@ export function AddEnhancedProjectDialog({ open, onOpenChange, onAdd, customers,
     if (projectProducts.some(pp => pp.productId === prod.id)) {
       setProjectProducts(prev => prev.map(pp => pp.productId === prod.id ? { ...pp, quantity: pp.quantity + qty, totalPrice: (pp.quantity + qty) * pp.unitPrice } : pp));
     } else {
-      setProjectProducts(prev => [...prev, { productId: prod.id, productName: prod.name, quantity: qty, unitPrice: prod.sellingPrice, totalPrice: qty * prod.sellingPrice, status: 'pending' }]);
+      setProjectProducts(prev => [...prev, { productId: prod.id, productName: prod.name, quantity: qty, unitPrice: (prod as any).sellingPrice ?? (prod as any).selling_price ?? 0, totalPrice: qty * ((prod as any).sellingPrice ?? (prod as any).selling_price ?? 0), status: 'pending' }]);
     }
     setAddProductId('');
     setAddProductQty('1');
@@ -169,7 +169,7 @@ export function AddEnhancedProjectDialog({ open, onOpenChange, onAdd, customers,
             <div className="flex gap-2">
               <Select value={addProductId} onValueChange={setAddProductId}>
                 <SelectTrigger className="flex-1"><SelectValue placeholder="Select product" /></SelectTrigger>
-                <SelectContent>{products.filter(p => p.status === 'Active').map(p => <SelectItem key={p.id} value={p.id}>{p.name} — ETB {p.sellingPrice.toLocaleString()}</SelectItem>)}</SelectContent>
+                <SelectContent>{products.filter(p => p.status === 'Active').map(p => <SelectItem key={p.id} value={p.id}>{p.name} — ETB {((p as any).sellingPrice ?? (p as any).selling_price ?? 0).toLocaleString()}</SelectItem>)}</SelectContent>
               </Select>
               <Input type="number" className="w-20" min="1" value={addProductQty} onChange={e => setAddProductQty(e.target.value)} placeholder="Qty" />
               <Button size="sm" onClick={handleAddProduct} disabled={!addProductId}><Plus className="h-3.5 w-3.5" /></Button>
