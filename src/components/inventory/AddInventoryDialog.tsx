@@ -50,6 +50,7 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
   const handleSubmit = () => {
     const e: Record<string, string> = {};
+    if (!selectedProductId) e.productId = 'Required';
     if (!form.name.trim()) e.name = 'Required';
     if (!form.stock || Number(form.stock) < 0) e.stock = 'Invalid';
     if (!form.unitCost || Number(form.unitCost) <= 0) e.unitCost = 'Required';
@@ -109,9 +110,9 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
           <TabsContent value="basic" className="space-y-3 mt-3">
             <div>
-              <Label className="text-xs">Link to Product</Label>
+              <Label className={`text-xs ${errors.productId ? 'text-destructive' : ''}`}>Link to Product *</Label>
               <Select value={selectedProductId} onValueChange={handleProductSelect}>
-                <SelectTrigger><SelectValue placeholder="Select product (optional)" /></SelectTrigger>
+                <SelectTrigger className={errors.productId ? 'border-destructive' : ''}><SelectValue placeholder="Select product" /></SelectTrigger>
                 <SelectContent>
                   {products.filter(p => p.product_type === 'Raw Material').map(p => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}
                 </SelectContent>
