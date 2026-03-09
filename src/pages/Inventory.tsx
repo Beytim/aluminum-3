@@ -114,17 +114,44 @@ export default function Inventory() {
     });
   };
 
-  const handleExport = () => {
+  import { generateReportPDF } from "@/lib/pdfExport";
+
+  const handleExportPDF = () => {
     const data = (selectedIds.length > 0 ? filtered.filter(i => selectedIds.includes(i.id)) : filtered);
-    const csv = [
-      ['Code', 'Product', 'Category', 'Stock', 'Reserved', 'Available', 'Unit', 'Unit Cost', 'Total Value', 'Location', 'Status'].join(','),
-      ...data.map(i => [i.itemCode, `"${i.productName}"`, i.category, i.stock, i.reserved, i.available, i.primaryUnit, i.unitCost, i.totalValue, `${i.warehouse}-${i.zone}-${i.rack}`, i.qualityStatus].join(',')),
-    ].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'inventory-export.csv'; a.click();
-    toast({ title: 'Exported', description: `${data.length} items exported to CSV` });
+    generateReportPDF(
+      "Inventory Report",
+      ['Code', 'Product', 'Category', 'Stock', 'Available', 'Unit Cost', 'Total Value'],
+      data.map(i => [
+        i.itemCode,
+        language === 'am' ? i.productNameAm : i.productName,
+        i.category,
+        `${i.stock} ${i.primaryUnit}`,
+        `${i.available} ${i.primaryUnit}`,
+        formatCurrency(i.unitCost),
+        formatCurrency(i.totalValue)
+      ])
+    );
+    toast({ title: 'Exported', description: `${data.length} items exported to PDF` });
+  };
+
+  const handleExportOne = (item: EnhancedInventoryItem) => {
+    generateReportPDF(
+      `Inventory Item: ${item.itemCode}`,
+      ['Property', 'Value'],
+      [
+        ['Code', item.itemCode],
+        ['Name', language === 'am' ? item.productNameAm : item.productName],
+        ['Category', item.category],
+        ['Stock', `${item.stock} ${item.primaryUnit}`],
+        ['Available', `${item.available} ${item.primaryUnit}`],
+        ['Location', `${item.warehouse}-${item.zone}-${item.rack}`],
+        ['Unit Cost', formatCurrency(item.unitCost)],
+        ['Total Value', formatCurrency(item.totalValue)],
+        ['Status', item.status],
+        ['Quality', item.qualityStatus],
+      ]
+    );
+    toast({ title: 'Exported', description: `${item.itemCode} details exported to PDF` });
   };
 
   return (
