@@ -113,29 +113,51 @@ export function CuttingTable({ jobs, selectedIds, onSelect, onSelectAll, onView,
                 <TableCell><Badge className={`text-[9px] ${priorityColors[job.priority]}`}>{job.priority}</Badge></TableCell>
                 <TableCell className="text-xs text-right font-mono">{formatETBShort(job.totalCost)}</TableCell>
                 <TableCell className="text-right" onClick={e => e.stopPropagation()}>
-                  <div className="flex gap-0.5 justify-end">
-                    {job.status === 'Pending' && !job.optimized && (
-                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onOptimize(job.id)} title="Optimize">
-                        <Calculator className="h-3 w-3 text-info" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-7 w-7">
+                        <MoreVertical className="h-3.5 w-3.5" />
                       </Button>
-                    )}
-                    {job.status === 'Pending' && (
-                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onStatusChange(job.id, 'In Progress')} title="Start">
-                        <Play className="h-3 w-3 text-success" />
-                      </Button>
-                    )}
-                    {job.status === 'In Progress' && (
-                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onStatusChange(job.id, 'Completed')} title="Complete">
-                        <CheckCircle className="h-3 w-3 text-success" />
-                      </Button>
-                    )}
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onView(job)}>
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onDelete(job.id)}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuItem onClick={() => onEdit(job)}>
+                        <Pencil className="h-3.5 w-3.5 mr-2" />Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onView(job)}>
+                        <Eye className="h-3.5 w-3.5 mr-2" />View Details
+                      </DropdownMenuItem>
+                      {job.status === 'Pending' && !job.optimized && (
+                        <DropdownMenuItem onClick={() => onOptimize(job.id)}>
+                          <Calculator className="h-3.5 w-3.5 mr-2" />Optimize
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      {job.status === 'Pending' && (
+                        <DropdownMenuItem onClick={() => onStatusChange(job.id, 'In Progress')}>
+                          <Play className="h-3.5 w-3.5 mr-2" />Start Job
+                        </DropdownMenuItem>
+                      )}
+                      {job.status === 'In Progress' && (
+                        <>
+                          <DropdownMenuItem onClick={() => onStatusChange(job.id, 'Completed')}>
+                            <CheckCircle className="h-3.5 w-3.5 mr-2" />Complete
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onStatusChange(job.id, 'Pending')}>
+                            <Pause className="h-3.5 w-3.5 mr-2" />Pause
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {job.status !== 'Cancelled' && job.status !== 'Completed' && (
+                        <DropdownMenuItem onClick={() => onStatusChange(job.id, 'Cancelled')}>
+                          <XCircle className="h-3.5 w-3.5 mr-2" />Cancel
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive" onClick={() => onDelete(job.id)}>
+                        <Trash2 className="h-3.5 w-3.5 mr-2" />Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
