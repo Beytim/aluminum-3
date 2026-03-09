@@ -30,7 +30,7 @@ interface Props {
 
 type SortKey = 'jobNumber' | 'materialName' | 'totalCuts' | 'efficiency' | 'wastePercent' | 'totalCost' | 'status' | 'priority';
 
-export function CuttingTable({ jobs, selectedIds, onSelect, onSelectAll, onView, onOptimize, onStatusChange, onDelete }: Props) {
+export function CuttingTable({ jobs, selectedIds, onSelect, onSelectAll, onView, onEdit, onOptimize, onStatusChange, onDelete }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('jobNumber');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
