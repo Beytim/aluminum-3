@@ -20,6 +20,7 @@ interface Props {
 }
 
 export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }: Props) {
+  const { data: products = [] } = useProducts();
   const [form, setForm] = useState({
     projectId: '', productId: '', quantity: '',
     priority: 'Medium' as WorkOrderPriority,
@@ -29,7 +30,7 @@ export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }:
   });
 
   const selectedProject = enhancedSampleProjects.find(p => p.id === form.projectId);
-  const selectedProduct = sampleProducts.find(p => p.id === form.productId);
+  const selectedProduct = products.find(p => p.id === form.productId);
   const customer = selectedProject ? enhancedCustomers.find(c => c.id === selectedProject.customerId) : null;
 
   const handleAdd = () => {
