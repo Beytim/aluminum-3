@@ -20,7 +20,11 @@ interface Props {
   onUpdateOutput?: (id: string, goodUnits: number, scrap: number, rework: number) => void;
 }
 
-export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAdvance }: Props) {
+export function WorkOrderDetailsDialog({ workOrder: wo, open, onOpenChange, onAdvance, onUpdateOutput }: Props) {
+  const [goodInput, setGoodInput] = useState(0);
+  const [scrapInput, setScrapInput] = useState(0);
+  const [reworkInput, setReworkInput] = useState(0);
+
   if (!wo) return null;
 
   const daysLeft = getDaysUntilDue(wo.scheduledEnd);
