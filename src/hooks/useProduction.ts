@@ -221,22 +221,25 @@ export function useProduction() {
     }
   });
 
-  const advanceStage = async (id: string) => {
+  const advanceStage = async (id: string): Promise<'needs_output' | 'ok'> => {
     const wo = workOrders.find(w => w.id === id);
-    if (!wo) return;
+    if (!wo) return 'ok';
     const stages: ProductionStage[] = ['Pending', 'Cutting', 'Machining', 'Assembly', 'Welding', 'Glazing', 'Quality Check', 'Packaging', 'Completed'];
     const idx = stages.indexOf(wo.currentStage);
-    if (idx < 0 || idx >= stages.length - 1) return;
+    if (idx < 0 || idx >= stages.length - 1) return 'ok';
     const nextStage = stages[idx + 1];
     
     if (wo.currentStage === 'Pending' && (wo.status === 'Draft' || wo.status === 'Scheduled')) {
       startWorkOrder.mutate(id);
-      return;
+      return 'ok';
     }
 
     if (nextStage === 'Completed') {
+      if (wo.goodUnits <= 0) {
+        return 'needs_output';
+      }
       completeWorkOrder.mutate(id);
-      return;
+      return 'ok';
     }
 
     const newProgress = Math.min(100, Math.round(((idx + 2) / stages.length) * 100));
@@ -250,6 +253,7 @@ export function useProduction() {
       },
     });
     toast({ title: `Stage Advanced to ${nextStage}` });
+    return 'ok';
   };
 
   return {
