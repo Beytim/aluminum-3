@@ -175,6 +175,137 @@ export type Database = {
           },
         ]
       }
+      cutting_jobs: {
+        Row: {
+          assignee: string | null
+          created_at: string
+          created_by: string | null
+          efficiency: number | null
+          end_time: string | null
+          id: string
+          inventory_item_id: string | null
+          job_number: string
+          labor_cost: number | null
+          machine: string | null
+          material_cost: number | null
+          notes: string | null
+          optimized: boolean | null
+          priority: Database["public"]["Enums"]["work_order_priority"]
+          quality_checked: boolean | null
+          quality_notes: string | null
+          quality_result:
+            | Database["public"]["Enums"]["quality_check_result"]
+            | null
+          scheduled_date: string | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["cutting_job_status"]
+          stock_length: number | null
+          stocks_used: number | null
+          total_cut_length: number | null
+          total_cuts: number | null
+          updated_at: string
+          waste: number | null
+          waste_cost: number | null
+          waste_percent: number | null
+          work_order_id: string | null
+        }
+        Insert: {
+          assignee?: string | null
+          created_at?: string
+          created_by?: string | null
+          efficiency?: number | null
+          end_time?: string | null
+          id?: string
+          inventory_item_id?: string | null
+          job_number: string
+          labor_cost?: number | null
+          machine?: string | null
+          material_cost?: number | null
+          notes?: string | null
+          optimized?: boolean | null
+          priority?: Database["public"]["Enums"]["work_order_priority"]
+          quality_checked?: boolean | null
+          quality_notes?: string | null
+          quality_result?:
+            | Database["public"]["Enums"]["quality_check_result"]
+            | null
+          scheduled_date?: string | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["cutting_job_status"]
+          stock_length?: number | null
+          stocks_used?: number | null
+          total_cut_length?: number | null
+          total_cuts?: number | null
+          updated_at?: string
+          waste?: number | null
+          waste_cost?: number | null
+          waste_percent?: number | null
+          work_order_id?: string | null
+        }
+        Update: {
+          assignee?: string | null
+          created_at?: string
+          created_by?: string | null
+          efficiency?: number | null
+          end_time?: string | null
+          id?: string
+          inventory_item_id?: string | null
+          job_number?: string
+          labor_cost?: number | null
+          machine?: string | null
+          material_cost?: number | null
+          notes?: string | null
+          optimized?: boolean | null
+          priority?: Database["public"]["Enums"]["work_order_priority"]
+          quality_checked?: boolean | null
+          quality_notes?: string | null
+          quality_result?:
+            | Database["public"]["Enums"]["quality_check_result"]
+            | null
+          scheduled_date?: string | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["cutting_job_status"]
+          stock_length?: number | null
+          stocks_used?: number | null
+          total_cut_length?: number | null
+          total_cuts?: number | null
+          updated_at?: string
+          waste?: number | null
+          waste_cost?: number | null
+          waste_percent?: number | null
+          work_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cutting_jobs_assignee_fkey"
+            columns: ["assignee"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cutting_jobs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cutting_jobs_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cutting_jobs_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           batch_number: string | null
@@ -336,6 +467,82 @@ export type Database = {
           },
         ]
       }
+      labor_entries: {
+        Row: {
+          approved: boolean | null
+          approved_by: string | null
+          created_at: string
+          date: string
+          hourly_rate: number | null
+          hours: number
+          id: string
+          is_overtime: boolean | null
+          notes: string | null
+          overtime_multiplier: number | null
+          stage: Database["public"]["Enums"]["production_stage"] | null
+          task: string | null
+          units_produced: number | null
+          work_order_id: string
+          worker_id: string | null
+        }
+        Insert: {
+          approved?: boolean | null
+          approved_by?: string | null
+          created_at?: string
+          date?: string
+          hourly_rate?: number | null
+          hours?: number
+          id?: string
+          is_overtime?: boolean | null
+          notes?: string | null
+          overtime_multiplier?: number | null
+          stage?: Database["public"]["Enums"]["production_stage"] | null
+          task?: string | null
+          units_produced?: number | null
+          work_order_id: string
+          worker_id?: string | null
+        }
+        Update: {
+          approved?: boolean | null
+          approved_by?: string | null
+          created_at?: string
+          date?: string
+          hourly_rate?: number | null
+          hours?: number
+          id?: string
+          is_overtime?: boolean | null
+          notes?: string | null
+          overtime_multiplier?: number | null
+          stage?: Database["public"]["Enums"]["production_stage"] | null
+          task?: string | null
+          units_produced?: number | null
+          work_order_id?: string
+          worker_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "labor_entries_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "labor_entries_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "labor_entries_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_bom: {
         Row: {
           component_type: Database["public"]["Enums"]["bom_component_type"]
@@ -461,6 +668,82 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_issues: {
+        Row: {
+          cost_impact: number | null
+          description: string | null
+          estimated_delay: number | null
+          id: string
+          issue_number: string
+          reported_at: string
+          reported_by: string | null
+          resolution: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          title: string
+          type: Database["public"]["Enums"]["issue_type"]
+          work_order_id: string
+        }
+        Insert: {
+          cost_impact?: number | null
+          description?: string | null
+          estimated_delay?: number | null
+          id?: string
+          issue_number: string
+          reported_at?: string
+          reported_by?: string | null
+          resolution?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          title: string
+          type: Database["public"]["Enums"]["issue_type"]
+          work_order_id: string
+        }
+        Update: {
+          cost_impact?: number | null
+          description?: string | null
+          estimated_delay?: number | null
+          id?: string
+          issue_number?: string
+          reported_at?: string
+          reported_by?: string | null
+          resolution?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          title?: string
+          type?: Database["public"]["Enums"]["issue_type"]
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_issues_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_issues_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_issues_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -839,6 +1122,218 @@ export type Database = {
         }
         Relationships: []
       }
+      work_order_materials: {
+        Row: {
+          actual_unit_cost: number | null
+          created_at: string
+          estimated_unit_cost: number | null
+          id: string
+          inventory_item_id: string | null
+          is_from_bom: boolean | null
+          notes: string | null
+          quantity_consumed: number
+          quantity_required: number
+          unit: string | null
+          work_order_id: string
+        }
+        Insert: {
+          actual_unit_cost?: number | null
+          created_at?: string
+          estimated_unit_cost?: number | null
+          id?: string
+          inventory_item_id?: string | null
+          is_from_bom?: boolean | null
+          notes?: string | null
+          quantity_consumed?: number
+          quantity_required?: number
+          unit?: string | null
+          work_order_id: string
+        }
+        Update: {
+          actual_unit_cost?: number | null
+          created_at?: string
+          estimated_unit_cost?: number | null
+          id?: string
+          inventory_item_id?: string | null
+          is_from_bom?: boolean | null
+          notes?: string | null
+          quantity_consumed?: number
+          quantity_required?: number
+          unit?: string | null
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_materials_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_materials_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_orders: {
+        Row: {
+          act_hours: number | null
+          act_labor_cost: number | null
+          act_material_cost: number | null
+          act_overhead_cost: number | null
+          act_total_cost: number | null
+          actual_end: string | null
+          actual_start: string | null
+          completed: number
+          created_at: string
+          created_by: string | null
+          current_stage: Database["public"]["Enums"]["production_stage"]
+          customer_id: string | null
+          est_hours: number | null
+          est_labor_cost: number | null
+          est_material_cost: number | null
+          est_overhead_cost: number | null
+          est_total_cost: number | null
+          good_units: number
+          id: string
+          is_at_risk: boolean | null
+          is_blocked: boolean | null
+          is_overdue: boolean | null
+          notes: string | null
+          priority: Database["public"]["Enums"]["work_order_priority"]
+          product_id: string | null
+          progress: number | null
+          project_id: string | null
+          quantity: number
+          quote_id: string | null
+          remaining: number
+          rework: number
+          scheduled_end: string | null
+          scheduled_start: string | null
+          scrap: number
+          status: Database["public"]["Enums"]["work_order_status"]
+          supervisor_notes: string | null
+          updated_at: string
+          updated_by: string | null
+          work_order_number: string
+        }
+        Insert: {
+          act_hours?: number | null
+          act_labor_cost?: number | null
+          act_material_cost?: number | null
+          act_overhead_cost?: number | null
+          act_total_cost?: number | null
+          actual_end?: string | null
+          actual_start?: string | null
+          completed?: number
+          created_at?: string
+          created_by?: string | null
+          current_stage?: Database["public"]["Enums"]["production_stage"]
+          customer_id?: string | null
+          est_hours?: number | null
+          est_labor_cost?: number | null
+          est_material_cost?: number | null
+          est_overhead_cost?: number | null
+          est_total_cost?: number | null
+          good_units?: number
+          id?: string
+          is_at_risk?: boolean | null
+          is_blocked?: boolean | null
+          is_overdue?: boolean | null
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["work_order_priority"]
+          product_id?: string | null
+          progress?: number | null
+          project_id?: string | null
+          quantity?: number
+          quote_id?: string | null
+          remaining?: number
+          rework?: number
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          scrap?: number
+          status?: Database["public"]["Enums"]["work_order_status"]
+          supervisor_notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          work_order_number: string
+        }
+        Update: {
+          act_hours?: number | null
+          act_labor_cost?: number | null
+          act_material_cost?: number | null
+          act_overhead_cost?: number | null
+          act_total_cost?: number | null
+          actual_end?: string | null
+          actual_start?: string | null
+          completed?: number
+          created_at?: string
+          created_by?: string | null
+          current_stage?: Database["public"]["Enums"]["production_stage"]
+          customer_id?: string | null
+          est_hours?: number | null
+          est_labor_cost?: number | null
+          est_material_cost?: number | null
+          est_overhead_cost?: number | null
+          est_total_cost?: number | null
+          good_units?: number
+          id?: string
+          is_at_risk?: boolean | null
+          is_blocked?: boolean | null
+          is_overdue?: boolean | null
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["work_order_priority"]
+          product_id?: string | null
+          progress?: number | null
+          project_id?: string | null
+          quantity?: number
+          quote_id?: string | null
+          remaining?: number
+          rework?: number
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          scrap?: number
+          status?: Database["public"]["Enums"]["work_order_status"]
+          supervisor_notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          work_order_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -871,6 +1366,7 @@ export type Database = {
         | "Wholesale"
         | "Fabricator"
         | "Distributor"
+      cutting_job_status: "Pending" | "In Progress" | "Completed" | "Cancelled"
       inventory_item_status: "active" | "inactive" | "discontinued" | "obsolete"
       inventory_movement_type:
         | "receipt"
@@ -885,6 +1381,14 @@ export type Database = {
         | "approved"
         | "rejected"
         | "returned"
+      issue_severity: "Low" | "Medium" | "High" | "Critical"
+      issue_type:
+        | "material_shortage"
+        | "machine_breakdown"
+        | "quality_problem"
+        | "staff_shortage"
+        | "design_issue"
+        | "other"
       payment_terms:
         | "COD"
         | "Net 15"
@@ -920,6 +1424,19 @@ export type Database = {
         | "Custom"
       product_status: "Active" | "Inactive" | "Discontinued" | "Draft"
       product_type: "Raw Material" | "Fabricated" | "System" | "Custom"
+      production_stage:
+        | "Pending"
+        | "Cutting"
+        | "Machining"
+        | "Assembly"
+        | "Welding"
+        | "Glazing"
+        | "Quality Check"
+        | "Packaging"
+        | "Completed"
+        | "On Hold"
+        | "Cancelled"
+      quality_check_result: "pass" | "fail" | "conditional"
       supplier_business_type:
         | "Manufacturer"
         | "Distributor"
@@ -932,6 +1449,14 @@ export type Database = {
         | "Blacklisted"
         | "Pending"
         | "Prospect"
+      work_order_priority: "Low" | "Medium" | "High" | "Urgent" | "Critical"
+      work_order_status:
+        | "Draft"
+        | "Scheduled"
+        | "In Progress"
+        | "On Hold"
+        | "Completed"
+        | "Cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1079,6 +1604,7 @@ export const Constants = {
         "Fabricator",
         "Distributor",
       ],
+      cutting_job_status: ["Pending", "In Progress", "Completed", "Cancelled"],
       inventory_item_status: ["active", "inactive", "discontinued", "obsolete"],
       inventory_movement_type: [
         "receipt",
@@ -1094,6 +1620,15 @@ export const Constants = {
         "approved",
         "rejected",
         "returned",
+      ],
+      issue_severity: ["Low", "Medium", "High", "Critical"],
+      issue_type: [
+        "material_shortage",
+        "machine_breakdown",
+        "quality_problem",
+        "staff_shortage",
+        "design_issue",
+        "other",
       ],
       payment_terms: [
         "COD",
@@ -1133,6 +1668,20 @@ export const Constants = {
       ],
       product_status: ["Active", "Inactive", "Discontinued", "Draft"],
       product_type: ["Raw Material", "Fabricated", "System", "Custom"],
+      production_stage: [
+        "Pending",
+        "Cutting",
+        "Machining",
+        "Assembly",
+        "Welding",
+        "Glazing",
+        "Quality Check",
+        "Packaging",
+        "Completed",
+        "On Hold",
+        "Cancelled",
+      ],
+      quality_check_result: ["pass", "fail", "conditional"],
       supplier_business_type: [
         "Manufacturer",
         "Distributor",
@@ -1146,6 +1695,15 @@ export const Constants = {
         "Blacklisted",
         "Pending",
         "Prospect",
+      ],
+      work_order_priority: ["Low", "Medium", "High", "Urgent", "Critical"],
+      work_order_status: [
+        "Draft",
+        "Scheduled",
+        "In Progress",
+        "On Hold",
+        "Completed",
+        "Cancelled",
       ],
     },
   },

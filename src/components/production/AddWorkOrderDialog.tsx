@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { sampleProducts } from "@/data/sampleData";
 import { enhancedSampleProjects } from "@/data/enhancedProjectData";
 import { enhancedCustomers } from "@/data/enhancedCustomerData";
 import type { EnhancedWorkOrder, WorkOrderPriority } from "@/data/enhancedProductionData";
+import { useProducts } from "@/hooks/useProducts";
 
 interface Props {
   open: boolean;
@@ -20,6 +20,7 @@ interface Props {
 }
 
 export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }: Props) {
+  const { data: products = [] } = useProducts();
   const [form, setForm] = useState({
     projectId: '', productId: '', quantity: '',
     priority: 'Medium' as WorkOrderPriority,
@@ -29,7 +30,7 @@ export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }:
   });
 
   const selectedProject = enhancedSampleProjects.find(p => p.id === form.projectId);
-  const selectedProduct = sampleProducts.find(p => p.id === form.productId);
+  const selectedProduct = products.find(p => p.id === form.productId);
   const customer = selectedProject ? enhancedCustomers.find(c => c.id === selectedProject.customerId) : null;
 
   const handleAdd = () => {
@@ -40,21 +41,21 @@ export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }:
       projectId: form.projectId, projectName: selectedProject?.name || '', projectCode: form.projectId,
       customerId: selectedProject?.customerId, customerName: selectedProject?.customerName,
       productId: form.productId, productCode: selectedProduct?.code || '',
-      productName: selectedProduct?.name || '', productNameAm: selectedProduct?.nameAm,
-      productCategory: selectedProduct?.category || '', productType: selectedProduct?.productType || 'Fabricated',
+      productName: selectedProduct?.name || '', productNameAm: selectedProduct?.name_am,
+      productCategory: selectedProduct?.category || '', productType: (selectedProduct?.product_type as any) || 'Fabricated',
       specifications: {
-        profile: selectedProduct?.profile, glass: selectedProduct?.glass,
-        color: selectedProduct?.colors?.[0], alloyType: selectedProduct?.alloyType, temper: selectedProduct?.temper,
+        profile: selectedProduct?.profile || undefined, glass: selectedProduct?.glass || undefined,
+        color: selectedProduct?.colors?.[0], alloyType: selectedProduct?.alloy_type || undefined, temper: selectedProduct?.temper || undefined,
       },
       quantity: Number(form.quantity), completed: 0, remaining: Number(form.quantity), scrap: 0, rework: 0, goodUnits: 0,
       createdAt: new Date().toISOString().split('T')[0],
       scheduledStart: form.scheduledStart,
       scheduledEnd: form.scheduledEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       estimated: {
-        hours: (selectedProduct?.laborHrs || 2) * Number(form.quantity),
-        laborCost: (selectedProduct?.laborHrs || 2) * Number(form.quantity) * 140,
-        materialCost: (selectedProduct?.materialCost || 5000) * Number(form.quantity),
-        overheadCost: Math.round((selectedProduct?.materialCost || 5000) * Number(form.quantity) * 0.05),
+        hours: (selectedProduct?.labor_hrs || 2) * Number(form.quantity),
+        laborCost: (selectedProduct?.labor_hrs || 2) * Number(form.quantity) * 140,
+        materialCost: (selectedProduct?.material_cost || 5000) * Number(form.quantity),
+        overheadCost: Math.round((selectedProduct?.material_cost || 5000) * Number(form.quantity) * 0.05),
         totalCost: 0,
       },
       actual: { hours: 0, laborCost: 0, materialCost: 0, overheadCost: 0, totalCost: 0 },
@@ -113,17 +114,17 @@ export function AddWorkOrderDialog({ open, onOpenChange, onAdd, existingCount }:
               <Select value={form.productId} onValueChange={v => setForm(p => ({ ...p, productId: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
                 <SelectContent>
-                  {sampleProducts.filter(p => p.status === 'Active').map(p => (
+                  {products.filter(p => p.status === 'Active').map(p => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name} — {p.category}
-                      <span className="text-muted-foreground text-[10px] ml-1">(ETB {p.sellingPrice.toLocaleString()})</span>
+                      <span className="text-muted-foreground text-[10px] ml-1">(ETB {p.selling_price?.toLocaleString()})</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedProduct && (
                 <div className="mt-1 text-[10px] text-muted-foreground">
-                  {selectedProduct.code} · {selectedProduct.profile} · {selectedProduct.laborHrs}h labor · Stock: {selectedProduct.currentStock || 0}
+                  {selectedProduct.code} · {selectedProduct.profile} · {selectedProduct.labor_hrs}h labor · Stock: {selectedProduct.current_stock || 0}
                 </div>
               )}
             </div>
