@@ -40,6 +40,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
     fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '',
     currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '',
     supplierName: '', leadTimeDays: '', moq: '', tags: '',
+    installationInstructions: '', images: '', alternativeProducts: '', certifications: '',
   });
 
   const [bom, setBom] = useState<BOMRow[]>([]);
