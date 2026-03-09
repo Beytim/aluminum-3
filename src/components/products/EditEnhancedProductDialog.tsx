@@ -200,6 +200,10 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
               {F('glass', 'Glass')}
               {F('colors', 'Colors (comma-separated)', { span: true })}
               {F('tags', 'Tags (comma-separated)', { span: true })}
+              {F('certifications', 'Certifications (comma-separated)', { span: true })}
+              {F('installationInstructions', 'Installation Instructions URL', { span: true })}
+              {F('images', 'Image URLs (comma-separated)', { span: true })}
+              {F('alternativeProducts', 'Alternative Product IDs (comma-separated)', { span: true })}
               {F('notes', 'Notes', { span: true })}
             </div>
           </TabsContent>
