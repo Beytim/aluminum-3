@@ -177,12 +177,16 @@ export function useProducts() {
       if (error) throw error;
       
       return (data || []).map((p: any) => {
+        const isRawMaterial = p.product_type === 'Raw Material';
         const hasInventoryItems = p.inventory_items && p.inventory_items.length > 0;
-        const calculatedStock = hasInventoryItems 
+        
+        // For Raw Materials, we pull stock from inventory_items
+        // For Finished Goods, we always use the isolated current_stock on the product
+        const calculatedStock = (isRawMaterial && hasInventoryItems)
           ? p.inventory_items.reduce((sum: number, item: any) => sum + (Number(item.stock) || 0), 0) 
           : p.current_stock;
           
-        const calculatedReserved = hasInventoryItems 
+        const calculatedReserved = (isRawMaterial && hasInventoryItems)
           ? p.inventory_items.reduce((sum: number, item: any) => sum + (Number(item.reserved) || 0), 0) 
           : p.reserved_stock;
         
