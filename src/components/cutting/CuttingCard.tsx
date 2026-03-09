@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Scissors, Trash2, Play, CheckCircle, Calculator } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreVertical, Eye, Trash2, Play, CheckCircle, Calculator, Pencil, Pause, XCircle, FileDown } from "lucide-react";
 import type { EnhancedCuttingJob } from "@/data/enhancedProductionData";
 import { formatETBShort, priorityColors } from "@/data/enhancedProductionData";
 
@@ -15,6 +16,7 @@ const statusColor: Record<string, string> = {
 interface Props {
   job: EnhancedCuttingJob;
   onView: (job: EnhancedCuttingJob) => void;
+  onEdit: (job: EnhancedCuttingJob) => void;
   onOptimize: (id: string) => void;
   onStatusChange: (id: string, status: EnhancedCuttingJob['status']) => void;
   onDelete: (id: string) => void;
