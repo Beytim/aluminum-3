@@ -55,6 +55,27 @@ const mapDbToItem = (dbItem: any, product: any = {}): EnhancedInventoryItem => (
   updatedBy: dbItem.updated_by || ''
 });
 
+const mapDbToMovement = (dbMov: any): StockMovement => ({
+  id: dbMov.id,
+  movementNumber: dbMov.movement_number,
+  inventoryItemId: dbMov.inventory_item_id,
+  itemCode: '',
+  itemName: '',
+  type: dbMov.type as MovementType,
+  quantity: Number(dbMov.quantity),
+  unit: '',
+  previousStock: Number(dbMov.previous_stock),
+  newStock: Number(dbMov.new_stock),
+  sourceType: dbMov.source_type || 'manual',
+  sourceId: dbMov.source_id,
+  sourceNumber: dbMov.source_id,
+  userId: dbMov.user_id || '',
+  userName: 'System',
+  date: dbMov.created_at,
+  notes: dbMov.notes,
+  createdAt: dbMov.created_at,
+});
+
 export function useInventory() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
