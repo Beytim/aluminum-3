@@ -219,7 +219,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-4 h-8">
             <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
-            <TabsTrigger value="dimensions" className="text-xs">Dimensions</TabsTrigger>
+            <TabsTrigger value="specs" className="text-xs">Specs & Dims</TabsTrigger>
             <TabsTrigger value="bom" className="text-xs">BOM</TabsTrigger>
             <TabsTrigger value="pricing" className="text-xs">Pricing & Stock</TabsTrigger>
           </TabsList>
