@@ -35,6 +35,7 @@ export default function AddEnhancedProductDialog({ open, onOpenChange, existingC
     profile: '', glass: '', colors: '', unit: 'pcs', version: '1.0', effectiveDate: '',
     width: '', height: '', thickness: '', length: '', diameter: '', wallThickness: '',
     weightPerMeter: '', weightPerPiece: '', laborHrs: '',
+    surfaceFinish: '', hasThermalBreak: false, uValue: '', windLoadRating: '', stcRating: '', fireRating: '', warrantyMonths: '',
     profileCost: '', glassCost: '', hardwareCost: '', accessoriesCost: '',
     fabLaborCost: '', installLaborCost: '', overheadPercent: '20', sellingPrice: '',
     currentStock: '', minStock: '', maxStock: '', warehouseLocation: '', supplierId: '',
