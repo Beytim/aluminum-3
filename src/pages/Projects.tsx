@@ -24,7 +24,7 @@ import { EditEnhancedProjectDialog } from "@/components/projects/EditEnhancedPro
 
 export default function Projects() {
   const { projects, isLoading, addProject, updateProject, deleteProject, bulkDelete, bulkStatusChange, getNextProjectNumber } = useProjects();
-  const { products } = useProducts();
+  const { data: products = [] } = useProducts();
 
   // Fetch customers from DB
   const { data: customers = [] } = useQuery({
