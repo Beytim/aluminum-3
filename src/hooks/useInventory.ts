@@ -196,8 +196,21 @@ export function useInventory() {
     }
   });
 
+  const { data: movements = [] } = useQuery({
+    queryKey: ['inventory_movements'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('inventory_movements')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map(mapDbToMovement);
+    }
+  });
+
   return {
     inventory,
+    movements,
     isLoading,
     addItem: addItem.mutate,
     updateItem: updateItem.mutate,
