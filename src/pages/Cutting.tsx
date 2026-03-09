@@ -26,6 +26,7 @@ export default function Cutting() {
   const [detailsJob, setDetailsJob] = useState<EnhancedCuttingJob | null>(null);
   const [optimizerOpen, setOptimizerOpen] = useState(false);
   const [optimizerJob, setOptimizerJob] = useState<EnhancedCuttingJob | null>(null);
+  const [editJob, setEditJob] = useState<EnhancedCuttingJob | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [quickFilter, setQuickFilter] = useState('all');
   const [filters, setFilters] = useState({
