@@ -40,6 +40,7 @@ export default function ProductFilters({
           <SelectTrigger className="w-28 sm:w-32 h-8 text-xs"><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="finished">Finished Goods</SelectItem>
             <SelectItem value="Raw Material">Raw Material</SelectItem>
             <SelectItem value="Fabricated">Fabricated</SelectItem>
             <SelectItem value="System">System</SelectItem>

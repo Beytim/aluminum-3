@@ -113,7 +113,7 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
               <Select value={selectedProductId} onValueChange={handleProductSelect}>
                 <SelectTrigger><SelectValue placeholder="Select product (optional)" /></SelectTrigger>
                 <SelectContent>
-                  {products.map(p => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}
+                  {products.filter(p => p.product_type === 'Raw Material').map(p => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
