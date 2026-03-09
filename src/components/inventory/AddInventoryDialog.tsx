@@ -7,9 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { sampleProducts, type Product } from "@/data/sampleData";
-import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import type { EnhancedInventoryItem } from "@/data/enhancedInventoryData";
+import { useProducts } from "@/hooks/useProducts";
+import { useSuppliers } from "@/hooks/useSuppliers";
 
 interface Props {
   open: boolean;
@@ -19,7 +19,8 @@ interface Props {
 }
 
 export default function AddInventoryDialog({ open, onOpenChange, onAdd, existingCount }: Props) {
-  const [products] = useLocalStorage<Product[]>(STORAGE_KEYS.PRODUCTS, sampleProducts);
+  const { data: products = [] } = useProducts();
+  const { data: suppliers = [] } = useSuppliers();
   const [selectedProductId, setSelectedProductId] = useState('');
   const [form, setForm] = useState({
     name: '', nameAm: '', category: 'Profile' as string, productType: 'RawMaterial' as string,
@@ -37,12 +38,12 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
     if (product) {
       setForm(prev => ({
         ...prev,
-        name: product.name, nameAm: product.nameAm,
+        name: product.name, nameAm: product.name_am || '',
         category: product.category === 'Windows' || product.category === 'Doors' || product.category === 'Curtain Walls' || product.category === 'Handrails' || product.category === 'Louvers' || product.category === 'Partitions' ? 'Finished Product' : product.category === 'Sheet' || product.category === 'Tube/Pipe' || product.category === 'Profile' ? 'Profile' : product.category,
-        productType: product.productType === 'Raw Material' ? 'RawMaterial' : product.productType,
-        unitCost: String(product.materialCost), sellingPrice: String(product.sellingPrice),
-        alloyType: product.alloyType || '', temper: product.temper || '',
-        stock: String(product.currentStock || 0),
+        productType: product.product_type === 'Raw Material' ? 'RawMaterial' : product.product_type,
+        unitCost: String(product.material_cost || 0), sellingPrice: String(product.selling_price || 0),
+        alloyType: product.alloy_type || '', temper: product.temper || '',
+        stock: String(product.current_stock || 0),
       }));
     }
   };
