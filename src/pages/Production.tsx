@@ -89,6 +89,20 @@ export default function Production() {
     toast({ title: "Exported" });
   };
 
+  const handleExportPDF = (wo: EnhancedWorkOrder) => {
+    generateWorkOrderPDF(wo);
+  };
+
+  const handleExportAllPDF = () => {
+    const data = selectedIds.length > 0 ? workOrders.filter(w => selectedIds.includes(w.id)) : filteredWOs;
+    generateProductionReportPDF(data);
+  };
+
+  const handleUpdateStatus = (id: string, status: string) => {
+    updateWorkOrder({ id, updates: { status } });
+    toast({ title: `Status updated to ${status}` });
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
