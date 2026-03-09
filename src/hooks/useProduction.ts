@@ -229,7 +229,7 @@ export function useProduction() {
     if (idx < 0 || idx >= stages.length - 1) return;
     const nextStage = stages[idx + 1];
     
-    if (wo.currentStage === 'Pending' && nextStage === 'Cutting') {
+    if (wo.currentStage === 'Pending' && (wo.status === 'Draft' || wo.status === 'Scheduled')) {
       startWorkOrder.mutate(id);
       return;
     }
