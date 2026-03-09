@@ -1,20 +1,15 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Download, LayoutGrid, List } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { generateReportPDF } from "@/lib/pdfExport";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/lib/settingsContext";
-import { enhancedCustomers } from "@/data/enhancedCustomerData";
+import { useCustomers } from "@/hooks/useCustomers";
+import { useProjects } from "@/hooks/useProjects";
 import type { EnhancedCustomer } from "@/data/customerTypes";
-import { sampleQuotes, sampleProducts } from "@/data/sampleData";
-import type { Quote, Product, Invoice } from "@/data/sampleData";
-import { enhancedSampleProjects } from "@/data/enhancedProjectData";
-import type { EnhancedProject } from "@/data/enhancedProjectData";
-import { sampleInvoices } from "@/data/sampleData";
+import { sampleQuotes, sampleInvoices } from "@/data/sampleData";
 
 import { CustomerStats } from "@/components/customers/CustomerStats";
 import { CustomerFilters, defaultCustomerFilters, type CustomerFilterState } from "@/components/customers/CustomerFilters";
@@ -26,7 +21,9 @@ import { EditEnhancedCustomerDialog } from "@/components/customers/EditEnhancedC
 import { BulkActionsBar } from "@/components/customers/BulkActionsBar";
 
 export default function Customers() {
-  const [customers, setCustomers] = useLocalStorage<EnhancedCustomer[]>('enhanced_customers', enhancedCustomers);
+  const { customers, isLoading, addCustomer, updateCustomer, deleteCustomer, bulkDelete, getNextCode } = useCustomers();
+  const { projects } = useProjects();
+  
   const [filters, setFilters] = useState<CustomerFilterState>(defaultCustomerFilters);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -58,14 +55,12 @@ export default function Customers() {
   }, [customers, filters]);
 
   const handleDelete = (id: string) => {
-    setCustomers(prev => prev.filter(c => c.id !== id));
+    deleteCustomer.mutate(id);
     setSelectedIds(prev => prev.filter(i => i !== id));
-    toast({ title: "Deleted", description: "Customer removed." });
   };
 
   const handleBulkDelete = () => {
-    setCustomers(prev => prev.filter(c => !selectedIds.includes(c.id)));
-    toast({ title: "Deleted", description: `${selectedIds.length} customers removed.` });
+    bulkDelete.mutate(selectedIds);
     setSelectedIds([]);
   };
 
@@ -76,6 +71,14 @@ export default function Customers() {
       data.map(c => [c.code, c.name, c.contact, c.type, c.phone, String(c.projects), formatCurrency(c.totalValue), formatCurrency(c.outstanding), `${c.healthScore} (${c.healthStatus})`])
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-sm text-muted-foreground">Loading customers...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -155,9 +158,28 @@ export default function Customers() {
       )}
 
       {/* Dialogs */}
-      <AddEnhancedCustomerDialog open={addOpen} onOpenChange={setAddOpen} onAdd={c => setCustomers(prev => [...prev, c])} existingCustomers={customers} />
-      <EditEnhancedCustomerDialog open={!!editCustomer} onOpenChange={open => { if (!open) setEditCustomer(null); }} customer={editCustomer} onSave={updated => setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c))} />
-      <CustomerDetailsDialog open={!!viewCustomer} onOpenChange={open => { if (!open) setViewCustomer(null); }} customer={viewCustomer} onEdit={c => { setViewCustomer(null); setEditCustomer(c); }} language={language} projects={enhancedSampleProjects} quotes={sampleQuotes} invoices={sampleInvoices} />
+      <AddEnhancedCustomerDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onAdd={c => addCustomer.mutate(c)}
+        existingCustomers={customers}
+      />
+      <EditEnhancedCustomerDialog
+        open={!!editCustomer}
+        onOpenChange={open => { if (!open) setEditCustomer(null); }}
+        customer={editCustomer}
+        onSave={updated => updateCustomer.mutate(updated)}
+      />
+      <CustomerDetailsDialog
+        open={!!viewCustomer}
+        onOpenChange={open => { if (!open) setViewCustomer(null); }}
+        customer={viewCustomer}
+        onEdit={c => { setViewCustomer(null); setEditCustomer(c); }}
+        language={language}
+        projects={projects as any}
+        quotes={sampleQuotes}
+        invoices={sampleInvoices}
+      />
     </div>
   );
 }
