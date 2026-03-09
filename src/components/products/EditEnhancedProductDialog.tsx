@@ -195,6 +195,23 @@ export default function EditEnhancedProductDialog({ open, onOpenChange, product 
             </div>
           </TabsContent>
 
+          <TabsContent value="specs" className="mt-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {F('surfaceFinish', 'Surface Finish')}
+              <div className="flex items-end pb-1.5">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={form.hasThermalBreak} onChange={e => setForm(p => ({ ...p, hasThermalBreak: e.target.checked }))} className="h-4 w-4 rounded border-border" />
+                  Thermal Break
+                </label>
+              </div>
+              {F('uValue', 'U-Value', { type: 'number' })}
+              {F('windLoadRating', 'Wind Load Rating')}
+              {F('stcRating', 'STC Rating')}
+              {F('fireRating', 'Fire Rating')}
+              {F('warrantyMonths', 'Warranty (Months)', { type: 'number' })}
+            </div>
+          </TabsContent>
+
           <TabsContent value="pricing" className="mt-3">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {F('profileCost', 'Profile Cost (ETB)', { type: 'number' })}
