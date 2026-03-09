@@ -27,11 +27,11 @@ export function ProductionStats({ stats }: Props) {
     },
     {
       label: 'Avg Efficiency',
-      value: `${stats.averageEfficiency}%`,
-      sub: stats.averageEfficiency >= 90 ? 'Excellent' : stats.averageEfficiency >= 70 ? 'Good' : 'Needs improvement',
+      value: stats.averageEfficiency > 0 ? `${stats.averageEfficiency}%` : 'N/A',
+      sub: stats.averageEfficiency === 0 ? 'No data yet' : stats.averageEfficiency >= 90 ? 'Excellent' : stats.averageEfficiency >= 70 ? 'Good' : 'Needs improvement',
       icon: Gauge,
-      color: stats.averageEfficiency >= 90 ? 'text-success' : stats.averageEfficiency >= 70 ? 'text-warning' : 'text-destructive',
-      bg: stats.averageEfficiency >= 90 ? 'bg-success/10' : stats.averageEfficiency >= 70 ? 'bg-warning/10' : 'bg-destructive/10',
+      color: stats.averageEfficiency === 0 ? 'text-muted-foreground' : stats.averageEfficiency >= 90 ? 'text-success' : stats.averageEfficiency >= 70 ? 'text-warning' : 'text-destructive',
+      bg: stats.averageEfficiency === 0 ? 'bg-muted' : stats.averageEfficiency >= 90 ? 'bg-success/10' : stats.averageEfficiency >= 70 ? 'bg-warning/10' : 'bg-destructive/10',
     },
     {
       label: 'On-Time Rate',
@@ -44,10 +44,10 @@ export function ProductionStats({ stats }: Props) {
     {
       label: 'Material Cost',
       value: formatETBShort(stats.totalMaterialCost),
-      sub: 'consumed this period',
+      sub: stats.totalMaterialCost > 0 ? 'estimated/consumed' : 'no materials yet',
       icon: Package,
-      color: 'text-info',
-      bg: 'bg-info/10',
+      color: stats.totalMaterialCost > 0 ? 'text-info' : 'text-muted-foreground',
+      bg: stats.totalMaterialCost > 0 ? 'bg-info/10' : 'bg-muted',
     },
     {
       label: 'Labor Cost',
@@ -59,11 +59,11 @@ export function ProductionStats({ stats }: Props) {
     },
     {
       label: 'Cost Variance',
-      value: formatETBShort(Math.abs(stats.costVariance)),
-      sub: stats.costVariance >= 0 ? '✅ Under budget' : '⚠️ Over budget',
+      value: stats.costVariance !== 0 ? formatETBShort(Math.abs(stats.costVariance)) : 'ETB 0',
+      sub: stats.costVariance === 0 ? 'On budget' : stats.costVariance > 0 ? '✅ Under budget' : '⚠️ Over budget',
       icon: TrendingUp,
-      color: stats.costVariance >= 0 ? 'text-success' : 'text-destructive',
-      bg: stats.costVariance >= 0 ? 'bg-success/10' : 'bg-destructive/10',
+      color: stats.costVariance === 0 ? 'text-muted-foreground' : stats.costVariance > 0 ? 'text-success' : 'text-destructive',
+      bg: stats.costVariance === 0 ? 'bg-muted' : stats.costVariance > 0 ? 'bg-success/10' : 'bg-destructive/10',
     },
     {
       label: 'At Risk / Blocked',
