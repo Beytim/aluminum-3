@@ -191,6 +191,36 @@ export function useProduction() {
     },
   });
 
+  const startWorkOrder = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc('start_work_order', { p_work_order_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['work_orders'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_items'] });
+      toast({ title: 'Work Order Started', description: 'Materials have been reserved.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error starting Work Order', description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const completeWorkOrder = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc('complete_work_order', { p_work_order_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['work_orders'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_items'] });
+      toast({ title: 'Work Order Completed', description: 'Materials consumed and finished goods added to inventory.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error completing Work Order', description: error.message, variant: 'destructive' });
+    }
+  });
+
   const advanceStage = async (id: string) => {
     const wo = workOrders.find(w => w.id === id);
     if (!wo) return;
@@ -198,15 +228,25 @@ export function useProduction() {
     const idx = stages.indexOf(wo.currentStage);
     if (idx < 0 || idx >= stages.length - 1) return;
     const nextStage = stages[idx + 1];
-    const newProgress = nextStage === 'Completed' ? 100 : Math.min(100, Math.round(((idx + 2) / stages.length) * 100));
+    
+    if (wo.currentStage === 'Pending' && nextStage === 'Cutting') {
+      startWorkOrder.mutate(id);
+      return;
+    }
+
+    if (nextStage === 'Completed') {
+      completeWorkOrder.mutate(id);
+      return;
+    }
+
+    const newProgress = Math.min(100, Math.round(((idx + 2) / stages.length) * 100));
     
     updateWorkOrder.mutate({
       id,
       updates: {
         current_stage: nextStage,
         progress: newProgress,
-        status: nextStage === 'Completed' ? 'Completed' : 'In Progress',
-        actual_end: nextStage === 'Completed' ? new Date().toISOString().split('T')[0] : null,
+        status: 'In Progress',
       },
     });
     toast({ title: `Stage Advanced to ${nextStage}` });
@@ -218,6 +258,8 @@ export function useProduction() {
     addWorkOrder: addWorkOrder.mutate,
     updateWorkOrder: updateWorkOrder.mutate,
     deleteWorkOrder: deleteWorkOrder.mutate,
+    startWorkOrder: startWorkOrder.mutate,
+    completeWorkOrder: completeWorkOrder.mutate,
     advanceStage,
   };
 }
