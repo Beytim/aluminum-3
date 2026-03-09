@@ -352,8 +352,17 @@ export function calculateProductionStats(workOrders: EnhancedWorkOrder[]): Produ
   const totalEst = workOrders.reduce((s, w) => s + w.estimated.totalCost, 0);
   const totalAct = workOrders.reduce((s, w) => s + w.actual.totalCost, 0);
   const avgProgress = workOrders.length > 0 ? workOrders.reduce((s, w) => s + w.progress, 0) / workOrders.length : 0;
-  const avgEfficiency = workOrders.filter(w => w.variances.efficiency > 0).length > 0
-    ? workOrders.filter(w => w.variances.efficiency > 0).reduce((s, w) => s + w.variances.efficiency, 0) / workOrders.filter(w => w.variances.efficiency > 0).length
+  
+  // FIX: Only calculate efficiency for work orders with actual hours > 0
+  const ordersWithActualHours = workOrders.filter(w => w.actual.hours > 0);
+  const avgEfficiency = ordersWithActualHours.length > 0
+    ? ordersWithActualHours.reduce((s, w) => {
+        // Efficiency = (estimated hours / actual hours) * 100
+        const eff = w.estimated.hours > 0 && w.actual.hours > 0 
+          ? (w.estimated.hours / w.actual.hours) * 100 
+          : 0;
+        return s + Math.min(eff, 200); // Cap at 200% to avoid outliers
+      }, 0) / ordersWithActualHours.length
     : 0;
 
   const totalQty = workOrders.reduce((s, w) => s + w.quantity, 0);
@@ -363,6 +372,18 @@ export function calculateProductionStats(workOrders: EnhancedWorkOrder[]): Produ
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // FIX: Use estimated costs for material/labor when actual is zero (not yet started)
+  const totalMaterialCost = workOrders.reduce((s, w) => 
+    s + (w.actual.materialCost > 0 ? w.actual.materialCost : w.estimated.materialCost), 0);
+  const totalLaborCost = workOrders.reduce((s, w) => 
+    s + (w.actual.laborCost > 0 ? w.actual.laborCost : w.estimated.laborCost), 0);
+
+  // FIX: Cost variance should only compare for work with actual costs recorded
+  const ordersWithActualCosts = workOrders.filter(w => w.actual.totalCost > 0);
+  const costVariance = ordersWithActualCosts.length > 0
+    ? ordersWithActualCosts.reduce((s, w) => s + (w.estimated.totalCost - w.actual.totalCost), 0)
+    : 0;
 
   return {
     totalWorkOrders: workOrders.length,
@@ -376,11 +397,11 @@ export function calculateProductionStats(workOrders: EnhancedWorkOrder[]): Produ
     averageProgress: Math.round(avgProgress),
     averageEfficiency: Math.round(avgEfficiency),
     onTimeRate: completed.length > 0 ? Math.round((completed.filter(w => !w.isOverdue).length / completed.length) * 100) : 0,
-    totalMaterialCost: workOrders.reduce((s, w) => s + w.actual.materialCost, 0),
-    totalLaborCost: workOrders.reduce((s, w) => s + w.actual.laborCost, 0),
+    totalMaterialCost,
+    totalLaborCost,
     totalEstimatedCost: totalEst,
     totalActualCost: totalAct,
-    costVariance: totalEst - totalAct,
+    costVariance,
     scrapRate: totalQty > 0 ? Math.round((totalScrap / totalQty) * 100) : 0,
     reworkRate: totalQty > 0 ? Math.round((totalRework / totalQty) * 100) : 0,
     overdueCount: overdue.length,

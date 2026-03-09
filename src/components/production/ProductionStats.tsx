@@ -44,10 +44,10 @@ export function ProductionStats({ stats }: Props) {
     {
       label: 'Material Cost',
       value: formatETBShort(stats.totalMaterialCost),
-      sub: 'consumed this period',
+      sub: stats.totalMaterialCost > 0 ? 'estimated/consumed' : 'no materials yet',
       icon: Package,
-      color: 'text-info',
-      bg: 'bg-info/10',
+      color: stats.totalMaterialCost > 0 ? 'text-info' : 'text-muted-foreground',
+      bg: stats.totalMaterialCost > 0 ? 'bg-info/10' : 'bg-muted',
     },
     {
       label: 'Labor Cost',
