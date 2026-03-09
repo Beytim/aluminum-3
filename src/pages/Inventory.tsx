@@ -114,8 +114,6 @@ export default function Inventory() {
     });
   };
 
-  import { generateReportPDF } from "@/lib/pdfExport";
-
   const handleExportPDF = () => {
     const data = (selectedIds.length > 0 ? filtered.filter(i => selectedIds.includes(i.id)) : filtered);
     generateReportPDF(
