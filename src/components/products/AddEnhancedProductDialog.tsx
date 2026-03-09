@@ -15,7 +15,7 @@ const productTypes = ['Raw Material', 'Fabricated', 'System', 'Custom'];
 const units = ['pcs', 'm', 'm²', 'kg', 'set', 'roll', 'box', 'sqm', 'lm'];
 const bomTypes = ['Profile', 'Hardware', 'Glass', 'Accessory', 'Other'];
 
-interface BOMRow { id: string; type: string; name: string; quantity: number; unit: string; unitCost: number; total: number; }
+interface BOMRow { id: string; type: string; name: string; quantity: number; unit: string; unitCost: number; total: number; wastagePercent?: string; }
 
 interface Props {
   open: boolean;
