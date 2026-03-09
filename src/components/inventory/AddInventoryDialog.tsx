@@ -58,11 +58,11 @@ export default function AddInventoryDialog({ open, onOpenChange, onAdd, existing
 
     const stock = Number(form.stock);
     const reserved = 0;
-    const id = `INV-${String(existingCount + 1).padStart(3, '0')}`;
+    const uniqueId = `INV-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 100)}`;
     const product = products.find(p => p.id === selectedProductId);
 
     const item: EnhancedInventoryItem = {
-      id, itemCode: id,
+      id: uniqueId, itemCode: uniqueId,
       productId: selectedProductId || '', productCode: product?.code || id,
       productName: form.name.trim(), productNameAm: form.nameAm.trim() || form.name.trim(),
       category: form.category as any, productType: form.productType as any,
