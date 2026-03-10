@@ -3,10 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutGrid, List, Download, ShoppingCart } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { useLocalStorage, STORAGE_KEYS } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
-import { enhancedSampleOrders, calculateOrderStats } from "@/data/enhancedOrderData";
+import { calculateOrderStats } from "@/data/enhancedOrderData";
 import type { EnhancedOrder } from "@/data/enhancedOrderData";
+import { useOrders, useOrderMutations } from "@/hooks/useOrders";
 import { OrderStats } from "@/components/orders/OrderStats";
 import { OrderFilters } from "@/components/orders/OrderFilters";
 import { OrderCard } from "@/components/orders/OrderCard";
@@ -18,7 +18,8 @@ import { OrderDetailsDialog } from "@/components/orders/OrderDetailsDialog";
 type ViewMode = 'grid' | 'table';
 
 export default function Orders() {
-  const [orders, setOrders] = useLocalStorage<EnhancedOrder[]>(STORAGE_KEYS.ORDERS, enhancedSampleOrders);
+  const { data: orders = [], isLoading } = useOrders();
+  const { addOrder, updateOrder, deleteOrder } = useOrderMutations();
   const [view, setView] = useState<ViewMode>('table');
   const [addOpen, setAddOpen] = useState(false);
   const [detailsOrder, setDetailsOrder] = useState<EnhancedOrder | null>(null);
@@ -50,7 +51,7 @@ export default function Orders() {
   const projectNames = useMemo(() => [...new Set(orders.map(o => o.projectName).filter(Boolean) as string[])], [orders]);
 
   const handleDelete = (id: string) => {
-    setOrders(prev => prev.filter(o => o.id !== id));
+    deleteOrder.mutate(id);
     toast({ title: "Order deleted" });
   };
 
@@ -63,6 +64,8 @@ export default function Orders() {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'orders.csv'; a.click();
     toast({ title: "Exported" });
   };
+
+  if (isLoading) return <div className="flex items-center justify-center h-64"><div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" /></div>;
 
   return (
     <div className="space-y-4">
@@ -92,7 +95,7 @@ export default function Orders() {
       <OrderBulkActions
         count={selectedIds.length}
         onClear={() => setSelectedIds([])}
-        onDelete={() => { setOrders(prev => prev.filter(o => !selectedIds.includes(o.id))); setSelectedIds([]); toast({ title: `${selectedIds.length} orders deleted` }); }}
+        onDelete={() => { selectedIds.forEach(id => deleteOrder.mutate(id)); setSelectedIds([]); toast({ title: `${selectedIds.length} orders deleted` }); }}
         onExport={handleExport}
       />
 
@@ -121,11 +124,11 @@ export default function Orders() {
         </div>
       )}
 
-      <AddOrderDialog open={addOpen} onOpenChange={setAddOpen} onSave={o => { setOrders(prev => [...prev, o]); toast({ title: "Order Created", description: o.orderNumber }); }} existingCount={orders.length} />
+      <AddOrderDialog open={addOpen} onOpenChange={setAddOpen} onSave={o => { addOrder.mutate(o); toast({ title: "Order Created", description: o.orderNumber }); }} existingCount={orders.length} />
       <OrderDetailsDialog
         order={detailsOrder} open={!!detailsOrder}
         onOpenChange={o => { if (!o) setDetailsOrder(null); }}
-        onUpdate={updated => { setOrders(prev => prev.map(o => o.id === updated.id ? updated : o)); setDetailsOrder(updated); toast({ title: "Order updated" }); }}
+        onUpdate={updated => { updateOrder.mutate(updated); setDetailsOrder(updated); toast({ title: "Order updated" }); }}
       />
     </div>
   );
