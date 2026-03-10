@@ -41,6 +41,135 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_complaints: {
+        Row: {
+          activity_log: Json
+          category: string
+          channel: string
+          complaint_number: string
+          cost_of_resolution: number
+          created_at: string
+          created_by: string
+          customer_id: string | null
+          customer_name: string
+          customer_satisfaction: number | null
+          date: string
+          description: string
+          id: string
+          installation_id: string | null
+          ncr_id: string | null
+          ncr_number: string | null
+          notes: string | null
+          order_id: string | null
+          order_number: string | null
+          product_id: string | null
+          product_name: string | null
+          received_by: string
+          resolution: string | null
+          resolved: boolean
+          resolved_by: string | null
+          resolved_date: string | null
+          responded: boolean
+          responded_date: string | null
+          response_deadline: string | null
+          response_notes: string | null
+          response_required: boolean
+          severity: Database["public"]["Enums"]["complaint_severity"]
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          activity_log?: Json
+          category?: string
+          channel?: string
+          complaint_number: string
+          cost_of_resolution?: number
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_satisfaction?: number | null
+          date?: string
+          description?: string
+          id?: string
+          installation_id?: string | null
+          ncr_id?: string | null
+          ncr_number?: string | null
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          received_by?: string
+          resolution?: string | null
+          resolved?: boolean
+          resolved_by?: string | null
+          resolved_date?: string | null
+          responded?: boolean
+          responded_date?: string | null
+          response_deadline?: string | null
+          response_notes?: string | null
+          response_required?: boolean
+          severity?: Database["public"]["Enums"]["complaint_severity"]
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Update: {
+          activity_log?: Json
+          category?: string
+          channel?: string
+          complaint_number?: string
+          cost_of_resolution?: number
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_satisfaction?: number | null
+          date?: string
+          description?: string
+          id?: string
+          installation_id?: string | null
+          ncr_id?: string | null
+          ncr_number?: string | null
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          received_by?: string
+          resolution?: string | null
+          resolved?: boolean
+          resolved_by?: string | null
+          resolved_date?: string | null
+          responded?: boolean
+          responded_date?: string | null
+          response_deadline?: string | null
+          response_notes?: string | null
+          response_required?: boolean
+          severity?: Database["public"]["Enums"]["complaint_severity"]
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_complaints_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_complaints_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -327,6 +456,850 @@ export type Database = {
           },
         ]
       }
+      employees: {
+        Row: {
+          address: string
+          attendance: Json
+          bank_account: string | null
+          bank_branch: string | null
+          bank_name: string | null
+          city: string
+          confirmation_date: string | null
+          created_at: string
+          created_by: string
+          date_of_birth: string | null
+          department: Database["public"]["Enums"]["hr_department"]
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relation: string | null
+          employee_number: string
+          employment_type: Database["public"]["Enums"]["employment_type"]
+          first_name: string
+          first_name_am: string | null
+          full_name: string
+          full_name_am: string | null
+          gender: string
+          health_insurance: boolean
+          hire_date: string
+          housing_allowance: number
+          id: string
+          last_name: string
+          last_name_am: string | null
+          last_review_date: string | null
+          leave_accrual_rate: number
+          leave_balances: Json
+          marital_status: string | null
+          meal_allowance: number
+          national_id: string | null
+          next_review_date: string | null
+          notes: string | null
+          pension_enrolled: boolean
+          pension_number: string | null
+          performance_rating: number
+          personal_email: string
+          personal_phone: string
+          position: string
+          position_level: Database["public"]["Enums"]["position_level"]
+          probation_end_date: string | null
+          reports_to: string | null
+          reports_to_name: string | null
+          salary: number
+          salary_currency: string
+          skills: Json
+          status: Database["public"]["Enums"]["employment_status"]
+          sub_city: string | null
+          tax_id: string | null
+          termination_date: string | null
+          termination_reason: string | null
+          transportation_allowance: number
+          updated_at: string
+          updated_by: string
+          work_email: string
+          work_phone: string | null
+        }
+        Insert: {
+          address?: string
+          attendance?: Json
+          bank_account?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          city?: string
+          confirmation_date?: string | null
+          created_at?: string
+          created_by?: string
+          date_of_birth?: string | null
+          department?: Database["public"]["Enums"]["hr_department"]
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
+          employee_number: string
+          employment_type?: Database["public"]["Enums"]["employment_type"]
+          first_name?: string
+          first_name_am?: string | null
+          full_name?: string
+          full_name_am?: string | null
+          gender?: string
+          health_insurance?: boolean
+          hire_date?: string
+          housing_allowance?: number
+          id?: string
+          last_name?: string
+          last_name_am?: string | null
+          last_review_date?: string | null
+          leave_accrual_rate?: number
+          leave_balances?: Json
+          marital_status?: string | null
+          meal_allowance?: number
+          national_id?: string | null
+          next_review_date?: string | null
+          notes?: string | null
+          pension_enrolled?: boolean
+          pension_number?: string | null
+          performance_rating?: number
+          personal_email?: string
+          personal_phone?: string
+          position?: string
+          position_level?: Database["public"]["Enums"]["position_level"]
+          probation_end_date?: string | null
+          reports_to?: string | null
+          reports_to_name?: string | null
+          salary?: number
+          salary_currency?: string
+          skills?: Json
+          status?: Database["public"]["Enums"]["employment_status"]
+          sub_city?: string | null
+          tax_id?: string | null
+          termination_date?: string | null
+          termination_reason?: string | null
+          transportation_allowance?: number
+          updated_at?: string
+          updated_by?: string
+          work_email?: string
+          work_phone?: string | null
+        }
+        Update: {
+          address?: string
+          attendance?: Json
+          bank_account?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          city?: string
+          confirmation_date?: string | null
+          created_at?: string
+          created_by?: string
+          date_of_birth?: string | null
+          department?: Database["public"]["Enums"]["hr_department"]
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
+          employee_number?: string
+          employment_type?: Database["public"]["Enums"]["employment_type"]
+          first_name?: string
+          first_name_am?: string | null
+          full_name?: string
+          full_name_am?: string | null
+          gender?: string
+          health_insurance?: boolean
+          hire_date?: string
+          housing_allowance?: number
+          id?: string
+          last_name?: string
+          last_name_am?: string | null
+          last_review_date?: string | null
+          leave_accrual_rate?: number
+          leave_balances?: Json
+          marital_status?: string | null
+          meal_allowance?: number
+          national_id?: string | null
+          next_review_date?: string | null
+          notes?: string | null
+          pension_enrolled?: boolean
+          pension_number?: string | null
+          performance_rating?: number
+          personal_email?: string
+          personal_phone?: string
+          position?: string
+          position_level?: Database["public"]["Enums"]["position_level"]
+          probation_end_date?: string | null
+          reports_to?: string | null
+          reports_to_name?: string | null
+          salary?: number
+          salary_currency?: string
+          skills?: Json
+          status?: Database["public"]["Enums"]["employment_status"]
+          sub_city?: string | null
+          tax_id?: string | null
+          termination_date?: string | null
+          termination_reason?: string | null
+          transportation_allowance?: number
+          updated_at?: string
+          updated_by?: string
+          work_email?: string
+          work_phone?: string | null
+        }
+        Relationships: []
+      }
+      equipment: {
+        Row: {
+          capacity: string | null
+          category: Database["public"]["Enums"]["equipment_category"]
+          created_at: string
+          criticality: string
+          department: string
+          equipment_number: string
+          health_score: number
+          id: string
+          location: string
+          maintenance_frequency: Json
+          manufacturer: string
+          model: string
+          name: string
+          name_am: string | null
+          notes: string | null
+          power_rating: string | null
+          purchase_cost: number
+          purchase_date: string
+          serial_number: string
+          status: Database["public"]["Enums"]["equipment_status"]
+          supplier_id: string | null
+          supplier_name: string | null
+          total_operating_hours: number
+          updated_at: string
+          warranty_expiry: string | null
+          year_of_manufacture: number
+        }
+        Insert: {
+          capacity?: string | null
+          category?: Database["public"]["Enums"]["equipment_category"]
+          created_at?: string
+          criticality?: string
+          department?: string
+          equipment_number: string
+          health_score?: number
+          id?: string
+          location?: string
+          maintenance_frequency?: Json
+          manufacturer?: string
+          model?: string
+          name?: string
+          name_am?: string | null
+          notes?: string | null
+          power_rating?: string | null
+          purchase_cost?: number
+          purchase_date?: string
+          serial_number?: string
+          status?: Database["public"]["Enums"]["equipment_status"]
+          supplier_id?: string | null
+          supplier_name?: string | null
+          total_operating_hours?: number
+          updated_at?: string
+          warranty_expiry?: string | null
+          year_of_manufacture?: number
+        }
+        Update: {
+          capacity?: string | null
+          category?: Database["public"]["Enums"]["equipment_category"]
+          created_at?: string
+          criticality?: string
+          department?: string
+          equipment_number?: string
+          health_score?: number
+          id?: string
+          location?: string
+          maintenance_frequency?: Json
+          manufacturer?: string
+          model?: string
+          name?: string
+          name_am?: string | null
+          notes?: string | null
+          power_rating?: string | null
+          purchase_cost?: number
+          purchase_date?: string
+          serial_number?: string
+          status?: Database["public"]["Enums"]["equipment_status"]
+          supplier_id?: string | null
+          supplier_name?: string | null
+          total_operating_hours?: number
+          updated_at?: string
+          warranty_expiry?: string | null
+          year_of_manufacture?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          amount_in_etb: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          created_by: string
+          created_by_name: string
+          currency: Database["public"]["Enums"]["finance_currency"]
+          date: string
+          description: string
+          exchange_rate: number
+          expense_number: string
+          id: string
+          notes: string | null
+          paid: boolean
+          paid_date: string | null
+          payment_method: Database["public"]["Enums"]["finance_payment_method"]
+          project_id: string | null
+          project_name: string | null
+          supplier_id: string | null
+          supplier_name: string | null
+          tax_amount: number
+          tax_rate: number
+        }
+        Insert: {
+          amount?: number
+          amount_in_etb?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: Database["public"]["Enums"]["finance_currency"]
+          date?: string
+          description?: string
+          exchange_rate?: number
+          expense_number: string
+          id?: string
+          notes?: string | null
+          paid?: boolean
+          paid_date?: string | null
+          payment_method?: Database["public"]["Enums"]["finance_payment_method"]
+          project_id?: string | null
+          project_name?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          tax_amount?: number
+          tax_rate?: number
+        }
+        Update: {
+          amount?: number
+          amount_in_etb?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: Database["public"]["Enums"]["finance_currency"]
+          date?: string
+          description?: string
+          exchange_rate?: number
+          expense_number?: string
+          id?: string
+          notes?: string | null
+          paid?: boolean
+          paid_date?: string | null
+          payment_method?: Database["public"]["Enums"]["finance_payment_method"]
+          project_id?: string | null
+          project_name?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          tax_amount?: number
+          tax_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_payments: {
+        Row: {
+          account_number: string | null
+          amount: number
+          amount_in_etb: number
+          bank_name: string | null
+          cheque_number: string | null
+          currency: Database["public"]["Enums"]["finance_currency"]
+          customer_id: string | null
+          customer_name: string
+          date: string
+          exchange_rate: number
+          id: string
+          invoice_id: string | null
+          invoice_number: string
+          method: Database["public"]["Enums"]["finance_payment_method"]
+          notes: string | null
+          payment_number: string
+          phone_number: string | null
+          reconciled: boolean
+          reconciled_date: string | null
+          recorded_at: string
+          recorded_by: string
+          recorded_by_name: string
+          reference: string
+          status: Database["public"]["Enums"]["finance_payment_status"]
+          transaction_id: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          amount?: number
+          amount_in_etb?: number
+          bank_name?: string | null
+          cheque_number?: string | null
+          currency?: Database["public"]["Enums"]["finance_currency"]
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          exchange_rate?: number
+          id?: string
+          invoice_id?: string | null
+          invoice_number?: string
+          method?: Database["public"]["Enums"]["finance_payment_method"]
+          notes?: string | null
+          payment_number: string
+          phone_number?: string | null
+          reconciled?: boolean
+          reconciled_date?: string | null
+          recorded_at?: string
+          recorded_by?: string
+          recorded_by_name?: string
+          reference?: string
+          status?: Database["public"]["Enums"]["finance_payment_status"]
+          transaction_id?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          amount?: number
+          amount_in_etb?: number
+          bank_name?: string | null
+          cheque_number?: string | null
+          currency?: Database["public"]["Enums"]["finance_currency"]
+          customer_id?: string | null
+          customer_name?: string
+          date?: string
+          exchange_rate?: number
+          id?: string
+          invoice_id?: string | null
+          invoice_number?: string
+          method?: Database["public"]["Enums"]["finance_payment_method"]
+          notes?: string | null
+          payment_number?: string
+          phone_number?: string | null
+          reconciled?: boolean
+          reconciled_date?: string | null
+          recorded_at?: string
+          recorded_by?: string
+          recorded_by_name?: string
+          reference?: string
+          status?: Database["public"]["Enums"]["finance_payment_status"]
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspections: {
+        Row: {
+          checklist_id: string | null
+          checklist_name: string | null
+          checklist_results: Json
+          completed_date: string | null
+          created_at: string
+          created_by: string
+          created_by_name: string
+          defect_count: number
+          defects: Json
+          equipment_id: string | null
+          id: string
+          inspection_date: string
+          inspection_number: string
+          inspector_dept: string | null
+          inspector_id: string
+          inspector_name: string
+          installation_id: string | null
+          inventory_item_code: string | null
+          inventory_item_id: string | null
+          measurements: Json | null
+          ncr_id: string | null
+          ncr_number: string | null
+          notes: string | null
+          order_id: string | null
+          order_number: string | null
+          product_code: string | null
+          product_id: string | null
+          product_name: string | null
+          project_id: string | null
+          project_name: string | null
+          purchase_order_id: string | null
+          purchase_order_number: string | null
+          result: Database["public"]["Enums"]["inspection_result"]
+          scheduled_date: string
+          score: number | null
+          status: Database["public"]["Enums"]["inspection_status"]
+          supplier_id: string | null
+          supplier_name: string | null
+          type: Database["public"]["Enums"]["inspection_type"]
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+          work_order_id: string | null
+          work_order_number: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          checklist_name?: string | null
+          checklist_results?: Json
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          defect_count?: number
+          defects?: Json
+          equipment_id?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_number: string
+          inspector_dept?: string | null
+          inspector_id?: string
+          inspector_name?: string
+          installation_id?: string | null
+          inventory_item_code?: string | null
+          inventory_item_id?: string | null
+          measurements?: Json | null
+          ncr_id?: string | null
+          ncr_number?: string | null
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          project_id?: string | null
+          project_name?: string | null
+          purchase_order_id?: string | null
+          purchase_order_number?: string | null
+          result?: Database["public"]["Enums"]["inspection_result"]
+          scheduled_date?: string
+          score?: number | null
+          status?: Database["public"]["Enums"]["inspection_status"]
+          supplier_id?: string | null
+          supplier_name?: string | null
+          type?: Database["public"]["Enums"]["inspection_type"]
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          work_order_id?: string | null
+          work_order_number?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          checklist_name?: string | null
+          checklist_results?: Json
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          defect_count?: number
+          defects?: Json
+          equipment_id?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_number?: string
+          inspector_dept?: string | null
+          inspector_id?: string
+          inspector_name?: string
+          installation_id?: string | null
+          inventory_item_code?: string | null
+          inventory_item_id?: string | null
+          measurements?: Json | null
+          ncr_id?: string | null
+          ncr_number?: string | null
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          project_id?: string | null
+          project_name?: string | null
+          purchase_order_id?: string | null
+          purchase_order_number?: string | null
+          result?: Database["public"]["Enums"]["inspection_result"]
+          scheduled_date?: string
+          score?: number | null
+          status?: Database["public"]["Enums"]["inspection_status"]
+          supplier_id?: string | null
+          supplier_name?: string | null
+          type?: Database["public"]["Enums"]["inspection_type"]
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          work_order_id?: string | null
+          work_order_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspections_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      installations: {
+        Row: {
+          access_instructions: string | null
+          activity_log: Json
+          actual_end_date: string | null
+          actual_start_date: string | null
+          assigned_vehicle: string | null
+          completed_at: string | null
+          completed_by: string | null
+          completion_notes: string | null
+          completion_photos: Json
+          created_at: string
+          created_by: string
+          created_by_name: string
+          customer_code: string
+          customer_contact: string | null
+          customer_email: string | null
+          customer_feedback: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_rating: number | null
+          customer_signature: string | null
+          delay_hours: number | null
+          delay_reasons: string[] | null
+          estimated_duration: number
+          has_issues: boolean
+          id: string
+          installation_number: string
+          internal_notes: string | null
+          is_overdue: boolean
+          is_today: boolean
+          issue_count: number
+          issues: Json
+          items: Json
+          material_delay: boolean | null
+          notes: string | null
+          notes_am: string | null
+          order_id: string | null
+          order_number: string | null
+          priority: Database["public"]["Enums"]["installation_priority"]
+          project_id: string | null
+          project_name: string | null
+          quote_id: string | null
+          requires_follow_up: boolean
+          scheduled_date: string
+          scheduled_end_time: string | null
+          scheduled_start_time: string | null
+          site_access_delay: boolean | null
+          site_address: string
+          site_city: string | null
+          site_contact_person: string | null
+          site_contact_phone: string | null
+          site_sub_city: string | null
+          status: Database["public"]["Enums"]["installation_status"]
+          team_lead: string
+          team_lead_id: string
+          team_members: Json
+          team_size: number
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+          weather_delay: boolean | null
+        }
+        Insert: {
+          access_instructions?: string | null
+          activity_log?: Json
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          assigned_vehicle?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          completion_photos?: Json
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          customer_code?: string
+          customer_contact?: string | null
+          customer_email?: string | null
+          customer_feedback?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_rating?: number | null
+          customer_signature?: string | null
+          delay_hours?: number | null
+          delay_reasons?: string[] | null
+          estimated_duration?: number
+          has_issues?: boolean
+          id?: string
+          installation_number: string
+          internal_notes?: string | null
+          is_overdue?: boolean
+          is_today?: boolean
+          issue_count?: number
+          issues?: Json
+          items?: Json
+          material_delay?: boolean | null
+          notes?: string | null
+          notes_am?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          priority?: Database["public"]["Enums"]["installation_priority"]
+          project_id?: string | null
+          project_name?: string | null
+          quote_id?: string | null
+          requires_follow_up?: boolean
+          scheduled_date?: string
+          scheduled_end_time?: string | null
+          scheduled_start_time?: string | null
+          site_access_delay?: boolean | null
+          site_address?: string
+          site_city?: string | null
+          site_contact_person?: string | null
+          site_contact_phone?: string | null
+          site_sub_city?: string | null
+          status?: Database["public"]["Enums"]["installation_status"]
+          team_lead?: string
+          team_lead_id?: string
+          team_members?: Json
+          team_size?: number
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          weather_delay?: boolean | null
+        }
+        Update: {
+          access_instructions?: string | null
+          activity_log?: Json
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          assigned_vehicle?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          completion_photos?: Json
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          customer_code?: string
+          customer_contact?: string | null
+          customer_email?: string | null
+          customer_feedback?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_rating?: number | null
+          customer_signature?: string | null
+          delay_hours?: number | null
+          delay_reasons?: string[] | null
+          estimated_duration?: number
+          has_issues?: boolean
+          id?: string
+          installation_number?: string
+          internal_notes?: string | null
+          is_overdue?: boolean
+          is_today?: boolean
+          issue_count?: number
+          issues?: Json
+          items?: Json
+          material_delay?: boolean | null
+          notes?: string | null
+          notes_am?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          priority?: Database["public"]["Enums"]["installation_priority"]
+          project_id?: string | null
+          project_name?: string | null
+          quote_id?: string | null
+          requires_follow_up?: boolean
+          scheduled_date?: string
+          scheduled_end_time?: string | null
+          scheduled_start_time?: string | null
+          site_access_delay?: boolean | null
+          site_address?: string
+          site_city?: string | null
+          site_contact_person?: string | null
+          site_contact_phone?: string | null
+          site_sub_city?: string | null
+          status?: Database["public"]["Enums"]["installation_status"]
+          team_lead?: string
+          team_lead_id?: string
+          team_members?: Json
+          team_size?: number
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          weather_delay?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           batch_number: string | null
@@ -488,6 +1461,171 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          activity_log: Json
+          balance: number
+          balance_in_etb: number
+          charges_description: string | null
+          created_at: string
+          created_by: string
+          created_by_name: string
+          currency: Database["public"]["Enums"]["finance_currency"]
+          customer_address: string | null
+          customer_code: string
+          customer_id: string | null
+          customer_name: string
+          customer_tax_id: string | null
+          discount_amount: number
+          due_date: string
+          exchange_rate: number
+          id: string
+          internal_notes: string | null
+          invoice_number: string
+          is_fully_paid: boolean
+          is_overdue: boolean
+          issue_date: string
+          items: Json
+          notes: string | null
+          order_id: string | null
+          order_number: string | null
+          other_charges: number
+          paid_date: string | null
+          payment_due_days: number
+          payment_terms: string
+          payments: Json
+          project_id: string | null
+          project_name: string | null
+          quote_id: string | null
+          quote_number: string | null
+          shipping_cost: number
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          taxable_amount: number
+          terms_and_conditions: string | null
+          total: number
+          total_in_etb: number
+          total_paid: number
+          total_paid_in_etb: number
+          updated_at: string
+        }
+        Insert: {
+          activity_log?: Json
+          balance?: number
+          balance_in_etb?: number
+          charges_description?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: Database["public"]["Enums"]["finance_currency"]
+          customer_address?: string | null
+          customer_code?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_tax_id?: string | null
+          discount_amount?: number
+          due_date?: string
+          exchange_rate?: number
+          id?: string
+          internal_notes?: string | null
+          invoice_number: string
+          is_fully_paid?: boolean
+          is_overdue?: boolean
+          issue_date?: string
+          items?: Json
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          other_charges?: number
+          paid_date?: string | null
+          payment_due_days?: number
+          payment_terms?: string
+          payments?: Json
+          project_id?: string | null
+          project_name?: string | null
+          quote_id?: string | null
+          quote_number?: string | null
+          shipping_cost?: number
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          taxable_amount?: number
+          terms_and_conditions?: string | null
+          total?: number
+          total_in_etb?: number
+          total_paid?: number
+          total_paid_in_etb?: number
+          updated_at?: string
+        }
+        Update: {
+          activity_log?: Json
+          balance?: number
+          balance_in_etb?: number
+          charges_description?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: Database["public"]["Enums"]["finance_currency"]
+          customer_address?: string | null
+          customer_code?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_tax_id?: string | null
+          discount_amount?: number
+          due_date?: string
+          exchange_rate?: number
+          id?: string
+          internal_notes?: string | null
+          invoice_number?: string
+          is_fully_paid?: boolean
+          is_overdue?: boolean
+          issue_date?: string
+          items?: Json
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          other_charges?: number
+          paid_date?: string | null
+          payment_due_days?: number
+          payment_terms?: string
+          payments?: Json
+          project_id?: string | null
+          project_name?: string | null
+          quote_id?: string | null
+          quote_number?: string | null
+          shipping_cost?: number
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          taxable_amount?: number
+          terms_and_conditions?: string | null
+          total?: number
+          total_in_etb?: number
+          total_paid?: number
+          total_paid_in_etb?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       labor_entries: {
         Row: {
           approved: boolean | null
@@ -560,6 +1698,754 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          approved_by: string | null
+          approved_by_name: string | null
+          approved_date: string | null
+          created_at: string
+          days_requested: number
+          employee_id: string | null
+          employee_name: string
+          end_date: string
+          handover_notes: string | null
+          handover_to: string | null
+          id: string
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          notes: string | null
+          reason: string
+          rejection_reason: string | null
+          remaining_balance_after: number
+          request_number: string
+          start_date: string
+          status: Database["public"]["Enums"]["leave_status"]
+          submitted_date: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          approved_by_name?: string | null
+          approved_date?: string | null
+          created_at?: string
+          days_requested?: number
+          employee_id?: string | null
+          employee_name?: string
+          end_date?: string
+          handover_notes?: string | null
+          handover_to?: string | null
+          id?: string
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          notes?: string | null
+          reason?: string
+          rejection_reason?: string | null
+          remaining_balance_after?: number
+          request_number: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          submitted_date?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          approved_by_name?: string | null
+          approved_date?: string | null
+          created_at?: string
+          days_requested?: number
+          employee_id?: string | null
+          employee_name?: string
+          end_date?: string
+          handover_notes?: string | null
+          handover_to?: string | null
+          id?: string
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          notes?: string | null
+          reason?: string
+          rejection_reason?: string | null
+          remaining_balance_after?: number
+          request_number?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          submitted_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_tasks: {
+        Row: {
+          activity_log: Json
+          affected_projects: string[] | null
+          affected_work_orders: string[] | null
+          assigned_to: string[] | null
+          assigned_to_names: string[] | null
+          checklist: Json
+          completion_date: string | null
+          corrective_action: string | null
+          created_at: string
+          created_by: string
+          created_by_name: string
+          description: string
+          downtime_hours: number | null
+          equipment_category: Database["public"]["Enums"]["equipment_category"]
+          equipment_id: string | null
+          equipment_name: string
+          equipment_number: string
+          follow_up_required: boolean
+          id: string
+          is_emergency: boolean
+          is_overdue: boolean
+          issues_found: string[] | null
+          labor_cost: number
+          labor_hours: number
+          labor_rate: number
+          lead_technician: string | null
+          notes: string | null
+          outcome: string | null
+          parts_cost: number
+          parts_used: Json
+          priority: Database["public"]["Enums"]["maintenance_priority"]
+          production_impact: string | null
+          requires_shutdown: boolean
+          root_cause: string | null
+          scheduled_date: string
+          scheduled_duration: number
+          start_date: string | null
+          status: Database["public"]["Enums"]["maintenance_status"]
+          task_number: string
+          technician_notes: string | null
+          title: string
+          total_cost: number
+          type: Database["public"]["Enums"]["maintenance_type"]
+          updated_at: string
+        }
+        Insert: {
+          activity_log?: Json
+          affected_projects?: string[] | null
+          affected_work_orders?: string[] | null
+          assigned_to?: string[] | null
+          assigned_to_names?: string[] | null
+          checklist?: Json
+          completion_date?: string | null
+          corrective_action?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          description?: string
+          downtime_hours?: number | null
+          equipment_category?: Database["public"]["Enums"]["equipment_category"]
+          equipment_id?: string | null
+          equipment_name?: string
+          equipment_number?: string
+          follow_up_required?: boolean
+          id?: string
+          is_emergency?: boolean
+          is_overdue?: boolean
+          issues_found?: string[] | null
+          labor_cost?: number
+          labor_hours?: number
+          labor_rate?: number
+          lead_technician?: string | null
+          notes?: string | null
+          outcome?: string | null
+          parts_cost?: number
+          parts_used?: Json
+          priority?: Database["public"]["Enums"]["maintenance_priority"]
+          production_impact?: string | null
+          requires_shutdown?: boolean
+          root_cause?: string | null
+          scheduled_date?: string
+          scheduled_duration?: number
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          task_number: string
+          technician_notes?: string | null
+          title?: string
+          total_cost?: number
+          type?: Database["public"]["Enums"]["maintenance_type"]
+          updated_at?: string
+        }
+        Update: {
+          activity_log?: Json
+          affected_projects?: string[] | null
+          affected_work_orders?: string[] | null
+          assigned_to?: string[] | null
+          assigned_to_names?: string[] | null
+          checklist?: Json
+          completion_date?: string | null
+          corrective_action?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          description?: string
+          downtime_hours?: number | null
+          equipment_category?: Database["public"]["Enums"]["equipment_category"]
+          equipment_id?: string | null
+          equipment_name?: string
+          equipment_number?: string
+          follow_up_required?: boolean
+          id?: string
+          is_emergency?: boolean
+          is_overdue?: boolean
+          issues_found?: string[] | null
+          labor_cost?: number
+          labor_hours?: number
+          labor_rate?: number
+          lead_technician?: string | null
+          notes?: string | null
+          outcome?: string | null
+          parts_cost?: number
+          parts_used?: Json
+          priority?: Database["public"]["Enums"]["maintenance_priority"]
+          production_impact?: string | null
+          requires_shutdown?: boolean
+          root_cause?: string | null
+          scheduled_date?: string
+          scheduled_duration?: number
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          task_number?: string
+          technician_notes?: string | null
+          title?: string
+          total_cost?: number
+          type?: Database["public"]["Enums"]["maintenance_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tasks_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ncrs: {
+        Row: {
+          activity_log: Json
+          capa_id: string | null
+          capa_number: string | null
+          capa_required: boolean
+          category: string
+          closed_by: string | null
+          closure_date: string | null
+          cost_impact: number
+          created_at: string
+          created_by: string
+          created_by_name: string
+          customer_id: string | null
+          customer_name: string | null
+          description: string
+          id: string
+          immediate_action: string
+          inspection_id: string | null
+          inspection_number: string | null
+          investigation_required: boolean
+          investigation_status: string
+          investigation_summary: string | null
+          ncr_number: string
+          notes: string | null
+          order_id: string | null
+          order_number: string | null
+          preventive_action: string | null
+          product_id: string | null
+          product_name: string | null
+          purchase_order_id: string | null
+          purchase_order_number: string | null
+          quantity_affected: number
+          quantity_unit: string
+          quarantine_location: string | null
+          reported_by: string
+          reported_by_name: string
+          reported_date: string
+          root_cause: string | null
+          root_cause_category: string | null
+          scrap_value: number | null
+          severity: Database["public"]["Enums"]["defect_severity"]
+          status: Database["public"]["Enums"]["ncr_status"]
+          supplier_id: string | null
+          supplier_name: string | null
+          time_impact: number
+          title: string
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+          verification_required: boolean
+          verification_status: string
+          verified_by: string | null
+          verified_date: string | null
+          work_order_id: string | null
+          work_order_number: string | null
+        }
+        Insert: {
+          activity_log?: Json
+          capa_id?: string | null
+          capa_number?: string | null
+          capa_required?: boolean
+          category?: string
+          closed_by?: string | null
+          closure_date?: string | null
+          cost_impact?: number
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          description?: string
+          id?: string
+          immediate_action?: string
+          inspection_id?: string | null
+          inspection_number?: string | null
+          investigation_required?: boolean
+          investigation_status?: string
+          investigation_summary?: string | null
+          ncr_number: string
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          preventive_action?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          purchase_order_id?: string | null
+          purchase_order_number?: string | null
+          quantity_affected?: number
+          quantity_unit?: string
+          quarantine_location?: string | null
+          reported_by?: string
+          reported_by_name?: string
+          reported_date?: string
+          root_cause?: string | null
+          root_cause_category?: string | null
+          scrap_value?: number | null
+          severity?: Database["public"]["Enums"]["defect_severity"]
+          status?: Database["public"]["Enums"]["ncr_status"]
+          supplier_id?: string | null
+          supplier_name?: string | null
+          time_impact?: number
+          title?: string
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          verification_required?: boolean
+          verification_status?: string
+          verified_by?: string | null
+          verified_date?: string | null
+          work_order_id?: string | null
+          work_order_number?: string | null
+        }
+        Update: {
+          activity_log?: Json
+          capa_id?: string | null
+          capa_number?: string | null
+          capa_required?: boolean
+          category?: string
+          closed_by?: string | null
+          closure_date?: string | null
+          cost_impact?: number
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          description?: string
+          id?: string
+          immediate_action?: string
+          inspection_id?: string | null
+          inspection_number?: string | null
+          investigation_required?: boolean
+          investigation_status?: string
+          investigation_summary?: string | null
+          ncr_number?: string
+          notes?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          preventive_action?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          purchase_order_id?: string | null
+          purchase_order_number?: string | null
+          quantity_affected?: number
+          quantity_unit?: string
+          quarantine_location?: string | null
+          reported_by?: string
+          reported_by_name?: string
+          reported_date?: string
+          root_cause?: string | null
+          root_cause_category?: string | null
+          scrap_value?: number | null
+          severity?: Database["public"]["Enums"]["defect_severity"]
+          status?: Database["public"]["Enums"]["ncr_status"]
+          supplier_id?: string | null
+          supplier_name?: string | null
+          time_impact?: number
+          title?: string
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          verification_required?: boolean
+          verification_status?: string
+          verified_by?: string | null
+          verified_date?: string | null
+          work_order_id?: string | null
+          work_order_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ncrs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ncrs_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ncrs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ncrs_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ncrs_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          activity_log: Json
+          actual_delivery: string | null
+          balance: number
+          created_at: string
+          created_by: string
+          created_by_name: string
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          cutting_job_ids: string[] | null
+          deliveries: Json
+          discount_total: number
+          due_date: string
+          id: string
+          internal_notes: string | null
+          is_overdue: boolean
+          items: Json
+          notes: string | null
+          order_date: string
+          order_number: string
+          payment_method:
+            | Database["public"]["Enums"]["order_payment_method"]
+            | null
+          payment_status: Database["public"]["Enums"]["order_payment_status"]
+          payments: Json
+          profit_margin: number
+          project_id: string | null
+          project_name: string | null
+          quote_id: string | null
+          quote_number: string | null
+          requested_delivery: string | null
+          shipping_address: string | null
+          shipping_method: Database["public"]["Enums"]["shipping_method"] | null
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          tax: number
+          tax_rate: number
+          total: number
+          total_cost: number
+          total_delivered: number
+          total_paid: number
+          total_profit: number
+          total_shipped: number
+          tracking_number: string | null
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+          work_order_ids: string[] | null
+        }
+        Insert: {
+          activity_log?: Json
+          actual_delivery?: string | null
+          balance?: number
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          cutting_job_ids?: string[] | null
+          deliveries?: Json
+          discount_total?: number
+          due_date?: string
+          id?: string
+          internal_notes?: string | null
+          is_overdue?: boolean
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          order_number: string
+          payment_method?:
+            | Database["public"]["Enums"]["order_payment_method"]
+            | null
+          payment_status?: Database["public"]["Enums"]["order_payment_status"]
+          payments?: Json
+          profit_margin?: number
+          project_id?: string | null
+          project_name?: string | null
+          quote_id?: string | null
+          quote_number?: string | null
+          requested_delivery?: string | null
+          shipping_address?: string | null
+          shipping_method?:
+            | Database["public"]["Enums"]["shipping_method"]
+            | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          tax?: number
+          tax_rate?: number
+          total?: number
+          total_cost?: number
+          total_delivered?: number
+          total_paid?: number
+          total_profit?: number
+          total_shipped?: number
+          tracking_number?: string | null
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          work_order_ids?: string[] | null
+        }
+        Update: {
+          activity_log?: Json
+          actual_delivery?: string | null
+          balance?: number
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          cutting_job_ids?: string[] | null
+          deliveries?: Json
+          discount_total?: number
+          due_date?: string
+          id?: string
+          internal_notes?: string | null
+          is_overdue?: boolean
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          order_number?: string
+          payment_method?:
+            | Database["public"]["Enums"]["order_payment_method"]
+            | null
+          payment_status?: Database["public"]["Enums"]["order_payment_status"]
+          payments?: Json
+          profit_margin?: number
+          project_id?: string | null
+          project_name?: string | null
+          quote_id?: string | null
+          quote_number?: string | null
+          requested_delivery?: string | null
+          shipping_address?: string | null
+          shipping_method?:
+            | Database["public"]["Enums"]["shipping_method"]
+            | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          tax?: number
+          tax_rate?: number
+          total?: number
+          total_cost?: number
+          total_delivered?: number
+          total_paid?: number
+          total_profit?: number
+          total_shipped?: number
+          tracking_number?: string | null
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          work_order_ids?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payrolls: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_by_name: string | null
+          attendance_bonus: number
+          bank_account: string
+          bank_name: string
+          base_salary: number
+          calculated_at: string
+          calculated_by: string
+          calculated_by_name: string
+          created_at: string
+          department: Database["public"]["Enums"]["hr_department"]
+          employee_id: string | null
+          employee_name: string
+          employee_number: string
+          end_date: string
+          gross_pay: number
+          health_insurance: number
+          housing_allowance: number
+          id: string
+          income_tax: number
+          loan_repayment: number
+          meal_allowance: number
+          net_pay: number
+          notes: string | null
+          overtime_hours: number
+          overtime_pay: number
+          overtime_rate: number
+          paid_at: string | null
+          payment_date: string
+          payroll_number: string
+          pension: number
+          performance_bonus: number
+          period: string
+          start_date: string
+          status: Database["public"]["Enums"]["payroll_status"]
+          total_allowances: number
+          total_bonuses: number
+          total_deductions: number
+          transportation_allowance: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_name?: string | null
+          attendance_bonus?: number
+          bank_account?: string
+          bank_name?: string
+          base_salary?: number
+          calculated_at?: string
+          calculated_by?: string
+          calculated_by_name?: string
+          created_at?: string
+          department?: Database["public"]["Enums"]["hr_department"]
+          employee_id?: string | null
+          employee_name?: string
+          employee_number?: string
+          end_date?: string
+          gross_pay?: number
+          health_insurance?: number
+          housing_allowance?: number
+          id?: string
+          income_tax?: number
+          loan_repayment?: number
+          meal_allowance?: number
+          net_pay?: number
+          notes?: string | null
+          overtime_hours?: number
+          overtime_pay?: number
+          overtime_rate?: number
+          paid_at?: string | null
+          payment_date?: string
+          payroll_number: string
+          pension?: number
+          performance_bonus?: number
+          period?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["payroll_status"]
+          total_allowances?: number
+          total_bonuses?: number
+          total_deductions?: number
+          transportation_allowance?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_name?: string | null
+          attendance_bonus?: number
+          bank_account?: string
+          bank_name?: string
+          base_salary?: number
+          calculated_at?: string
+          calculated_by?: string
+          calculated_by_name?: string
+          created_at?: string
+          department?: Database["public"]["Enums"]["hr_department"]
+          employee_id?: string | null
+          employee_name?: string
+          employee_number?: string
+          end_date?: string
+          gross_pay?: number
+          health_insurance?: number
+          housing_allowance?: number
+          id?: string
+          income_tax?: number
+          loan_repayment?: number
+          meal_allowance?: number
+          net_pay?: number
+          notes?: string | null
+          overtime_hours?: number
+          overtime_pay?: number
+          overtime_rate?: number
+          paid_at?: string | null
+          payment_date?: string
+          payroll_number?: string
+          pension?: number
+          performance_bonus?: number
+          period?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["payroll_status"]
+          total_allowances?: number
+          total_bonuses?: number
+          total_deductions?: number
+          transportation_allowance?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payrolls_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1199,6 +3085,363 @@ export type Database = {
           },
         ]
       }
+      purchase_orders: {
+        Row: {
+          activity_log: Json
+          approval_status: Database["public"]["Enums"]["po_approval_status"]
+          approved_by: string | null
+          balance: number
+          balance_in_etb: number
+          carrier: string | null
+          created_at: string
+          created_by: string
+          created_by_name: string
+          currency: Database["public"]["Enums"]["proc_currency"]
+          customs_duty: number
+          discount_amount: number
+          exchange_rate: number
+          expected_delivery: string
+          id: string
+          insurance: number
+          internal_notes: string | null
+          is_overdue: boolean
+          is_urgent: boolean
+          items: Json
+          notes: string | null
+          order_date: string
+          other_charges: number
+          paid: number
+          paid_in_etb: number
+          payment_terms: Database["public"]["Enums"]["payment_terms"]
+          payments: Json
+          po_number: string
+          project_id: string | null
+          project_name: string | null
+          receipts: Json
+          received_date: string | null
+          shipped_date: string | null
+          shipping_cost: number
+          shipping_method: string | null
+          shipping_terms: string
+          status: Database["public"]["Enums"]["po_status"]
+          subtotal: number
+          supplier_code: string
+          supplier_id: string | null
+          supplier_name: string
+          tax_amount: number
+          total: number
+          total_in_etb: number
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_log?: Json
+          approval_status?: Database["public"]["Enums"]["po_approval_status"]
+          approved_by?: string | null
+          balance?: number
+          balance_in_etb?: number
+          carrier?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: Database["public"]["Enums"]["proc_currency"]
+          customs_duty?: number
+          discount_amount?: number
+          exchange_rate?: number
+          expected_delivery?: string
+          id?: string
+          insurance?: number
+          internal_notes?: string | null
+          is_overdue?: boolean
+          is_urgent?: boolean
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          other_charges?: number
+          paid?: number
+          paid_in_etb?: number
+          payment_terms?: Database["public"]["Enums"]["payment_terms"]
+          payments?: Json
+          po_number: string
+          project_id?: string | null
+          project_name?: string | null
+          receipts?: Json
+          received_date?: string | null
+          shipped_date?: string | null
+          shipping_cost?: number
+          shipping_method?: string | null
+          shipping_terms?: string
+          status?: Database["public"]["Enums"]["po_status"]
+          subtotal?: number
+          supplier_code?: string
+          supplier_id?: string | null
+          supplier_name?: string
+          tax_amount?: number
+          total?: number
+          total_in_etb?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_log?: Json
+          approval_status?: Database["public"]["Enums"]["po_approval_status"]
+          approved_by?: string | null
+          balance?: number
+          balance_in_etb?: number
+          carrier?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: Database["public"]["Enums"]["proc_currency"]
+          customs_duty?: number
+          discount_amount?: number
+          exchange_rate?: number
+          expected_delivery?: string
+          id?: string
+          insurance?: number
+          internal_notes?: string | null
+          is_overdue?: boolean
+          is_urgent?: boolean
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          other_charges?: number
+          paid?: number
+          paid_in_etb?: number
+          payment_terms?: Database["public"]["Enums"]["payment_terms"]
+          payments?: Json
+          po_number?: string
+          project_id?: string | null
+          project_name?: string | null
+          receipts?: Json
+          received_date?: string | null
+          shipped_date?: string | null
+          shipping_cost?: number
+          shipping_method?: string | null
+          shipping_terms?: string
+          status?: Database["public"]["Enums"]["po_status"]
+          subtotal?: number
+          supplier_code?: string
+          supplier_id?: string | null
+          supplier_name?: string
+          tax_amount?: number
+          total?: number
+          total_in_etb?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          activity_log: Json
+          converted_date: string | null
+          created_at: string
+          created_by: string
+          created_by_name: string
+          currency: string
+          customer_code: string
+          customer_contact: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_snapshot: Json
+          cutting_fee: number
+          delivery_terms: string | null
+          description: string | null
+          discount_amount: number
+          discount_type: string | null
+          discount_value: number | null
+          expiry_date: string
+          fees_description: string | null
+          finish_type: string | null
+          finish_upcharge: number
+          id: string
+          installation_cost: number
+          internal_notes: string | null
+          is_converted: boolean
+          is_expired: boolean
+          items: Json
+          notes: string | null
+          other_fees: number
+          payment_terms: string
+          profit_margin: number
+          project_id: string | null
+          project_name: string
+          project_status: string | null
+          quote_date: string
+          quote_number: string
+          rush_fee: number
+          status: Database["public"]["Enums"]["quote_status"]
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          taxable_amount: number
+          terms_and_conditions: string | null
+          title: string
+          total: number
+          total_cost: number
+          total_profit: number
+          transport_cost: number
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+          validity_days: number
+          version: string
+          version_history: Json
+          warranty: string | null
+        }
+        Insert: {
+          activity_log?: Json
+          converted_date?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: string
+          customer_code?: string
+          customer_contact?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_snapshot?: Json
+          cutting_fee?: number
+          delivery_terms?: string | null
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string | null
+          discount_value?: number | null
+          expiry_date?: string
+          fees_description?: string | null
+          finish_type?: string | null
+          finish_upcharge?: number
+          id?: string
+          installation_cost?: number
+          internal_notes?: string | null
+          is_converted?: boolean
+          is_expired?: boolean
+          items?: Json
+          notes?: string | null
+          other_fees?: number
+          payment_terms?: string
+          profit_margin?: number
+          project_id?: string | null
+          project_name?: string
+          project_status?: string | null
+          quote_date?: string
+          quote_number: string
+          rush_fee?: number
+          status?: Database["public"]["Enums"]["quote_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          taxable_amount?: number
+          terms_and_conditions?: string | null
+          title?: string
+          total?: number
+          total_cost?: number
+          total_profit?: number
+          transport_cost?: number
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          validity_days?: number
+          version?: string
+          version_history?: Json
+          warranty?: string | null
+        }
+        Update: {
+          activity_log?: Json
+          converted_date?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          currency?: string
+          customer_code?: string
+          customer_contact?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_snapshot?: Json
+          cutting_fee?: number
+          delivery_terms?: string | null
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string | null
+          discount_value?: number | null
+          expiry_date?: string
+          fees_description?: string | null
+          finish_type?: string | null
+          finish_upcharge?: number
+          id?: string
+          installation_cost?: number
+          internal_notes?: string | null
+          is_converted?: boolean
+          is_expired?: boolean
+          items?: Json
+          notes?: string | null
+          other_fees?: number
+          payment_terms?: string
+          profit_margin?: number
+          project_id?: string | null
+          project_name?: string
+          project_status?: string | null
+          quote_date?: string
+          quote_number?: string
+          rush_fee?: number
+          status?: Database["public"]["Enums"]["quote_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          taxable_amount?: number
+          terms_and_conditions?: string | null
+          title?: string
+          total?: number
+          total_cost?: number
+          total_profit?: number
+          transport_cost?: number
+          updated_at?: string
+          updated_by?: string
+          updated_by_name?: string
+          validity_days?: number
+          version?: string
+          version_history?: Json
+          warranty?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -1600,6 +3843,7 @@ export type Database = {
         | "Glass"
         | "Accessory"
         | "Other"
+      complaint_severity: "low" | "medium" | "high" | "critical"
       customer_language: "en" | "am" | "both"
       customer_status: "Active" | "Inactive"
       customer_type:
@@ -1612,6 +3856,102 @@ export type Database = {
         | "Fabricator"
         | "Distributor"
       cutting_job_status: "Pending" | "In Progress" | "Completed" | "Cancelled"
+      defect_severity: "critical" | "major" | "minor" | "observation"
+      employment_status:
+        | "active"
+        | "probation"
+        | "notice"
+        | "terminated"
+        | "resigned"
+        | "retired"
+        | "on_leave"
+        | "suspended"
+      employment_type:
+        | "full_time"
+        | "part_time"
+        | "contract"
+        | "intern"
+        | "temporary"
+        | "consultant"
+      equipment_category:
+        | "cutting_machine"
+        | "cnc_machine"
+        | "welding_machine"
+        | "assembly_line"
+        | "glass_processing"
+        | "painting_line"
+        | "hand_tools"
+        | "power_tools"
+        | "compressor"
+        | "generator"
+        | "forklift"
+        | "vehicle"
+        | "measuring_device"
+        | "testing_equipment"
+      equipment_status:
+        | "operational"
+        | "under_maintenance"
+        | "breakdown"
+        | "decommissioned"
+      expense_category:
+        | "Materials"
+        | "Labor"
+        | "Equipment"
+        | "Transport"
+        | "Utilities"
+        | "Rent"
+        | "Salaries"
+        | "Marketing"
+        | "Other"
+      finance_currency: "ETB" | "USD" | "EUR" | "CNY" | "GBP"
+      finance_payment_method:
+        | "Cash"
+        | "Bank Transfer"
+        | "TeleBirr"
+        | "Cheque"
+        | "Credit Card"
+        | "CBE Birr"
+        | "HelloCash"
+        | "Mobile Money"
+      finance_payment_status:
+        | "Pending"
+        | "Completed"
+        | "Failed"
+        | "Reversed"
+        | "Bounced"
+      hr_department:
+        | "production"
+        | "sales"
+        | "finance"
+        | "hr"
+        | "it"
+        | "procurement"
+        | "quality"
+        | "maintenance"
+        | "installation"
+        | "cutting"
+        | "projects"
+        | "administration"
+        | "management"
+      inspection_result: "pass" | "fail" | "conditional" | "rework" | "scrap"
+      inspection_status: "draft" | "completed" | "verified" | "cancelled"
+      inspection_type:
+        | "incoming"
+        | "in_process"
+        | "final"
+        | "installation"
+        | "maintenance"
+        | "audit"
+      installation_priority: "low" | "medium" | "high" | "urgent"
+      installation_status:
+        | "scheduled"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "delayed"
+        | "cancelled"
+        | "rescheduled"
+        | "partial"
       inventory_item_status: "active" | "inactive" | "discontinued" | "obsolete"
       inventory_movement_type:
         | "receipt"
@@ -1626,6 +3966,14 @@ export type Database = {
         | "approved"
         | "rejected"
         | "returned"
+      invoice_status:
+        | "Draft"
+        | "Sent"
+        | "Partial"
+        | "Paid"
+        | "Overdue"
+        | "Cancelled"
+        | "Credit Note"
       issue_severity: "Low" | "Medium" | "High" | "Critical"
       issue_type:
         | "material_shortage"
@@ -1634,6 +3982,59 @@ export type Database = {
         | "staff_shortage"
         | "design_issue"
         | "other"
+      leave_status: "pending" | "approved" | "rejected" | "cancelled" | "taken"
+      leave_type:
+        | "annual"
+        | "sick"
+        | "maternity"
+        | "paternity"
+        | "bereavement"
+        | "unpaid"
+        | "study"
+        | "compensatory"
+        | "emergency"
+        | "other"
+      maintenance_priority: "critical" | "high" | "medium" | "low" | "planned"
+      maintenance_status:
+        | "scheduled"
+        | "pending_parts"
+        | "in_progress"
+        | "completed"
+        | "overdue"
+        | "cancelled"
+        | "deferred"
+      maintenance_type:
+        | "preventive"
+        | "corrective"
+        | "emergency"
+        | "predictive"
+        | "calibration"
+        | "inspection"
+        | "overhaul"
+      ncr_status:
+        | "open"
+        | "investigating"
+        | "corrective_action"
+        | "verified"
+        | "closed"
+        | "rejected"
+      order_payment_method:
+        | "Cash"
+        | "Bank Transfer"
+        | "TeleBirr"
+        | "Cheque"
+        | "Credit"
+      order_payment_status: "Paid" | "Partial" | "Unpaid"
+      order_status:
+        | "Draft"
+        | "Quote Accepted"
+        | "Payment Received"
+        | "Processing"
+        | "Ready"
+        | "Shipped"
+        | "Delivered"
+        | "Completed"
+        | "Cancelled"
       payment_terms:
         | "COD"
         | "Net 15"
@@ -1643,6 +4044,27 @@ export type Database = {
         | "LC"
         | "TT Advance"
         | "TT Partial"
+      payroll_status: "draft" | "calculated" | "approved" | "paid" | "cancelled"
+      po_approval_status: "Pending" | "Approved" | "Rejected"
+      po_status:
+        | "Draft"
+        | "Pending Approval"
+        | "Sent"
+        | "Confirmed"
+        | "Shipped"
+        | "Partial"
+        | "Received"
+        | "Cancelled"
+        | "On Hold"
+        | "Disputed"
+      position_level:
+        | "entry"
+        | "junior"
+        | "senior"
+        | "supervisor"
+        | "manager"
+        | "director"
+        | "executive"
       preferred_contact:
         | "phone"
         | "email"
@@ -1694,6 +4116,14 @@ export type Database = {
         | "Cancelled"
       project_type: "Residential" | "Commercial" | "Industrial" | "Government"
       quality_check_result: "pass" | "fail" | "conditional"
+      quote_status:
+        | "Draft"
+        | "Pending"
+        | "Accepted"
+        | "Rejected"
+        | "Expired"
+        | "Converted"
+      shipping_method: "Pickup" | "Local Delivery" | "Freight" | "Courier"
       supplier_business_type:
         | "Manufacturer"
         | "Distributor"
@@ -1849,6 +4279,7 @@ export const Constants = {
         "Accessory",
         "Other",
       ],
+      complaint_severity: ["low", "medium", "high", "critical"],
       customer_language: ["en", "am", "both"],
       customer_status: ["Active", "Inactive"],
       customer_type: [
@@ -1862,6 +4293,112 @@ export const Constants = {
         "Distributor",
       ],
       cutting_job_status: ["Pending", "In Progress", "Completed", "Cancelled"],
+      defect_severity: ["critical", "major", "minor", "observation"],
+      employment_status: [
+        "active",
+        "probation",
+        "notice",
+        "terminated",
+        "resigned",
+        "retired",
+        "on_leave",
+        "suspended",
+      ],
+      employment_type: [
+        "full_time",
+        "part_time",
+        "contract",
+        "intern",
+        "temporary",
+        "consultant",
+      ],
+      equipment_category: [
+        "cutting_machine",
+        "cnc_machine",
+        "welding_machine",
+        "assembly_line",
+        "glass_processing",
+        "painting_line",
+        "hand_tools",
+        "power_tools",
+        "compressor",
+        "generator",
+        "forklift",
+        "vehicle",
+        "measuring_device",
+        "testing_equipment",
+      ],
+      equipment_status: [
+        "operational",
+        "under_maintenance",
+        "breakdown",
+        "decommissioned",
+      ],
+      expense_category: [
+        "Materials",
+        "Labor",
+        "Equipment",
+        "Transport",
+        "Utilities",
+        "Rent",
+        "Salaries",
+        "Marketing",
+        "Other",
+      ],
+      finance_currency: ["ETB", "USD", "EUR", "CNY", "GBP"],
+      finance_payment_method: [
+        "Cash",
+        "Bank Transfer",
+        "TeleBirr",
+        "Cheque",
+        "Credit Card",
+        "CBE Birr",
+        "HelloCash",
+        "Mobile Money",
+      ],
+      finance_payment_status: [
+        "Pending",
+        "Completed",
+        "Failed",
+        "Reversed",
+        "Bounced",
+      ],
+      hr_department: [
+        "production",
+        "sales",
+        "finance",
+        "hr",
+        "it",
+        "procurement",
+        "quality",
+        "maintenance",
+        "installation",
+        "cutting",
+        "projects",
+        "administration",
+        "management",
+      ],
+      inspection_result: ["pass", "fail", "conditional", "rework", "scrap"],
+      inspection_status: ["draft", "completed", "verified", "cancelled"],
+      inspection_type: [
+        "incoming",
+        "in_process",
+        "final",
+        "installation",
+        "maintenance",
+        "audit",
+      ],
+      installation_priority: ["low", "medium", "high", "urgent"],
+      installation_status: [
+        "scheduled",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "delayed",
+        "cancelled",
+        "rescheduled",
+        "partial",
+      ],
       inventory_item_status: ["active", "inactive", "discontinued", "obsolete"],
       inventory_movement_type: [
         "receipt",
@@ -1878,6 +4415,15 @@ export const Constants = {
         "rejected",
         "returned",
       ],
+      invoice_status: [
+        "Draft",
+        "Sent",
+        "Partial",
+        "Paid",
+        "Overdue",
+        "Cancelled",
+        "Credit Note",
+      ],
       issue_severity: ["Low", "Medium", "High", "Critical"],
       issue_type: [
         "material_shortage",
@@ -1886,6 +4432,65 @@ export const Constants = {
         "staff_shortage",
         "design_issue",
         "other",
+      ],
+      leave_status: ["pending", "approved", "rejected", "cancelled", "taken"],
+      leave_type: [
+        "annual",
+        "sick",
+        "maternity",
+        "paternity",
+        "bereavement",
+        "unpaid",
+        "study",
+        "compensatory",
+        "emergency",
+        "other",
+      ],
+      maintenance_priority: ["critical", "high", "medium", "low", "planned"],
+      maintenance_status: [
+        "scheduled",
+        "pending_parts",
+        "in_progress",
+        "completed",
+        "overdue",
+        "cancelled",
+        "deferred",
+      ],
+      maintenance_type: [
+        "preventive",
+        "corrective",
+        "emergency",
+        "predictive",
+        "calibration",
+        "inspection",
+        "overhaul",
+      ],
+      ncr_status: [
+        "open",
+        "investigating",
+        "corrective_action",
+        "verified",
+        "closed",
+        "rejected",
+      ],
+      order_payment_method: [
+        "Cash",
+        "Bank Transfer",
+        "TeleBirr",
+        "Cheque",
+        "Credit",
+      ],
+      order_payment_status: ["Paid", "Partial", "Unpaid"],
+      order_status: [
+        "Draft",
+        "Quote Accepted",
+        "Payment Received",
+        "Processing",
+        "Ready",
+        "Shipped",
+        "Delivered",
+        "Completed",
+        "Cancelled",
       ],
       payment_terms: [
         "COD",
@@ -1896,6 +4501,29 @@ export const Constants = {
         "LC",
         "TT Advance",
         "TT Partial",
+      ],
+      payroll_status: ["draft", "calculated", "approved", "paid", "cancelled"],
+      po_approval_status: ["Pending", "Approved", "Rejected"],
+      po_status: [
+        "Draft",
+        "Pending Approval",
+        "Sent",
+        "Confirmed",
+        "Shipped",
+        "Partial",
+        "Received",
+        "Cancelled",
+        "On Hold",
+        "Disputed",
+      ],
+      position_level: [
+        "entry",
+        "junior",
+        "senior",
+        "supervisor",
+        "manager",
+        "director",
+        "executive",
       ],
       preferred_contact: [
         "phone",
@@ -1952,6 +4580,15 @@ export const Constants = {
       ],
       project_type: ["Residential", "Commercial", "Industrial", "Government"],
       quality_check_result: ["pass", "fail", "conditional"],
+      quote_status: [
+        "Draft",
+        "Pending",
+        "Accepted",
+        "Rejected",
+        "Expired",
+        "Converted",
+      ],
+      shipping_method: ["Pickup", "Local Delivery", "Freight", "Courier"],
       supplier_business_type: [
         "Manufacturer",
         "Distributor",
