@@ -191,8 +191,8 @@ export function useComplaintMutations() {
           order_id: c.orderId || null, product_id: c.productId || null, product_name: c.productName,
           date: c.date, received_by: c.receivedBy, channel: c.channel,
           subject: c.subject, description: c.description, category: c.category, severity: c.severity,
-          response_required: c.responseRequired, response_deadline: c.responseDeadline,
-          status: c.status, notes: c.notes,
+          response_required: c.responseRequired, response_deadline: c.responseDueDate,
+          status: c.resolutionStatus || 'pending', notes: c.notes,
         } as any);
         if (error) throw error;
       },
