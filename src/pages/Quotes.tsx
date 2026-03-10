@@ -24,8 +24,9 @@ import { EditEnhancedQuoteDialog } from "@/components/quotes/EditEnhancedQuoteDi
 export default function Quotes() {
   const { data: quotes = [], isLoading } = useQuotes();
   const { addQuote, updateQuote, deleteQuote } = useQuoteMutations();
-  const { data: dbCustomers = [] } = useCustomers();
-  const { products: dbProducts = [] } = useProducts();
+  const { customers: dbCustomers = [], isLoading: loadingCust } = useCustomers();
+  const { data: rawProducts = [] } = useProducts();
+  const dbProducts = rawProducts;
 
   // Map DB data to legacy format for dialog compatibility
   const customers = useMemo(() => dbCustomers.map((c: any) => ({ id: c.id, name: c.name, contact: c.contact, phone: c.phone, email: c.email })), [dbCustomers]);
