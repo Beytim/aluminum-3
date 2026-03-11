@@ -29,8 +29,20 @@ export default function Quotes() {
   const dbProducts = rawProducts;
 
   // Map DB data to legacy format for dialog compatibility
-  const customers = useMemo(() => dbCustomers.map((c: any) => ({ id: c.id, name: c.name, contact: c.contact, phone: c.phone, email: c.email })), [dbCustomers]);
-  const products = useMemo(() => dbProducts.map((p: any) => ({ id: p.id, name: p.name, code: p.code, sellingPrice: p.sellingPrice ?? p.selling_price ?? 0, category: p.category })), [dbProducts]);
+  const customers = useMemo(() => dbCustomers.map((c: any) => ({
+    id: c.id, name: c.name, nameAm: c.nameAm || '', contact: c.contact, type: c.type || 'Individual',
+    phone: c.phone, email: c.email || '', address: c.address || '', projects: c.projects || 0,
+    totalValue: c.totalValue || 0, outstanding: c.outstanding || 0, status: c.status || 'Active',
+  } as import('@/data/sampleData').Customer)), [dbCustomers]);
+  const products = useMemo(() => dbProducts.map((p: any) => ({
+    id: p.id, name: p.name, nameAm: p.nameAm || '', code: p.code,
+    category: p.category || 'Custom', subcategory: p.subcategory || '', productType: p.productType || 'Raw Material',
+    profile: p.profile || '', glass: p.glass || '', colors: p.colors || [], laborHrs: p.laborHrs || 0,
+    materialCost: p.materialCost || 0, sellingPrice: p.sellingPrice ?? p.selling_price ?? 0,
+    status: p.status || 'Active',
+    profileCost: p.profileCost, glassCost: p.glassCost, hardwareCost: p.hardwareCost,
+    accessoriesCost: p.accessoriesCost, fabLaborCost: p.fabLaborCost, installLaborCost: p.installLaborCost,
+  } as import('@/data/sampleData').Product)), [dbProducts]);
 
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [dialogOpen, setDialogOpen] = useState(false);
